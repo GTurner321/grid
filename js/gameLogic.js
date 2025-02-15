@@ -1,6 +1,6 @@
 // gameLogic.js
 import { generatePath } from './pathGenerator.js';
-import { generateSequence, sequenceToEntries } from './sequenceGenerator.js';
+import { generateSequence, sequenceToEntries, formatNumber } from './sequenceGenerator.js';
 import { renderGrid, updateCell, highlightPath, debugGridInfo } from './gridRenderer.js';
 
 class GameState {
@@ -100,34 +100,8 @@ class GameController {
                     }
                 });
             }
-
-            // Instructions modal
-            this.setupInstructionsModal();
         } catch (error) {
             console.error('Error setting up event listeners:', error);
-        }
-    }
-
-    setupInstructionsModal() {
-        const instructionsBtn = document.getElementById('instructions-btn');
-        const modal = document.getElementById('instructions-modal');
-        const closeModalBtn = document.querySelector('.close-modal');
-
-        if (instructionsBtn && modal && closeModalBtn) {
-            instructionsBtn.addEventListener('click', () => {
-                modal.style.display = 'block';
-            });
-
-            closeModalBtn.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
-
-            // Close modal if clicked outside of content
-            window.addEventListener('click', (event) => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
         }
     }
 
@@ -157,8 +131,14 @@ class GameController {
             // Fill remaining cells
             this.fillRemainingCells();
 
-            // Render the grid
-            renderGrid(this.state.gridEntries);
+            // Render the grid with start and end coordinates
+            renderGrid(this.state.gridEntries, {
+                startCoord: this.state.path[0],
+                endCoord: this.state.path[this.state.path.length - 1]
+            });
+
+            // Display the sequence of sums
+            this.displaySequenceSums();
 
             // Debug grid information
             debugGridInfo(this.state.gridEntries);
@@ -170,6 +150,24 @@ class GameController {
         } catch (error) {
             console.error('Error starting level:', error);
             this.showMessage('Error starting game. Please try again.', 'error');
+        }
+    }
+
+    displaySequenceSums() {
+        const sumsContainer = document.getElementById('sequence-sums');
+        if (sumsContainer) {
+            // Clear previous sums
+            sumsContainer.innerHTML = '';
+
+            // Create a list of sums
+            const sumsList = document.createElement('ul');
+            this.state.sequence.forEach(sum => {
+                const sumItem = document.createElement('li');
+                sumItem.textContent = `${formatNumber(sum.num1)} ${sum.operator} ${formatNumber(sum.num2)} = ${formatNumber(sum.result)}`;
+                sumsList.appendChild(sumItem);
+            });
+
+            sumsContainer.appendChild(sumsList);
         }
     }
 
