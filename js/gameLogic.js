@@ -1,7 +1,7 @@
 // gameLogic.js
 import { generatePath } from './pathGenerator.js';
 import { generateSequence, sequenceToEntries } from './sequenceGenerator.js';
-import { renderGrid, updateCell, debugGridInfo } from './gridRenderer.js';
+import { renderGrid, updateCell, highlightPath, debugGridInfo } from './gridRenderer.js';
 
 class GameState {
     constructor() {
@@ -9,6 +9,7 @@ class GameState {
         this.score = 0;
         this.path = [];
         this.sequence = [];
+        this.sequenceEntries = []; // Flat list of entries
         this.userPath = [];
         this.gridEntries = new Array(100).fill(null);
         this.removedCells = new Set();
@@ -20,6 +21,7 @@ class GameState {
             this.userPath = [];
             this.path = [];
             this.sequence = [];
+            this.sequenceEntries = [];
             this.gridEntries = new Array(100).fill(null);
             this.removedCells.clear();
             this.score = 0;
@@ -98,8 +100,34 @@ class GameController {
                     }
                 });
             }
+
+            // Instructions modal
+            this.setupInstructionsModal();
         } catch (error) {
             console.error('Error setting up event listeners:', error);
+        }
+    }
+
+    setupInstructionsModal() {
+        const instructionsBtn = document.getElementById('instructions-btn');
+        const modal = document.getElementById('instructions-modal');
+        const closeModalBtn = document.querySelector('.close-modal');
+
+        if (instructionsBtn && modal && closeModalBtn) {
+            instructionsBtn.addEventListener('click', () => {
+                modal.style.display = 'block';
+            });
+
+            closeModalBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            // Close modal if clicked outside of content
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
         }
     }
 
@@ -118,9 +146,12 @@ class GameController {
 
             // Generate sequence
             this.state.sequence = await generateSequence(level);
-            console.log('Generated Sequence:', this.state.sequence);
+            
+            // Convert sequence to flat list of entries
+            this.state.sequenceEntries = sequenceToEntries(this.state.sequence);
+            console.log('Sequence Entries:', this.state.sequenceEntries);
 
-            // Convert sequence to grid entries
+            // Place sequence entries along the path
             this.placeMathSequence();
 
             // Fill remaining cells
@@ -144,19 +175,16 @@ class GameController {
 
     placeMathSequence() {
         try {
-            let sequenceIndex = 0;
-            
-            // Place sequence entries along the path
+            // Use the path coordinates to place sequence entries
             this.state.path.forEach((coord, index) => {
-                const cellIndex = coord[1] * 10 + coord[0];
-                
-                if (sequenceIndex < this.state.sequence.length) {
+                // Ensure we don't exceed available sequence entries
+                if (index < this.state.sequenceEntries.length) {
+                    const cellIndex = coord[1] * 10 + coord[0];
                     this.state.gridEntries[cellIndex] = {
-                        ...this.state.sequence[sequenceIndex],
+                        ...this.state.sequenceEntries[index],
                         isPartOfPath: true,
                         pathIndex: index
                     };
-                    sequenceIndex++;
                 }
             });
         } catch (error) {
@@ -166,21 +194,29 @@ class GameController {
 
     fillRemainingCells() {
         try {
-            // Get all empty cell indices
+            // Get remaining sequence entries not used in the path
+            const remainingEntries = this.state.sequenceEntries.slice(this.state.path.length);
+            
+            // Get empty cell indices
             const emptyCells = this.state.gridEntries
                 .map((entry, index) => entry === null ? index : null)
                 .filter(index => index !== null);
 
-            // Create array of remaining sequence entries
-            const remainingEntries = this.state.sequence.slice(this.state.path.length);
-
-            // Shuffle remaining entries
+            // Shuffle remaining entries and empty cells
             const shuffledEntries = [...remainingEntries].sort(() => Math.random() - 0.5);
+            const shuffledEmptyCells = emptyCells.sort(() => Math.random() - 0.5);
 
-            // Fill empty cells
-            emptyCells.forEach((cellIndex, i) => {
-                this.state.gridEntries[cellIndex] = 
-                    shuffledEntries[i] || this.generateRandomEntry();
+            // Fill empty cells with remaining entries
+            shuffledEmptyCells.forEach((cellIndex, i) => {
+                if (i < shuffledEntries.length) {
+                    this.state.gridEntries[cellIndex] = {
+                        ...shuffledEntries[i],
+                        isPartOfPath: false
+                    };
+                } else {
+                    // If we run out of entries, generate random entries
+                    this.state.gridEntries[cellIndex] = this.generateRandomEntry();
+                }
             });
         } catch (error) {
             console.error('Error filling remaining cells:', error);
@@ -190,8 +226,8 @@ class GameController {
     generateRandomEntry() {
         // Generate a random number or simple math entry
         return {
-            value: Math.floor(Math.random() * 20) + 1,
-            type: 'number'
+            type: 'number',
+            value: Math.floor(Math.random() * 20) + 1
         };
     }
 
@@ -200,7 +236,8 @@ class GameController {
             if (!this.state.gameActive) return;
 
             const cellIndex = parseInt(cell.dataset.index);
-            
+            const cellCoord = [cellIndex % 10, Math.floor(cellIndex / 10)];
+
             // Toggle cell selection
             if (this.state.userPath.includes(cellIndex)) {
                 // Remove this cell and all subsequent cells from the path
@@ -208,7 +245,7 @@ class GameController {
                 this.state.userPath = this.state.userPath.slice(0, index);
             } else {
                 // Add cell to path if it's a valid move
-                if (this.isValidNextCell(cellIndex)) {
+                if (this.isValidNextCell(cellCoord)) {
                     this.state.userPath.push(cellIndex);
                 }
             }
@@ -220,15 +257,14 @@ class GameController {
         }
     }
 
-    isValidNextCell(cellIndex) {
+    isValidNextCell(coord) {
         if (this.state.userPath.length === 0) return true;
 
         const lastCellIndex = this.state.userPath[this.state.userPath.length - 1];
         const lastCoord = [lastCellIndex % 10, Math.floor(lastCellIndex / 10)];
-        const newCoord = [cellIndex % 10, Math.floor(cellIndex / 10)];
 
-        const dx = Math.abs(newCoord[0] - lastCoord[0]);
-        const dy = Math.abs(newCoord[1] - lastCoord[1]);
+        const dx = Math.abs(coord[0] - lastCoord[0]);
+        const dy = Math.abs(coord[1] - lastCoord[1]);
 
         return (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
     }
@@ -258,6 +294,9 @@ class GameController {
                 this.state.score += 100;
                 this.showMessage('Congratulations! You found the correct path!', 'success');
                 this.state.gameActive = false;
+                
+                // Highlight the correct path
+                highlightPath(this.state.path);
             } else {
                 this.state.score -= 10;
                 this.showMessage('That\'s not the correct path. Try again!', 'error');
