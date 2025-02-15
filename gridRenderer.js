@@ -1,128 +1,134 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Path Game</title>
+// gridRenderer.js
+
+/**
+ * Renders the game grid based on the provided grid entries
+ * @param {Array} gridEntries - Array of cell entries to render
+ */
+export function renderGrid(gridEntries) {
+    try {
+        // Validate input
+        if (!Array.isArray(gridEntries)) {
+            console.error('Invalid grid entries: Expected an array');
+            return;
+        }
+
+        const gridContainer = document.getElementById('grid-container');
+        if (!gridContainer) {
+            console.error('Grid container not found');
+            return;
+        }
+
+        // Clear existing grid
+        gridContainer.innerHTML = '';
+
+        // Create grid cells
+        gridEntries.forEach((entry, index) => {
+            const cell = document.createElement('div');
+            cell.classList.add('grid-cell');
+            cell.dataset.index = index;
+
+            // Handle different types of entries
+            if (entry) {
+                // Handle numbers and fractions
+                if (typeof entry === 'number') {
+                    cell.textContent = entry.toString();
+                    cell.classList.add('number');
+                } else if (entry instanceof Object) {
+                    // For complex entries with value and properties
+                    const displayValue = entry.display || 
+                        (entry.value instanceof Object 
+                            ? entry.value.toString() 
+                            : entry.value);
+                    
+                    cell.textContent = displayValue || '';
+
+                    // Add additional styling based on entry properties
+                    if (entry.isPartOfPath) {
+                        cell.classList.add('path-cell');
+                    }
+                    if (entry.type === 'operator') {
+                        cell.classList.add('operator');
+                    }
+                }
+            } else {
+                // Empty cell
+                cell.textContent = '';
+            }
+
+            gridContainer.appendChild(cell);
+        });
+
+        // Ensure grid layout
+        gridContainer.style.gridTemplateColumns = 'repeat(10, 1fr)';
+    } catch (error) {
+        console.error('Error rendering grid:', error);
+    }
+}
+
+/**
+ * Updates a specific cell in the grid
+ * @param {number} index - Index of the cell to update
+ * @param {*} value - New value for the cell
+ */
+export function updateCell(index, value) {
+    try {
+        const cell = document.querySelector(`[data-index="${index}"]`);
+        if (!cell) {
+            console.warn(`Cell at index ${index} not found`);
+            return;
+        }
+
+        if (value === null) {
+            // Remove cell content
+            cell.textContent = '';
+            cell.classList.add('removed');
+        } else {
+            // Update cell content
+            const displayValue = value.display || 
+                (value instanceof Object ? value.toString() : value);
+            cell.textContent = displayValue;
+        }
+    } catch (error) {
+        console.error('Error updating cell:', error);
+    }
+}
+
+/**
+ * Highlights a specific path on the grid
+ * @param {Array} path - Array of coordinates to highlight
+ */
+export function highlightPath(path) {
+    try {
+        // Remove existing highlights
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.classList.remove('highlight');
+        });
+
+        // Highlight path cells
+        path.forEach(coord => {
+            const index = coord[1] * 10 + coord[0];
+            const cell = document.querySelector(`[data-index="${index}"]`);
+            if (cell) {
+                cell.classList.add('highlight');
+            }
+        });
+    } catch (error) {
+        console.error('Error highlighting path:', error);
+    }
+}
+
+/**
+ * Provides additional debugging information about the grid
+ */
+export function debugGridInfo(gridEntries) {
+    console.group('Grid Renderer Debug Info');
+    console.log('Total grid entries:', gridEntries.length);
     
-    <style>
-        /* Core styles */
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: #f0f2f5;
-        }
-        
-        .game-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        /* Grid styles */
-        #grid-container {
-            display: grid;
-            grid-template-columns: repeat(10, minmax(40px, 1fr));
-            gap: 2px;
-            background-color: #cbd5e1;
-            padding: 2px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
-        .grid-cell {
-            aspect-ratio: 1;
-            background-color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            user-select: none;
-        }
-        
-        .grid-cell:hover {
-            background-color: #e5e7eb;
-        }
-        
-        .grid-cell.selected {
-            background-color: #93c5fd;
-            color: #1e40af;
-        }
-        
-        .grid-cell.number {
-            font-weight: bold;
-        }
-        
-        .grid-cell.operator {
-            color: #dc2626;
-        }
-        
-        /* Control styles */
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            border: none;
-            background-color: #2563eb;
-            color: white;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .level-btn {
-            background-color: #4b5563;
-        }
-        
-        .level-btn.active {
-            background-color: #2563eb;
-        }
-    </style>
-</head>
-<body>
-    <div class="game-container">
-        <h1>Math Path Game</h1>
-        
-        <!-- Level selection -->
-        <div class="controls">
-            <button class="level-btn" data-level="1">Level 1</button>
-            <button class="level-btn" data-level="2">Level 2</button>
-            <button class="level-btn" data-level="3">Level 3</button>
-            <button class="level-btn" data-level="4">Level 4</button>
-            <button class="level-btn" data-level="5">Level 5</button>
-        </div>
-        
-        <!-- Grid container -->
-        <div id="grid-container"></div>
-        
-        <!-- Game controls -->
-        <div class="controls">
-            <button id="check-solution" disabled>Check Solution</button>
-            <button id="remove-spare" disabled>Remove Spare (-5 points)</button>
-            <div class="score">Score: <span id="score">0</span></div>
-        </div>
-        
-        <!-- Game messages -->
-        <div id="game-messages"></div>
-    </div>
+    const filledCells = gridEntries.filter(entry => entry !== null);
+    console.log('Filled cells:', filledCells.length);
     
-    <!-- Module scripts -->
-    <script type="module" src="js/pathGenerator.js"></script>
-    <script type="module" src="js/sequenceGenerator.js"></script>
-    <script type="module" src="js/gridRenderer.js"></script>
-    <script type="module" src="js/gameLogic.js"></script>
-</body>
-</html>
+    // Log a sample of entries
+    console.log('Sample entries:', filledCells.slice(0, 5));
+    
+    console.groupEnd();
+}
