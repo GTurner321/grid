@@ -29,26 +29,13 @@ export function renderGrid(gridEntries) {
 
             // Handle different types of entries
             if (entry) {
-                // Handle numbers and fractions
-                if (typeof entry === 'number') {
-                    cell.textContent = entry.toString();
+                // Simplified rendering based on type
+                if (entry.type === 'number') {
+                    cell.textContent = entry.value.toString();
                     cell.classList.add('number');
-                } else if (entry instanceof Object) {
-                    // For complex entries with value and properties
-                    const displayValue = entry.display || 
-                        (entry.value instanceof Object 
-                            ? entry.value.toString() 
-                            : entry.value);
-                    
-                    cell.textContent = displayValue || '';
-
-                    // Add additional styling based on entry properties
-                    if (entry.isPartOfPath) {
-                        cell.classList.add('path-cell');
-                    }
-                    if (entry.type === 'operator') {
-                        cell.classList.add('operator');
-                    }
+                } else if (entry.type === 'operator') {
+                    cell.textContent = entry.value;
+                    cell.classList.add('operator');
                 }
             } else {
                 // Empty cell
