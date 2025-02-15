@@ -224,25 +224,29 @@
             };
 
             const generateOrderedList = (sequence) => {
-                console.log('Generating ordered list...');
-                const list = [];
-                sequence.forEach((sum, index) => {
-                    if (index === 0) {
-                        list.push(formatNumber(sum.num1));
-                        list.push(sum.operator);
-                        list.push(formatNumber(sum.num2));
-                    } else {
-                        list.push(sum.operator);
-                        list.push(formatNumber(sum.num2));
-                    }
-                });
-                if (sequence.length > 0) {
-                    list.push(formatNumber(sequence[sequence.length - 1].result));
-                }
-                setNumbersList(list);
-                console.log('Ordered list generated:', list);
-            };
+    const list = [];
+    
+    // First sequence: first number, operator, second number
+    if (sequence.length > 0) {
+        const firstSum = sequence[0];
+        list.push(formatNumber(firstSum.num1));
+        list.push(firstSum.operator);
+        list.push(formatNumber(firstSum.num2));
+    }
 
+    // For all sequences: result/next first number, operator, second number
+    sequence.forEach((sum) => {
+        list.push(formatNumber(sum.result));  // Include result, which becomes next first number
+        if (sequence.indexOf(sum) !== sequence.length - 1) {  // Don't add operator/number after last result
+            const nextSum = sequence[sequence.indexOf(sum) + 1];
+            list.push(nextSum.operator);
+            list.push(formatNumber(nextSum.num2));
+        }
+    });
+
+    setNumbersList(list);
+};
+            
             const generateSequence = (level) => {
                 console.log(`Generating sequence for level: ${level}`);
                 setCurrentLevel(level);
