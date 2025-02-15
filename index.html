@@ -49,36 +49,43 @@
         </section>
 
         <!-- Main Game Area -->
-        <main class="game-board">
-            <!-- Grid Container -->
-            <div id="grid-container"></div>
-            
-            <!-- Game Controls -->
-            <div class="game-controls">
-                <button id="check-solution" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Check Solution
-                </button>
-                <button id="remove-spare" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                    Remove Spare (-5 pts)
-                </button>
-                
-                <!-- Score Display -->
-                <div class="score-display">
-                    Score: <span id="score">0</span>
-                </div>
-            </div>
+<main class="game-board">
+    <!-- Grid Container -->
+    <div id="grid-container"></div>
+    
+    <!-- Sequence of Sums Container -->
+    <div class="sequence-container">
+        <h3>Sequence of Sums</h3>
+        <div id="sequence-sums" class="sequence-list"></div>
+    </div>
+    
+    <!-- Game Controls -->
+    <div class="game-controls">
+        <button id="check-solution" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+            </svg>
+            Check Solution
+        </button>
+        
+        <button id="remove-spare" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Remove Spare Cell (-5 pts)
+        </button>
+        
+        <!-- Score Display -->
+        <div class="score-display">
+            Score: <span id="score">0</span>
+        </div>
+    </div>
 
-            <!-- Game Messages -->
-            <div id="game-messages" class="message-box"></div>
-        </main>
-
+    <!-- Game Messages -->
+    <div id="game-messages" class="message-box"></div>
+</main>
+        
         <!-- Instructions Modal -->
         <div id="instructions-modal" class="modal">
             <div class="modal-content">
