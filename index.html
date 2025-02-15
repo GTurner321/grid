@@ -3,48 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Path Game</title>
+    <title>Math Path Puzzle Game</title>
     
-    <!-- Base styles -->
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="styles/main.css" as="style">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="styles/main.css">
     
-    <!-- Load game scripts after modules are supported -->
-    <script type="module" src="js/gameLogic.js"></script>
+    <!-- Module Preloading -->
+    <link rel="modulepreload" href="js/gameLogic.js">
+    <link rel="modulepreload" href="js/pathGenerator.js">
+    <link rel="modulepreload" href="js/sequenceGenerator.js">
+    <link rel="modulepreload" href="js/gridRenderer.js">
 </head>
 <body>
     <div class="game-container">
-        <!-- Header section -->
+        <!-- Header Section -->
         <header class="game-header">
-            <h1>Math Path Game</h1>
-            <div class="level-selector">
-                <h2>Select Level</h2>
-                <div class="level-buttons">
-                    <button class="level-btn" data-level="1">Level 1</button>
-                    <button class="level-btn" data-level="2">Level 2</button>
-                    <button class="level-btn" data-level="3">Level 3</button>
-                    <button class="level-btn" data-level="4">Level 4</button>
-                    <button class="level-btn" data-level="5">Level 5</button>
-                </div>
-            </div>
+            <h1>Math Path Puzzle</h1>
+            
+            <!-- Game Instructions Modal Trigger -->
+            <button id="instructions-btn" class="info-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
+                </svg>
+            </button>
         </header>
 
-        <!-- Main game area -->
+        <!-- Level Selector -->
+        <section class="level-selector">
+            <h2>Select Difficulty</h2>
+            <div class="level-buttons">
+                <button class="level-btn" data-level="1">Level 1</button>
+                <button class="level-btn" data-level="2">Level 2</button>
+                <button class="level-btn" data-level="3">Level 3</button>
+                <button class="level-btn" data-level="4">Level 4</button>
+                <button class="level-btn" data-level="5">Level 5</button>
+            </div>
+        </section>
+
+        <!-- Main Game Area -->
         <main class="game-board">
-            <!-- Grid will be rendered here -->
+            <!-- Grid Container -->
             <div id="grid-container"></div>
             
-            <!-- Game controls -->
+            <!-- Game Controls -->
             <div class="game-controls">
-                <button id="check-solution" disabled>Check Solution</button>
-                <button id="remove-spare" disabled>Remove Spare Cell (-5 points)</button>
+                <button id="check-solution" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6 9 17l-5-5"></path>
+                    </svg>
+                    Check Solution
+                </button>
+                <button id="remove-spare" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Remove Spare (-5 pts)
+                </button>
+                
+                <!-- Score Display -->
                 <div class="score-display">
                     Score: <span id="score">0</span>
                 </div>
             </div>
 
-            <!-- Game status messages -->
-            <div id="game-messages"></div>
+            <!-- Game Messages -->
+            <div id="game-messages" class="message-box"></div>
         </main>
+
+        <!-- Instructions Modal -->
+        <div id="instructions-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>How to Play</h2>
+                <ol>
+                    <li>Select a difficulty level</li>
+                    <li>Find the path by following the mathematical sequence</li>
+                    <li>Click cells to create a connected path</li>
+                    <li>Solve the puzzle to earn points!</li>
+                </ol>
+                <div class="tips">
+                    <h3>Tips:</h3>
+                    <ul>
+                        <li>Path must be continuous</li>
+                        <li>Move only to adjacent cells</li>
+                        <li>Follow the mathematical logic</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Game Modules -->
+    <script type="module" src="js/gameLogic.js"></script>
+    <script type="module" src="js/pathGenerator.js"></script>
+    <script type="module" src="js/sequenceGenerator.js"></script>
+    <script type="module" src="js/gridRenderer.js"></script>
 </body>
 </html>
