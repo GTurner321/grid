@@ -227,24 +227,29 @@ export const generateSequence = async (level) => {
 export const sequenceToEntries = (sequence) => {
     const entries = [];
     
-    if (sequence.length > 0) {
-        const firstSum = sequence[0];
-        entries.push(
-            { type: 'number', value: firstSum.num1 },
-            { type: 'operator', value: firstSum.operator },
-            { type: 'number', value: firstSum.num2 }
-        );
-    }
-
     sequence.forEach((sum, index) => {
-        entries.push({ type: 'number', value: sum.result });
-        if (index < sequence.length - 1) {
-            const nextSum = sequence[index + 1];
-            entries.push(
-                { type: 'operator', value: nextSum.operator },
-                { type: 'number', value: nextSum.num2 }
-            );
+        // First number of the first sum
+        if (index === 0) {
+            entries.push({ type: 'number', value: sum.num1 });
         }
+
+        // Operator
+        entries.push({ 
+            type: 'operator', 
+            value: sum.operator 
+        });
+
+        // Second number
+        entries.push({ 
+            type: 'number', 
+            value: sum.num2 
+        });
+
+        // Result
+        entries.push({ 
+            type: 'number', 
+            value: sum.result 
+        });
     });
 
     return entries;
