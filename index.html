@@ -3,332 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Sequence Generator (Debug)</title>
-    <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone@7.22.5/babel.min.js"></script>
+    <title>Math Path Game</title>
     
-    <script>
-        console.log('Starting script load...');
-        window.onerror = function(msg, url, lineNo, columnNo, error) {
-            console.log('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nError: ' + error);
-            return false;
-        };
-    </script>
-
-    <style>
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin: 20px;
-            padding: 20px;
-            max-width: 800px;
-            margin: 20px auto;
-        }
-        .button {
-            padding: 8px 16px;
-            margin: 0 4px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .button-outline {
-            border: 1px solid #ccc;
-            background: white;
-        }
-        .button-default {
-            background: #007bff;
-            color: white;
-            border: none;
-        }
-        .output-box {
-            font-family: monospace;
-            background: #f8f9fa;
-            padding: 16px;
-            border-radius: 4px;
-            margin-top: 16px;
-            white-space: pre-wrap;
-        }
-        .numbers-list {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin-top: 16px;
-        }
-        .numbers-list-item {
-            display: flex;
-            align-items: center;
-        }
-        .arrow-down {
-            color: #ff6b6b;
-            margin-left: 8px;
-        }
-    </style>
+    <!-- Base styles -->
+    <link rel="stylesheet" href="styles/main.css">
+    
+    <!-- Load game scripts after modules are supported -->
+    <script type="module" src="js/gameLogic.js"></script>
 </head>
-<body style="background-color: #f0f2f5; margin: 0; padding: 20px;">
-    <div id="root"></div>
-
-    <script type="text/babel">
-        console.log('Starting Babel script...');
-
-        function App() {
-            console.log('Initializing App component...');
-            
-            const [sequence, setSequence] = React.useState([]);
-            const [numbersList, setNumbersList] = React.useState([]);
-            const [currentLevel, setCurrentLevel] = React.useState(null);
-
-            const isValidNumber = (num, maxNum, allowFractions, maxDenominator = 12) => {
-                if (typeof num === 'number') {
-                    return Number.isInteger(num) && num > 0 && num <= maxNum;
-                }
-                if (!allowFractions) return false;
-                return num.numerator <= 11 && 
-                       num.numerator > 0 && 
-                       num.denominator >= 2 && 
-                       num.denominator <= maxDenominator;
-            };
-
-            const generateFraction = (maxDenominator = 12) => {
-                const denominator = Math.floor(Math.random() * (maxDenominator - 1)) + 2;
-                const numerator = Math.floor(Math.random() * 11) + 1;
-                if (numerator >= denominator) return generateFraction(maxDenominator);
-                return { numerator, denominator };
-            };
-
-            const calculateResult = (num1, operator, num2, maxNum, allowFractions, maxDenominator = 12) => {
-                const n1 = typeof num1 === 'number' ? num1 : num1.numerator / num1.denominator;
-                const n2 = typeof num2 === 'number' ? num2 : num2.numerator / num2.denominator;
-                
-                let result;
-                switch (operator) {
-                    case '+': result = n1 + n2; break;
-                    case '-': result = n1 - n2; break;
-                    case '*': result = n1 * n2; break;
-                    case '/': 
-                        if (n2 === 0) return null;
-                        result = n1 / n2; 
-                        break;
-                    default: return null;
-                }
-                
-                if (result <= 0 || result > maxNum || isNaN(result)) return null;
-                
-                if (Number.isInteger(result)) return result;
-                if (!allowFractions) return null;
-                
-                for (let denominator = 2; denominator <= maxDenominator; denominator++) {
-                    const numerator = Math.round(result * denominator);
-                    if (numerator <= 11 && numerator > 0 && 
-                        numerator < denominator &&
-                        Math.abs(numerator/denominator - result) < 0.0001) {
-                        return { numerator, denominator };
-                    }
-                }
-                
-                return null;
-            };
-
-            const selectOperatorAndNum2 = (num1, maxNum, allowFractions, maxDenominator) => {
-                const n1 = typeof num1 === 'number' ? num1 : num1.numerator / num1.denominator;
-                
-                if (n1 > 16) {
-                    if (Math.random() < 0.8) {
-                        if (Math.random() < 0.4) {
-                            const targetResult = Math.floor(Math.random() * 16) + 1;
-                            const num2 = Math.floor(n1 - targetResult);
-                            if (num2 > 1 && num2 <= maxNum) {
-                                return { operator: '-', num2 };
-                            }
-                        } else {
-                            for (let divisor = 2; divisor <= Math.min(10, maxNum); divisor++) {
-                                if (n1 / divisor < 17 && n1 % divisor === 0) {
-                                    return { operator: '/', num2: divisor };
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                const operatorBias = Math.random();
-                let operator;
-                if (operatorBias < 0.35) operator = '*';
-                else if (operatorBias < 0.6) operator = '/';
-                else if (operatorBias < 0.8) operator = '+';
-                else operator = '-';
-                
-                let num2;
-                do {
-                    if (typeof num1 === 'number') {
-                        num2 = Math.random() < 0.7 ? 
-                            Math.floor(Math.random() * (maxNum - 1)) + 2 : 
-                            (allowFractions ? generateFraction(maxDenominator) : Math.floor(Math.random() * (maxNum - 1)) + 2);
-                    } else {
-                        num2 = Math.floor(Math.random() * (maxNum - 1)) + 2;
-                    }
-                } while (num2 === 1);
-                
-                return { operator, num2 };
-            };
-
-            const formatNumber = (num) => {
-                if (typeof num === 'number') return num.toString();
-                return `${num.numerator}/${num.denominator}`;
-            };
-
-            const generateNextSum = (startNum, level) => {
-                console.log(`Generating next sum for ${startNum} in level ${level}`);
-                const config = {
-                    L1: { maxNum: 30, allowFractions: false, maxDenominator: 12 },
-                    L2: { maxNum: 99, allowFractions: false, maxDenominator: 12 },
-                    L3: { maxNum: 30, allowFractions: true, maxDenominator: 5 },
-                    L4: { maxNum: 30, allowFractions: true, maxDenominator: 12 },
-                    L5: { maxNum: 99, allowFractions: true, maxDenominator: 12 }
-                }[level];
-
-                let attempts = 0;
-                while (attempts < 100) {
-                    const { operator, num2 } = selectOperatorAndNum2(
-                        startNum, 
-                        config.maxNum, 
-                        config.allowFractions, 
-                        config.maxDenominator
-                    );
-                    
-                    if (typeof startNum !== 'number' && typeof num2 !== 'number') {
-                        attempts++;
-                        continue;
-                    }
-                    
-                    const result = calculateResult(
-                        startNum, 
-                        operator, 
-                        num2, 
-                        config.maxNum, 
-                        config.allowFractions,
-                        config.maxDenominator
-                    );
-                    
-                    if (result !== null && isValidNumber(result, config.maxNum, config.allowFractions, config.maxDenominator)) {
-                        return {
-                            num1: startNum,
-                            operator: operator === '*' ? 'x' : operator,
-                            num2,
-                            result
-                        };
-                    }
-                    attempts++;
-                }
-                return null;
-            };
-
-            const generateOrderedList = (sequence) => {
-    const list = [];
-    
-    // First sequence: first number, operator, second number
-    if (sequence.length > 0) {
-        const firstSum = sequence[0];
-        list.push(formatNumber(firstSum.num1));
-        list.push(firstSum.operator);
-        list.push(formatNumber(firstSum.num2));
-    }
-
-    // For all sequences: result/next first number, operator, second number
-    sequence.forEach((sum) => {
-        list.push(formatNumber(sum.result));  // Include result, which becomes next first number
-        if (sequence.indexOf(sum) !== sequence.length - 1) {  // Don't add operator/number after last result
-            const nextSum = sequence[sequence.indexOf(sum) + 1];
-            list.push(nextSum.operator);
-            list.push(formatNumber(nextSum.num2));
-        }
-    });
-
-    setNumbersList(list);
-};
-            
-            const generateSequence = (level) => {
-                console.log(`Generating sequence for level: ${level}`);
-                setCurrentLevel(level);
-                let currentNum = Math.floor(Math.random() * 16) + 1;
-                console.log(`Starting with number: ${currentNum}`);
-                const newSequence = [];
-                
-                for (let i = 0; i < 33; i++) {
-                    const sum = generateNextSum(currentNum, level);
-                    if (!sum) {
-                        console.log(`Failed to generate valid sum at position ${i}`);
-                        break;
-                    }
-                    console.log(`Generated sum ${i + 1}:`, sum);
-                    newSequence.push(sum);
-                    currentNum = sum.result;
-                }
-                
-                console.log('Final sequence length:', newSequence.length);
-                setSequence(newSequence);
-                generateOrderedList(newSequence);
-            };
-
-            return (
-                <div className="card">
-                    <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h1 style={{ margin: 0 }}>Math Sequence Generator</h1>
-                        <div>
-                            {['L1', 'L2', 'L3', 'L4', 'L5'].map(level => (
-                                <button 
-                                    key={level}
-                                    onClick={() => generateSequence(level)}
-                                    className={`button ${currentLevel === level ? 'button-default' : 'button-outline'}`}
-                                >
-                                    {level}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="output-box">
-                        {sequence.map((sum, index) => (
-                            <div key={index} style={{ marginBottom: '8px' }}>
-                                <span style={{ color: '#666', width: '30px', display: 'inline-block' }}>{index + 1}.</span>
-                                {formatNumber(sum.num1)} {sum.operator} {formatNumber(sum.num2)} = {formatNumber(sum.result)}
-                                {typeof sum.result === 'number' && sum.result > 16 && 
-                                    <span className="arrow-down">↓</span>
-                                }
-                            </div>
-                        ))}
-                        {sequence.length === 0 && (
-                            <div style={{ color: '#666', fontStyle: 'italic' }}>
-                                Click a level button to generate a sequence
-                            </div>
-                        )}
-                    </div>
-
-                    {numbersList.length > 0 && (
-                        <div className="output-box">
-                            <h3>Ordered List:</h3>
-                            <div className="numbers-list">
-                                {numbersList.map((item, index) => (
-                                    <div key={index} className="numbers-list-item">
-                                        <span style={{ color: '#666', width: '30px' }}>{index + 1}.</span>
-                                        <span>{item}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+<body>
+    <div class="game-container">
+        <!-- Header section -->
+        <header class="game-header">
+            <h1>Math Path Game</h1>
+            <div class="level-selector">
+                <h2>Select Level</h2>
+                <div class="level-buttons">
+                    <button class="level-btn" data-level="1">Level 1</button>
+                    <button class="level-btn" data-level="2">Level 2</button>
+                    <button class="level-btn" data-level="3">Level 3</button>
+                    <button class="level-btn" data-level="4">Level 4</button>
+                    <button class="level-btn" data-level="5">Level 5</button>
                 </div>
-            );
-        }
+            </div>
+        </header>
 
-        try {
-            console.log('Starting React render...');
-            const root = ReactDOM.createRoot(document.getElementById('root'));
-            root.render(<App />);
-            console.log('React render completed');
-        } catch (error) {
-            console.error('Error during render:', error);
-        }
-    </script>
+        <!-- Main game area -->
+        <main class="game-board">
+            <!-- Grid will be rendered here -->
+            <div id="grid-container"></div>
+            
+            <!-- Game controls -->
+            <div class="game-controls">
+                <button id="check-solution" disabled>Check Solution</button>
+                <button id="remove-spare" disabled>Remove Spare Cell (-5 points)</button>
+                <div class="score-display">
+                    Score: <span id="score">0</span>
+                </div>
+            </div>
+
+            <!-- Game status messages -->
+            <div id="game-messages"></div>
+        </main>
+    </div>
 </body>
 </html>
