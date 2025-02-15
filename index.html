@@ -1,227 +1,277 @@
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-
-const MathSequenceGenerator = () => {
-  const [sequence, setSequence] = useState([]);
-  const [currentLevel, setCurrentLevel] = useState(null);
-
-  const isValidNumber = (num, maxNum, allowFractions, maxDenominator = 10) => {
-    if (typeof num === 'number') {
-      return Number.isInteger(num) && num > 0 && num <= maxNum;
-    }
-    if (!allowFractions) return false;
-    return num.numerator < num.denominator && 
-           num.numerator > 0 && 
-           num.denominator >= 2 && 
-           num.denominator <= maxDenominator;
-  };
-
-  const generateFraction = (maxDenominator = 10) => {
-    const denominator = Math.floor(Math.random() * (maxDenominator - 1)) + 2;
-    const numerator = Math.floor(Math.random() * (denominator - 1)) + 1;
-    return { numerator, denominator };
-  };
-
-  const calculateResult = (num1, operator, num2, maxNum, allowFractions, maxDenominator = 10) => {
-    const n1 = typeof num1 === 'number' ? num1 : num1.numerator / num1.denominator;
-    const n2 = typeof num2 === 'number' ? num2 : num2.numerator / num2.denominator;
-    
-    let result;
-    switch (operator) {
-      case '+': result = n1 + n2; break;
-      case '-': result = n1 - n2; break;
-      case '*': result = n1 * n2; break;
-      case '/': 
-        if (n2 === 0) return null;
-        result = n1 / n2; 
-        break;
-      default: return null;
-    }
-    
-    if (result <= 0 || result > maxNum || isNaN(result)) return null;
-    
-    if (Number.isInteger(result)) return result;
-    if (!allowFractions) return null;
-    
-    for (let denominator = 2; denominator <= maxDenominator; denominator++) {
-      const numerator = Math.round(result * denominator);
-      if (numerator < denominator && numerator > 0 && 
-          Math.abs(numerator/denominator - result) < 0.0001) {
-        return { numerator, denominator };
-      }
-    }
-    
-    return null;
-  };
-
-  const selectOperatorAndNum2 = (num1, maxNum, allowFractions, maxDenominator) => {
-    const n1 = typeof num1 === 'number' ? num1 : num1.numerator / num1.denominator;
-    
-    // If number is large (>16), try to reduce it
-    if (n1 > 16) {
-      if (Math.random() < 0.8) { // 80% chance to try reduction
-        if (Math.random() < 0.4) { // 40% subtraction, 60% division
-          const targetResult = Math.floor(Math.random() * 16) + 1;
-          const num2 = Math.floor(n1 - targetResult);
-          if (num2 > 0 && num2 <= maxNum) {
-            return { operator: '-', num2 };
-          }
-        } else {
-          for (let divisor = 2; divisor <= Math.min(10, maxNum); divisor++) {
-            if (n1 / divisor < 17 && n1 % divisor === 0) {
-              return { operator: '/', num2: divisor };
-            }
-          }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Sequence Generator</title>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            margin: 1rem;
+            padding: 1rem;
         }
-      }
-    }
-    
-    // Increased bias for multiplication and division
-    const operatorBias = Math.random();
-    let operator;
-    if (operatorBias < 0.35) operator = '*';      // 35% chance
-    else if (operatorBias < 0.6) operator = '/';  // 25% chance
-    else if (operatorBias < 0.8) operator = '+';  // 20% chance
-    else operator = '-';                          // 20% chance
-    
-    // Ensure at least one integer in the operation
-    let num2;
-    if (typeof num1 === 'number') {
-      num2 = Math.random() < 0.7 ? 
-        Math.floor(Math.random() * maxNum) + 1 : 
-        (allowFractions ? generateFraction(maxDenominator) : Math.floor(Math.random() * maxNum) + 1);
-    } else {
-      num2 = Math.floor(Math.random() * maxNum) + 1; // Must be integer if num1 is fraction
-    }
-    
-    if (operator === '/' && typeof num2 === 'number' && num2 > 11) {
-      num2 = Math.floor(Math.random() * 8) + 2; // 2-9 range for divisors
-    }
-    
-    return { operator, num2 };
-  };
+        .button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .button-outline {
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+        .button-outline:hover {
+            background: #f7fafc;
+        }
+        .button-default {
+            background: #3b82f6;
+            color: white;
+        }
+        .button-default:hover {
+            background: #2563eb;
+        }
+        .output-box {
+            font-family: monospace;
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+    <div id="root"></div>
 
-  const formatNumber = (num) => {
-    if (typeof num === 'number') return num.toString();
-    return `${num.numerator}/${num.denominator}`;
-  };
+    <script type="text/babel">
+        const MathSequenceGenerator = () => {
+            const [sequence, setSequence] = React.useState([]);
+            const [currentLevel, setCurrentLevel] = React.useState(null);
 
-  const generateNextSum = (startNum, level) => {
-    const config = {
-      L1: { maxNum: 30, allowFractions: false, integerBias: 1, maxDenominator: 10 },
-      L2: { maxNum: 99, allowFractions: false, integerBias: 1, maxDenominator: 10 },
-      L3: { maxNum: 30, allowFractions: true, integerBias: 0.8, maxDenominator: 5 },
-      L4: { maxNum: 30, allowFractions: true, integerBias: 0.7, maxDenominator: 10 },
-      L5: { maxNum: 99, allowFractions: true, integerBias: 0.4, maxDenominator: 10 }
-    }[level];
+            const isValidNumber = (num, maxNum, allowFractions, maxDenominator = 10) => {
+                if (typeof num === 'number') {
+                    return Number.isInteger(num) && num > 0 && num <= maxNum;
+                }
+                if (!allowFractions) return false;
+                return num.numerator < num.denominator && 
+                       num.numerator > 0 && 
+                       num.denominator >= 2 && 
+                       num.denominator <= maxDenominator;
+            };
 
-    let attempts = 0;
-    while (attempts < 100) {
-      const { operator, num2 } = selectOperatorAndNum2(
-        startNum, 
-        config.maxNum, 
-        config.allowFractions, 
-        config.maxDenominator
-      );
-      
-      // Skip if both numbers are fractions
-      if (typeof startNum !== 'number' && typeof num2 !== 'number') {
-        attempts++;
-        continue;
-      }
-      
-      const result = calculateResult(
-        startNum, 
-        operator, 
-        num2, 
-        config.maxNum, 
-        config.allowFractions,
-        config.maxDenominator
-      );
-      
-      if (result !== null && isValidNumber(result, config.maxNum, config.allowFractions, config.maxDenominator)) {
-        return {
-          num1: startNum,
-          operator: operator === '*' ? 'x' : operator,
-          num2,
-          result
+            const generateFraction = (maxDenominator = 10) => {
+                const denominator = Math.floor(Math.random() * (maxDenominator - 1)) + 2;
+                const numerator = Math.floor(Math.random() * (denominator - 1)) + 1;
+                return { numerator, denominator };
+            };
+
+            const calculateResult = (num1, operator, num2, maxNum, allowFractions, maxDenominator = 10) => {
+                const n1 = typeof num1 === 'number' ? num1 : num1.numerator / num1.denominator;
+                const n2 = typeof num2 === 'number' ? num2 : num2.numerator / num2.denominator;
+                
+                let result;
+                switch (operator) {
+                    case '+': result = n1 + n2; break;
+                    case '-': result = n1 - n2; break;
+                    case '*': result = n1 * n2; break;
+                    case '/': 
+                        if (n2 === 0) return null;
+                        result = n1 / n2; 
+                        break;
+                    default: return null;
+                }
+                
+                if (result <= 0 || result > maxNum || isNaN(result)) return null;
+                
+                if (Number.isInteger(result)) return result;
+                if (!allowFractions) return null;
+                
+                for (let denominator = 2; denominator <= maxDenominator; denominator++) {
+                    const numerator = Math.round(result * denominator);
+                    if (numerator < denominator && numerator > 0 && 
+                        Math.abs(numerator/denominator - result) < 0.0001) {
+                        return { numerator, denominator };
+                    }
+                }
+                
+                return null;
+            };
+
+            const selectOperatorAndNum2 = (num1, maxNum, allowFractions, maxDenominator) => {
+                const n1 = typeof num1 === 'number' ? num1 : num1.numerator / num1.denominator;
+                
+                // If number is large (>16), try to reduce it
+                if (n1 > 16) {
+                    if (Math.random() < 0.8) {
+                        if (Math.random() < 0.4) {
+                            const targetResult = Math.floor(Math.random() * 16) + 1;
+                            const num2 = Math.floor(n1 - targetResult);
+                            if (num2 > 0 && num2 <= maxNum) {
+                                return { operator: '-', num2 };
+                            }
+                        } else {
+                            for (let divisor = 2; divisor <= Math.min(10, maxNum); divisor++) {
+                                if (n1 / divisor < 17 && n1 % divisor === 0) {
+                                    return { operator: '/', num2: divisor };
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Increased bias for multiplication and division
+                const operatorBias = Math.random();
+                let operator;
+                if (operatorBias < 0.35) operator = '*';
+                else if (operatorBias < 0.6) operator = '/';
+                else if (operatorBias < 0.8) operator = '+';
+                else operator = '-';
+                
+                let num2;
+                if (typeof num1 === 'number') {
+                    num2 = Math.random() < 0.7 ? 
+                        Math.floor(Math.random() * maxNum) + 1 : 
+                        (allowFractions ? generateFraction(maxDenominator) : Math.floor(Math.random() * maxNum) + 1);
+                } else {
+                    num2 = Math.floor(Math.random() * maxNum) + 1;
+                }
+                
+                if (operator === '/' && typeof num2 === 'number' && num2 > 11) {
+                    num2 = Math.floor(Math.random() * 8) + 2;
+                }
+                
+                return { operator, num2 };
+            };
+
+            const formatNumber = (num) => {
+                if (typeof num === 'number') return num.toString();
+                return `${num.numerator}/${num.denominator}`;
+            };
+
+            const generateNextSum = (startNum, level) => {
+                const config = {
+                    L1: { maxNum: 30, allowFractions: false, integerBias: 1, maxDenominator: 10 },
+                    L2: { maxNum: 99, allowFractions: false, integerBias: 1, maxDenominator: 10 },
+                    L3: { maxNum: 30, allowFractions: true, integerBias: 0.8, maxDenominator: 5 },
+                    L4: { maxNum: 30, allowFractions: true, integerBias: 0.7, maxDenominator: 10 },
+                    L5: { maxNum: 99, allowFractions: true, integerBias: 0.4, maxDenominator: 10 }
+                }[level];
+
+                let attempts = 0;
+                while (attempts < 100) {
+                    const { operator, num2 } = selectOperatorAndNum2(
+                        startNum, 
+                        config.maxNum, 
+                        config.allowFractions, 
+                        config.maxDenominator
+                    );
+                    
+                    if (typeof startNum !== 'number' && typeof num2 !== 'number') {
+                        attempts++;
+                        continue;
+                    }
+                    
+                    const result = calculateResult(
+                        startNum, 
+                        operator, 
+                        num2, 
+                        config.maxNum, 
+                        config.allowFractions,
+                        config.maxDenominator
+                    );
+                    
+                    if (result !== null && isValidNumber(result, config.maxNum, config.allowFractions, config.maxDenominator)) {
+                        return {
+                            num1: startNum,
+                            operator: operator === '*' ? 'x' : operator,
+                            num2,
+                            result
+                        };
+                    }
+                    attempts++;
+                }
+                return null;
+            };
+
+            const generateSequence = (level) => {
+                setCurrentLevel(level);
+                let currentNum = Math.floor(Math.random() * 16) + 1;
+                const newSequence = [];
+                
+                for (let i = 0; i < 33; i++) {
+                    const sum = generateNextSum(currentNum, level);
+                    if (!sum) {
+                        console.log(`Failed to generate valid sum at position ${i}`);
+                        break;
+                    }
+                    newSequence.push(sum);
+                    currentNum = sum.result;
+                }
+                
+                setSequence(newSequence);
+            };
+
+            return (
+                <div className="max-w-2xl mx-auto">
+                    <div className="card">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-bold">Math Sequence Generator</h2>
+                            <div className="flex gap-2">
+                                {['L1', 'L2', 'L3', 'L4', 'L5'].map(level => (
+                                    <button 
+                                        key={level}
+                                        onClick={() => generateSequence(level)}
+                                        className={`button ${currentLevel === level ? 'button-default' : 'button-outline'}`}
+                                    >
+                                        {level}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="text-sm mb-4">
+                            {currentLevel && (
+                                <div className="text-gray-600">
+                                    {currentLevel === 'L1' && "Integers 1-30 only"}
+                                    {currentLevel === 'L2' && "Integers 1-99 only"}
+                                    {currentLevel === 'L3' && "Integers 1-30 and fractions (denominators 2-5)"}
+                                    {currentLevel === 'L4' && "Integers 1-30 and fractions (denominators 2-10)"}
+                                    {currentLevel === 'L5' && "Integers 1-99 and fractions, favoring fractional results"}
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="output-box">
+                            {sequence.map((sum, index) => (
+                                <div key={index} className="flex items-center space-x-2 mb-1">
+                                    <span className="w-8 text-gray-500">{index + 1}.</span>
+                                    <span className="flex-1">
+                                        {formatNumber(sum.num1)} {sum.operator} {formatNumber(sum.num2)} = {formatNumber(sum.result)}
+                                        {typeof sum.result === 'number' && sum.result > 16 && 
+                                            <span className="text-orange-500 ml-2">↓</span>
+                                        }
+                                    </span>
+                                </div>
+                            ))}
+                            {sequence.length === 0 && (
+                                <div className="text-gray-500 italic">
+                                    Click a level button to generate a sequence
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
         };
-      }
-      attempts++;
-    }
-    return null;
-  };
 
-  const generateSequence = (level) => {
-    setCurrentLevel(level);
-    let currentNum = Math.floor(Math.random() * 16) + 1;
-    const newSequence = [];
-    
-    for (let i = 0; i < 33; i++) {
-      const sum = generateNextSum(currentNum, level);
-      if (!sum) {
-        console.log(`Failed to generate valid sum at position ${i}`);
-        break;
-      }
-      
-      newSequence.push(sum);
-      currentNum = sum.result;
-    }
-    
-    setSequence(newSequence);
-  };
-
-  return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between mb-4">
-          Math Sequence Generator
-          <div className="flex gap-2">
-            {['L1', 'L2', 'L3', 'L4', 'L5'].map(level => (
-              <Button 
-                key={level}
-                onClick={() => generateSequence(level)}
-                variant={currentLevel === level ? "default" : "outline"}
-                size="sm"
-              >
-                {level}
-              </Button>
-            ))}
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="text-sm mb-4">
-          {currentLevel && (
-            <div className="text-gray-600 mb-2">
-              {currentLevel === 'L1' && "Integers 1-30 only"}
-              {currentLevel === 'L2' && "Integers 1-99 only"}
-              {currentLevel === 'L3' && "Integers 1-30 and fractions (denominators 2-5)"}
-              {currentLevel === 'L4' && "Integers 1-30 and fractions (denominators 2-10)"}
-              {currentLevel === 'L5' && "Integers 1-99 and fractions, favoring fractional results"}
-            </div>
-          )}
-        </div>
-        <div className="font-mono text-sm space-y-1 bg-gray-50 p-4 rounded-lg">
-          {sequence.map((sum, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <span className="w-8 text-gray-500">{index + 1}.</span>
-              <span className="flex-1">
-                {formatNumber(sum.num1)} {sum.operator} {formatNumber(sum.num2)} = {formatNumber(sum.result)}
-                {typeof sum.result === 'number' && sum.result > 16 && <span className="text-orange-500 ml-2">↓</span>}
-              </span>
-            </div>
-          ))}
-          {sequence.length === 0 && (
-            <div className="text-gray-500 italic">
-              Click a level button to generate a sequence
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-export default MathSequenceGenerator;
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MathSequenceGenerator />);
+    </script>
+</body>
+</html>
