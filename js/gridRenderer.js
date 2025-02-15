@@ -4,7 +4,7 @@
  * Renders the game grid based on the provided grid entries
  * @param {Array} gridEntries - Array of cell entries to render
  */
-export function renderGrid(gridEntries) {
+export function renderGrid(gridEntries, options = {}) {
     try {
         // Validate input
         if (!Array.isArray(gridEntries)) {
@@ -44,6 +44,24 @@ export function renderGrid(gridEntries) {
 
             gridContainer.appendChild(cell);
         });
+
+        // Highlight start square if coordinates are provided
+        if (options.startCoord) {
+            const startIndex = options.startCoord[1] * 10 + options.startCoord[0];
+            const startCell = gridContainer.querySelector(`[data-index="${startIndex}"]`);
+            if (startCell) {
+                startCell.classList.add('start-cell');
+            }
+        }
+
+        // Highlight end square if coordinates are provided
+        if (options.endCoord) {
+            const endIndex = options.endCoord[1] * 10 + options.endCoord[0];
+            const endCell = gridContainer.querySelector(`[data-index="${endIndex}"]`);
+            if (endCell) {
+                endCell.classList.add('end-cell');
+            }
+        }
 
         // Ensure grid layout
         gridContainer.style.gridTemplateColumns = 'repeat(10, 1fr)';
