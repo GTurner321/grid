@@ -60,6 +60,16 @@ body {
     color: white;
 }
 
+.grid-cell.start-cell-selected {
+    background-color: darkgreen;
+    color: white;
+}
+
+.grid-cell.end-cell-selected {
+    background-color: darkred;
+    color: white;
+}
+
 .grid-cell.number {
     font-weight: bold;
 }
