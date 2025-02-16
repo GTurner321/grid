@@ -18,6 +18,26 @@ body {
     padding: 20px;
 }
 
+.game-header h1 {
+    text-align: center;
+    font-family: monospace;
+    font-size: 2.5rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+}
+
+.score-display {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #fef08a;
+    border: 2px solid black;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: black;
+    font-weight: bold;
+}
+
 #grid-container {
     display: grid;
     grid-template-columns: repeat(10, var(--grid-cell-size));
@@ -112,23 +132,6 @@ button:disabled {
     background-color: var(--primary-color);
 }
 
-.sequence-container {
-    margin-top: 20px;
-    background-color: #f9fafb;
-    padding: 10px;
-    border-radius: 8px;
-}
-
-.sequence-list ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.sequence-list li {
-    margin-bottom: 5px;
-    font-family: monospace;
-}
-
 #game-messages {
     margin-top: 15px;
     padding: 10px;
@@ -196,4 +199,11 @@ button:disabled {
 
 .command-box:hover .content {
     display: block;
+}
+
+.level-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
