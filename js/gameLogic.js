@@ -1,12 +1,13 @@
 // gameLogic.js
 import { generatePath } from './pathGenerator.js';
 import { generateSequence, sequenceToEntries, formatNumber } from './sequenceGenerator.js';
-import { renderGrid, updateCell, highlightPath, debugGridInfo } from './gridRenderer.js';
+import { renderGrid, updateCell, debugGridInfo } from './gridRenderer.js';
+import { scoreManager } from './scoreManager.js';
+import { validatePath } from './pathValidator.js';
 
 class GameState {
     constructor() {
         this.currentLevel = null;
-        this.score = 0;
         this.path = [];
         this.sequence = [];
         this.sequenceEntries = []; // Flat list of entries
@@ -24,7 +25,6 @@ class GameState {
             this.sequenceEntries = [];
             this.gridEntries = new Array(100).fill(null);
             this.removedCells.clear();
-            this.score = 0;
             this.gameActive = false;
             this.updateUI();
         } catch (error) {
@@ -34,10 +34,16 @@ class GameState {
 
     updateUI() {
         try {
-            // Update score display
-            const scoreElement = document.getElementById('score');
-            if (scoreElement) {
-                scoreElement.textContent = this.score;
+            // Update total score and current level score
+            const totalScoreElement = document.getElementById('total-score');
+            const currentScoreElement = document.getElementById('score');
+            
+            if (totalScoreElement) {
+                totalScoreElement.textContent = scoreManager.totalScore;
+            }
+            
+            if (currentScoreElement) {
+                currentScoreElement.textContent = scoreManager.remainingPoints;
             }
             
             // Update button states
@@ -88,7 +94,7 @@ class GameController {
             }
 
             if (removeSpareBtn) {
-                removeSpareBtn.addEventListener('click', () => this.removeSpareCell());
+                removeSpareBtn.addEventListener('click', () => this.removeAllSpareCells());
             }
 
             // Grid cell clicks
@@ -113,6 +119,9 @@ class GameController {
             this.state.reset();
             this.state.currentLevel = level;
             this.state.gameActive = true;
+
+            // Initialize scoring for this level
+            scoreManager.initializeLevel(level);
 
             // Generate path
             this.state.path = await generatePath();
@@ -229,6 +238,30 @@ class GameController {
         };
     }
 
+    removeAllSpareCells() {
+        try {
+            // Find and remove all spare cells (not part of the original path)
+            const spareCells = this.state.gridEntries
+                .map((entry, index) => (!entry.isPartOfPath && !this.state.removedCells.has(index)) ? index : null)
+                .filter(index => index !== null);
+
+            spareCells.forEach(cellIndex => {
+                this.state.removedCells.add(cellIndex);
+                updateCell(cellIndex, null);
+            });
+
+            // Reduce points for removing spare cells
+            scoreManager.reducePointsOnRemoveSpareCells();
+
+            this.showMessage(`Removed ${spareCells.length} spare cells. Remaining points reduced.`, 'info');
+            
+            // Update UI to reflect new score
+            this.state.updateUI();
+        } catch (error) {
+            console.error('Error removing spare cells:', error);
+        }
+    }
+
     handleCellClick(cell) {
         try {
             if (!this.state.gameActive) return;
@@ -285,194 +318,80 @@ class GameController {
     }
 
     checkSolution() {
-    try {
-        // Get the grid entries for the user's selected path
-        const userPathEntries = this.state.userPath.map(cellIndex => 
-            this.state.gridEntries[cellIndex]
-        );
-
-        // Validate path length and start/end conditions
-        const isValidPathLength = userPathEntries.length >= 30;
-        const startsAtStartSquare = this.isStartSquare(this.state.userPath[0]);
-        const endsAtEndSquare = this.isEndSquare(this.state.userPath[this.state.userPath.length - 1]);
-
-        // Validate mathematical sequence
-        const validationResult = this.validateMathematicalSequence(userPathEntries);
-
-        if (validationResult.isValid) {
-            if (isValidPathLength && endsAtEndSquare) {
-                // Puzzle completely solved
-                this.handlePuzzleSolved();
-            } else if (!endsAtEndSquare && userPathEntries.length >= 30) {
-                // Path correct but not at end square
-                this.showMessage('Path is mathematically correct! Continue to the end square.', 'info');
-            } else if (!isValidPathLength) {
-                this.showMessage('Path is mathematically correct so far. Keep going!', 'info');
-            }
-        } else {
-            // Mathematical error found
-            this.handleMathematicalError(validationResult);
-        }
-    } catch (error) {
-        console.error('Error checking solution:', error);
-    }
-}
-
-validateMathematicalSequence(pathEntries) {
-    const calculationSteps = [];
-    let currentResult = null;
-
-    for (let i = 0; i < pathEntries.length; i += 3) {
-        // Ensure we have enough entries to form a complete calculation
-        if (i + 2 >= pathEntries.length) break;
-
-        const num1 = currentResult !== null ? currentResult : pathEntries[i].value;
-        const operator = pathEntries[i + 1].value;
-        const num2 = pathEntries[i + 2].value;
-
-        const result = this.calculateStep(num1, operator, num2);
-
-        if (result === null) {
-            return {
-                isValid: false,
-                errorStep: i,
-                errorDetails: `Invalid calculation: ${num1} ${operator} ${num2}`
-            };
-        }
-
-        calculationSteps.push({
-            num1, 
-            operator, 
-            num2, 
-            result
-        });
-
-        currentResult = result;
-    }
-
-    return {
-        isValid: true,
-        steps: calculationSteps
-    };
-}
-
-calculateStep(num1, operator, num2) {
-    // Convert fractions and handle different number types
-    const convertToNumber = (val) => {
-        if (typeof val === 'string' && val.includes('/')) {
-            const [numerator, denominator] = val.split('/').map(Number);
-            return numerator / denominator;
-        }
-        return Number(val);
-    };
-
-    const a = convertToNumber(num1);
-    const b = convertToNumber(num2);
-
-    switch(operator) {
-        case '+': return a + b;
-        case '-': return a - b;
-        case 'x': return a * b;
-        case '/': return a / b;
-        default: return null;
-    }
-}
-
-handlePuzzleSolved() {
-    // Highlight user path
-    this.highlightUserPath();
-
-    // Increase score
-    this.state.score += 100;
-
-    // Show congratulations
-    this.showMessage('Congratulations! You solved the puzzle!', 'success');
-
-    // Disable game
-    this.state.gameActive = false;
-}
-
-handleMathematicalError(validationResult) {
-    // Truncate user path to the point of error
-    const errorIndex = validationResult.errorStep;
-    this.state.userPath = this.state.userPath.slice(0, errorIndex);
-
-    // Update path display
-    this.updatePathDisplay();
-
-    // Show error message
-    this.showMessage(
-        `Mathematical error: ${validationResult.errorDetails}`, 
-        'error'
-    );
-
-    // Reduce score
-    this.state.score -= 10;
-}
-
-highlightUserPath() {
-    this.state.userPath.forEach(cellIndex => {
-        const cell = document.querySelector(`[data-index="${cellIndex}"]`);
-        if (cell) cell.classList.add('user-solved-path');
-    });
-}
-
-isStartSquare(cellIndex) {
-    const coord = [cellIndex % 10, Math.floor(cellIndex / 10)];
-    return this.state.path[0][0] === coord[0] && this.state.path[0][1] === coord[1];
-}
-
-isEndSquare(cellIndex) {
-    const coord = [cellIndex % 10, Math.floor(cellIndex / 10)];
-    const lastPathCoord = this.state.path[this.state.path.length - 1];
-    return lastPathCoord[0] === coord[0] && lastPathCoord[1] === coord[1];
-}
-    
-    validatePath() {
         try {
-            if (this.state.userPath.length !== this.state.path.length) return false;
-
-            return this.state.userPath.every((cellIndex, i) => {
-                const userCoord = [cellIndex % 10, Math.floor(cellIndex / 10)];
-                const pathCoord = this.state.path[i];
-                return userCoord[0] === pathCoord[0] && userCoord[1] === pathCoord[1];
+            // Reduce points on solution check
+            scoreManager.reducePointsOnCheck();
+            
+            // Validate the path
+            const validationResult = validatePath({
+                userPath: this.state.userPath,
+                gridEntries: this.state.gridEntries,
+                originalPath: this.state.path
             });
-        } catch (error) {
-            console.error('Error validating path:', error);
-            return false;
-        }
-    }
 
-    removeSpareCell() {
-        try {
-            if (this.state.removedCells.size >= 20) {
-                this.showMessage('Maximum number of cells removed', 'error');
-                return;
+            if (validationResult.isValid) {
+                if (validationResult.isValidLength && validationResult.endsAtEndSquare) {
+                    // Puzzle completely solved
+                    this.handlePuzzleSolved();
+                } else if (!validationResult.endsAtEndSquare && validationResult.isValidLength) {
+                    // Path correct but not at end square
+                    this.showMessage('Path is mathematically correct! Continue to the end square.', 'info');
+                } else if (!validationResult.isValidLength) {
+                    this.showMessage('Path is mathematically correct so far. Keep going!', 'info');
+                }
+            } else {
+                // Mathematical error found
+                this.handleMathematicalError(validationResult);
             }
 
-            // Find a random cell that's not part of the path
-            const availableCells = this.state.gridEntries
-                .map((entry, index) => (!entry || !entry.isPartOfPath) && 
-                     !this.state.removedCells.has(index) ? index : null)
-                .filter(index => index !== null);
-
-            if (availableCells.length === 0) {
-                this.showMessage('No more spare cells to remove', 'error');
-                return;
-            }
-
-            const randomIndex = availableCells[Math.floor(Math.random() * availableCells.length)];
-            this.state.removedCells.add(randomIndex);
-            
-            // Update visual state
-            updateCell(randomIndex, null);
-            
-            // Update score
-            this.state.score -= 5;
+            // Update UI to reflect new score
             this.state.updateUI();
         } catch (error) {
-            console.error('Error removing spare cell:', error);
+            console.error('Error checking solution:', error);
         }
+    }
+
+    handlePuzzleSolved() {
+        // Complete puzzle and get points breakdown
+        const pointsBreakdown = scoreManager.completePuzzle();
+        
+        // Highlight user path
+        this.highlightUserPath();
+
+        // Show detailed message
+        this.showMessage(
+            `Congratulations! 
+            Remaining Points: ${pointsBreakdown.remainingPoints}
+            Bonus Points: ${pointsBreakdown.bonusPoints}
+            Total Puzzle Points: ${pointsBreakdown.totalPuzzlePoints}
+            Total Score: ${pointsBreakdown.totalScore}`, 
+            'success'
+        );
+
+        // Disable game
+        this.state.gameActive = false;
+    }
+
+    handleMathematicalError(validationResult) {
+        // Truncate user path to the point of error
+        const errorIndex = validationResult.errorStep * 3;
+        this.state.userPath = this.state.userPath.slice(0, errorIndex);
+
+        // Update path display
+        this.updatePathDisplay();
+
+        // Show error message
+        this.showMessage(
+            `Mathematical error: ${validationResult.errorDetails}`, 
+            'error'
+        );
+    }
+
+    highlightUserPath() {
+        this.state.userPath.forEach(cellIndex => {
+            const cell = document.querySelector(`[data-index="${cellIndex}"]`);
+            if (cell) cell.classList.add('user-solved-path');
+        });
     }
 
     showMessage(message, type = 'info') {
