@@ -145,3 +145,55 @@ button:disabled {
     background-color: #fee2e2;
     color: #991b1b;
 }
+
+.command-box {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: #f5f5dc;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    width: 45px;
+    height: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+    color: #666;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.command-box:hover {
+    width: 600px;
+    height: 400px;
+    overflow-y: auto;
+    background-color: #f5f5dc;
+    display: block;
+    padding: 15px;
+}
+
+.command-box .title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.command-box:hover .title {
+    display: none;
+}
+
+.command-box .content {
+    display: none;
+    margin-top: 15px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.command-box:hover .content {
+    display: block;
+}
