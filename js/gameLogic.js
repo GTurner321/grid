@@ -285,27 +285,149 @@ class GameController {
     }
 
     checkSolution() {
-        try {
-            const isCorrect = this.validatePath();
-            
-            if (isCorrect) {
-                this.state.score += 100;
-                this.showMessage('Congratulations! You found the correct path!', 'success');
-                this.state.gameActive = false;
-                
-                // Highlight the correct path
-                highlightPath(this.state.path);
-            } else {
-                this.state.score -= 10;
-                this.showMessage('That\'s not the correct path. Try again!', 'error');
-            }
+    try {
+        // Get the grid entries for the user's selected path
+        const userPathEntries = this.state.userPath.map(cellIndex => 
+            this.state.gridEntries[cellIndex]
+        );
 
-            this.state.updateUI();
-        } catch (error) {
-            console.error('Error checking solution:', error);
+        // Validate path length and start/end conditions
+        const isValidPathLength = userPathEntries.length >= 30;
+        const startsAtStartSquare = this.isStartSquare(this.state.userPath[0]);
+        const endsAtEndSquare = this.isEndSquare(this.state.userPath[this.state.userPath.length - 1]);
+
+        // Validate mathematical sequence
+        const validationResult = this.validateMathematicalSequence(userPathEntries);
+
+        if (validationResult.isValid) {
+            if (isValidPathLength && endsAtEndSquare) {
+                // Puzzle completely solved
+                this.handlePuzzleSolved();
+            } else if (!endsAtEndSquare && userPathEntries.length >= 30) {
+                // Path correct but not at end square
+                this.showMessage('Path is mathematically correct! Continue to the end square.', 'info');
+            } else if (!isValidPathLength) {
+                this.showMessage('Path is mathematically correct so far. Keep going!', 'info');
+            }
+        } else {
+            // Mathematical error found
+            this.handleMathematicalError(validationResult);
         }
+    } catch (error) {
+        console.error('Error checking solution:', error);
+    }
+}
+
+validateMathematicalSequence(pathEntries) {
+    const calculationSteps = [];
+    let currentResult = null;
+
+    for (let i = 0; i < pathEntries.length; i += 3) {
+        // Ensure we have enough entries to form a complete calculation
+        if (i + 2 >= pathEntries.length) break;
+
+        const num1 = currentResult !== null ? currentResult : pathEntries[i].value;
+        const operator = pathEntries[i + 1].value;
+        const num2 = pathEntries[i + 2].value;
+
+        const result = this.calculateStep(num1, operator, num2);
+
+        if (result === null) {
+            return {
+                isValid: false,
+                errorStep: i,
+                errorDetails: `Invalid calculation: ${num1} ${operator} ${num2}`
+            };
+        }
+
+        calculationSteps.push({
+            num1, 
+            operator, 
+            num2, 
+            result
+        });
+
+        currentResult = result;
     }
 
+    return {
+        isValid: true,
+        steps: calculationSteps
+    };
+}
+
+calculateStep(num1, operator, num2) {
+    // Convert fractions and handle different number types
+    const convertToNumber = (val) => {
+        if (typeof val === 'string' && val.includes('/')) {
+            const [numerator, denominator] = val.split('/').map(Number);
+            return numerator / denominator;
+        }
+        return Number(val);
+    };
+
+    const a = convertToNumber(num1);
+    const b = convertToNumber(num2);
+
+    switch(operator) {
+        case '+': return a + b;
+        case '-': return a - b;
+        case 'x': return a * b;
+        case '/': return a / b;
+        default: return null;
+    }
+}
+
+handlePuzzleSolved() {
+    // Highlight user path
+    this.highlightUserPath();
+
+    // Increase score
+    this.state.score += 100;
+
+    // Show congratulations
+    this.showMessage('Congratulations! You solved the puzzle!', 'success');
+
+    // Disable game
+    this.state.gameActive = false;
+}
+
+handleMathematicalError(validationResult) {
+    // Truncate user path to the point of error
+    const errorIndex = validationResult.errorStep;
+    this.state.userPath = this.state.userPath.slice(0, errorIndex);
+
+    // Update path display
+    this.updatePathDisplay();
+
+    // Show error message
+    this.showMessage(
+        `Mathematical error: ${validationResult.errorDetails}`, 
+        'error'
+    );
+
+    // Reduce score
+    this.state.score -= 10;
+}
+
+highlightUserPath() {
+    this.state.userPath.forEach(cellIndex => {
+        const cell = document.querySelector(`[data-index="${cellIndex}"]`);
+        if (cell) cell.classList.add('user-solved-path');
+    });
+}
+
+isStartSquare(cellIndex) {
+    const coord = [cellIndex % 10, Math.floor(cellIndex / 10)];
+    return this.state.path[0][0] === coord[0] && this.state.path[0][1] === coord[1];
+}
+
+isEndSquare(cellIndex) {
+    const coord = [cellIndex % 10, Math.floor(cellIndex / 10)];
+    const lastPathCoord = this.state.path[this.state.path.length - 1];
+    return lastPathCoord[0] === coord[0] && lastPathCoord[1] === coord[1];
+}
+    
     validatePath() {
         try {
             if (this.state.userPath.length !== this.state.path.length) return false;
