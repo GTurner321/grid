@@ -86,29 +86,27 @@
     <div id="game-messages" class="message-box"></div>
 </main>
         
-        <!-- Instructions Modal -->
-        <div id="instructions-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-modal">&times;</span>
-                <h2>How to Play</h2>
-                <ol>
-                    <li>Select a difficulty level</li>
-                    <li>Find the path by following the mathematical sequence</li>
-                    <li>Click cells to create a connected path</li>
-                    <li>Solve the puzzle to earn points!</li>
-                </ol>
-                <div class="tips">
-                    <h3>Tips:</h3>
-                    <ul>
-                        <li>Path must be continuous</li>
-                        <li>Move only to adjacent cells</li>
-                        <li>Follow the mathematical logic</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+        <!-- Rules Overlay -->
+<div class="command-box">
+    <div class="title">RULES</div>
+    <div class="content">
+        <h3>How to Play</h3>
+        <ol>
+            <li>Select a difficulty level</li>
+            <li>Find the path by following the mathematical sequence, from green to red</li>
+            <li>Move to adjacent cells only, left / right / up / down; you cannot go back to the same cell</li>
+            <li>The answer to each sum is the first number in the next sum</li>
+        </ol>
+        
+        <h3>More</h3>
+        <ol>
+            <li>You can remove all the cells which are not in the path (cost: 1/2 points)</li>
+            <li>You can check whether you've made any mistakes, but the right Maths doesn't always mean you're on the right path (cost: 1/4 points)</li>
+            <li>Bonus points depend on time</li>
+        </ol>
     </div>
 
+</div>
     <!-- Game Modules -->
     <script type="module" src="js/gameLogic.js"></script>
     <script type="module" src="js/pathGenerator.js"></script>
