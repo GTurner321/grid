@@ -1,12 +1,18 @@
 /**
- * Configuration for different game levels
+ * Calculates the greatest common divisor of two numbers
+ * @param {number} a - First number
+ * @param {number} b - Second number
+ * @returns {number}
  */
-const LEVEL_CONFIG = {
-    1: { maxNum: 30, allowFractions: false, maxDenominator: 12 },
-    2: { maxNum: 99, allowFractions: false, maxDenominator: 12 },
-    3: { maxNum: 30, allowFractions: true, maxDenominator: 5 },
-    4: { maxNum: 30, allowFractions: true, maxDenominator: 12 },
-    5: { maxNum: 99, allowFractions: true, maxDenominator: 12 }
+const gcd = (a, b) => {
+    a = Math.abs(a);
+    b = Math.abs(b);
+    while (b) {
+        const temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
 };
 
 /**
@@ -14,8 +20,10 @@ const LEVEL_CONFIG = {
  */
 class Fraction {
     constructor(numerator, denominator) {
-        this.numerator = numerator;
-        this.denominator = denominator;
+        // Reduce the fraction upon construction
+        const divisor = gcd(numerator, denominator);
+        this.numerator = numerator / divisor;
+        this.denominator = denominator / divisor;
     }
 
     toDecimal() {
@@ -26,6 +34,17 @@ class Fraction {
         return `${this.numerator}/${this.denominator}`;
     }
 }
+
+/**
+ * Configuration for different game levels
+ */
+const LEVEL_CONFIG = {
+    1: { maxNum: 30, allowFractions: false, maxDenominator: 12 },
+    2: { maxNum: 99, allowFractions: false, maxDenominator: 12 },
+    3: { maxNum: 30, allowFractions: true, maxDenominator: 5 },
+    4: { maxNum: 30, allowFractions: true, maxDenominator: 12 },
+    5: { maxNum: 99, allowFractions: true, maxDenominator: 12 }
+};
 
 /**
  * Checks if a number or fraction is valid for the given configuration
@@ -46,7 +65,7 @@ const isValidNumber = (num, config) => {
 };
 
 /**
- * Generates a random fraction
+ * Generates a random fraction in lowest terms
  * @param {number} maxDenominator - Maximum denominator allowed
  * @returns {Fraction}
  */
@@ -54,6 +73,7 @@ const generateFraction = (maxDenominator = 12) => {
     const denominator = Math.floor(Math.random() * (maxDenominator - 1)) + 2;
     const numerator = Math.floor(Math.random() * 11) + 1;
     if (numerator >= denominator) return generateFraction(maxDenominator);
+    // Constructor will automatically reduce the fraction
     return new Fraction(numerator, denominator);
 };
 
@@ -86,12 +106,13 @@ const calculateResult = (num1, operator, num2, config) => {
     if (Number.isInteger(result)) return result;
     if (!config.allowFractions) return null;
     
-    // Try to convert decimal to fraction
+    // Try to convert decimal to fraction in lowest terms
     for (let denominator = 2; denominator <= config.maxDenominator; denominator++) {
         const numerator = Math.round(result * denominator);
         if (numerator <= 11 && numerator > 0 && 
             numerator < denominator &&
             Math.abs(numerator/denominator - result) < 0.0001) {
+            // Constructor will automatically reduce the fraction
             return new Fraction(numerator, denominator);
         }
     }
