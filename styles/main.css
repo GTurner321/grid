@@ -68,6 +68,10 @@ body {
     color: #dc2626;
 }
 
+.grid-cell.user-solved-path {
+    background-color: yellow;
+}
+
 .game-controls {
     display: flex;
     gap: 10px;
