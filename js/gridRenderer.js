@@ -1,8 +1,10 @@
 // gridRenderer.js
+import PuzzleSymbols from './puzzleSymbols.js';
 
 /**
  * Renders the game grid based on the provided grid entries
  * @param {Array} gridEntries - Array of cell entries to render
+ * @param {Object} options - Additional rendering options
  */
 export function renderGrid(gridEntries, options = {}) {
     try {
@@ -29,9 +31,27 @@ export function renderGrid(gridEntries, options = {}) {
 
             // Handle different types of entries
             if (entry) {
-                // Simplified rendering based on type
                 if (entry.type === 'number') {
-                    cell.textContent = entry.value.toString();
+                    // Create symbol element
+                    const symbolContainer = document.createElement('div');
+                    symbolContainer.classList.add('symbol-container');
+                    
+                    // Convert value to string for symbol rendering
+                    const symbolValue = entry.value.toString().includes('/') 
+                        ? entry.value 
+                        : parseInt(entry.value);
+                    
+                    // Create SVG element for the symbol
+                    const symbolSvg = createSymbolSVG(symbolValue);
+                    
+                    if (symbolSvg) {
+                        symbolContainer.appendChild(symbolSvg);
+                        cell.appendChild(symbolContainer);
+                    } else {
+                        // Fallback to text if symbol creation fails
+                        cell.textContent = entry.value.toString();
+                    }
+                    
                     cell.classList.add('number');
                 } else if (entry.type === 'operator') {
                     cell.textContent = entry.value;
@@ -71,6 +91,36 @@ export function renderGrid(gridEntries, options = {}) {
 }
 
 /**
+ * Creates an SVG symbol for a given value
+ * @param {number|string} value - Value to convert to a symbol
+ * @param {number} size - Size of the symbol (default 40)
+ * @returns {SVGSVGElement|null} Created SVG element or null
+ */
+function createSymbolSVG(value, size = 40) {
+    // Check if the value is a valid symbol
+    if (PuzzleSymbols.validSymbols.includes(value) || 
+        (Number.isInteger(value) && value >= 1 && value <= 9)) {
+        
+        // Create a temporary container
+        const tempDiv = document.createElement('div');
+        
+        // Use React to create the symbol
+        const symbolElement = React.createElement(PuzzleSymbols, { 
+            symbol: value, 
+            size: size 
+        });
+
+        // Render the React element
+        ReactDOM.render(symbolElement, tempDiv);
+
+        // Return the first child (SVG element)
+        return tempDiv.firstChild;
+    }
+
+    return null;
+}
+
+/**
  * Updates a specific cell in the grid
  * @param {number} index - Index of the cell to update
  * @param {*} value - New value for the cell
@@ -85,13 +135,29 @@ export function updateCell(index, value) {
 
         if (value === null) {
             // Remove cell content
-            cell.textContent = '';
+            cell.innerHTML = '';
             cell.classList.add('removed');
         } else {
             // Update cell content
-            const displayValue = value.display || 
-                (value instanceof Object ? value.toString() : value);
-            cell.textContent = displayValue;
+            const symbolContainer = document.createElement('div');
+            symbolContainer.classList.add('symbol-container');
+            
+            // Convert value to string for symbol rendering
+            const symbolValue = value.value ? 
+                (value.value.toString().includes('/') ? value.value : parseInt(value.value)) : 
+                value;
+            
+            // Create SVG element for the symbol
+            const symbolSvg = createSymbolSVG(symbolValue);
+            
+            if (symbolSvg) {
+                symbolContainer.appendChild(symbolSvg);
+                cell.innerHTML = '';
+                cell.appendChild(symbolContainer);
+            } else {
+                // Fallback to text if symbol creation fails
+                cell.textContent = value.toString();
+            }
         }
     } catch (error) {
         console.error('Error updating cell:', error);
