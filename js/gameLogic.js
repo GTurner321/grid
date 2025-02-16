@@ -350,6 +350,18 @@ class GameController {
     }
 }
 
+isStartSquare(cellIndex) {
+    const coord = [cellIndex % 10, Math.floor(cellIndex / 10)];
+    const startCoord = this.state.path[0];
+    return coord[0] === startCoord[0] && coord[1] === startCoord[1];
+}
+
+isEndSquare(cellIndex) {
+    const coord = [cellIndex % 10, Math.floor(cellIndex / 10)];
+    const endCoord = this.state.path[this.state.path.length - 1];
+    return coord[0] === endCoord[0] && coord[1] === endCoord[1];
+}
+    
     isValidNextCell(coord) {
         if (this.state.userPath.length === 0) return true;
 
