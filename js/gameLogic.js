@@ -73,44 +73,73 @@ class GameController {
     }
 
     initializeEventListeners() {
-        try {
-            console.log('Setting up event listeners');
-            
-            // Level selection
-            document.querySelectorAll('.level-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const level = parseInt(btn.dataset.level);
-                    console.log(`Selected Level: ${level}`);
-                    this.startLevel(level);
-                });
+    try {
+        console.log('Setting up event listeners');
+        
+        // Level selection
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const level = parseInt(btn.dataset.level);
+                console.log(`Selected Level: ${level}`);
+                this.startLevel(level);
+            });
+        });
+
+        // Game controls
+        const checkSolutionBtn = document.getElementById('check-solution');
+        const removeSpareBtn = document.getElementById('remove-spare');
+
+        if (checkSolutionBtn) {
+            checkSolutionBtn.addEventListener('click', () => this.checkSolution());
+        }
+
+        if (removeSpareBtn) {
+            removeSpareBtn.addEventListener('click', () => this.removeAllSpareCells());
+        }
+
+        // Grid cell interactions
+        const gridContainer = document.getElementById('grid-container');
+        if (gridContainer) {
+            // Mouse/click events
+            gridContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('grid-cell')) {
+                    this.handleCellClick(e.target);
+                }
             });
 
-            // Game controls
-            const checkSolutionBtn = document.getElementById('check-solution');
-            const removeSpareBtn = document.getElementById('remove-spare');
+            // Touch support
+            let touchStartCell = null;
+            
+            gridContainer.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const cell = document.elementFromPoint(
+                    e.touches[0].clientX, 
+                    e.touches[0].clientY
+                );
+                
+                if (cell && cell.classList.contains('grid-cell')) {
+                    touchStartCell = cell;
+                    this.handleCellClick(cell);
+                }
+            });
 
-            if (checkSolutionBtn) {
-                checkSolutionBtn.addEventListener('click', () => this.checkSolution());
-            }
-
-            if (removeSpareBtn) {
-                removeSpareBtn.addEventListener('click', () => this.removeAllSpareCells());
-            }
-
-            // Grid cell clicks
-            const gridContainer = document.getElementById('grid-container');
-            if (gridContainer) {
-                gridContainer.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('grid-cell')) {
-                        this.handleCellClick(e.target);
-                    }
-                });
-            }
-        } catch (error) {
-            console.error('Error setting up event listeners:', error);
+            gridContainer.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const cell = document.elementFromPoint(
+                    e.touches[0].clientX, 
+                    e.touches[0].clientY
+                );
+                
+                if (cell && cell.classList.contains('grid-cell')) {
+                    this.handleCellClick(cell);
+                }
+            });
         }
+    } catch (error) {
+        console.error('Error setting up event listeners:', error);
     }
-
+}
+    
     async startLevel(level) {
         try {
             console.log(`Starting Level ${level}`);
@@ -263,30 +292,63 @@ class GameController {
     }
 
     handleCellClick(cell) {
-        try {
-            if (!this.state.gameActive) return;
+    try {
+        if (!this.state.gameActive) return;
 
-            const cellIndex = parseInt(cell.dataset.index);
-            const cellCoord = [cellIndex % 10, Math.floor(cellIndex / 10)];
+        const cellIndex = parseInt(cell.dataset.index);
+        const cellCoord = [cellIndex % 10, Math.floor(cellIndex / 10)];
 
-            // Toggle cell selection
-            if (this.state.userPath.includes(cellIndex)) {
-                // Remove this cell and all subsequent cells from the path
-                const index = this.state.userPath.indexOf(cellIndex);
-                this.state.userPath = this.state.userPath.slice(0, index);
+        // Check if this is the start square
+        const isStartSquare = this.isStartSquare(cellIndex);
+        const isEndSquare = this.isEndSquare(cellIndex);
+
+        // If no path started, force start with green square
+        if (this.state.userPath.length === 0) {
+            if (isStartSquare) {
+                this.state.userPath.push(cellIndex);
+                this.updatePathDisplay();
+                return;
             } else {
-                // Add cell to path if it's a valid move
-                if (this.isValidNextCell(cellCoord)) {
-                    this.state.userPath.push(cellIndex);
-                }
+                this.showMessage('You must start at the green square!', 'error');
+                return;
             }
-
-            // Update visual state
-            this.updatePathDisplay();
-        } catch (error) {
-            console.error('Error handling cell click:', error);
         }
+
+        // Check if move is valid (adjacent to last selected square)
+        const lastCellIndex = this.state.userPath[this.state.userPath.length - 1];
+        const lastCoord = [lastCellIndex % 10, Math.floor(lastCellIndex / 10)];
+
+        const dx = Math.abs(cellCoord[0] - lastCoord[0]);
+        const dy = Math.abs(cellCoord[1] - lastCoord[1]);
+
+        // Validate adjacency
+        if (!((dx === 1 && dy === 0) || (dx === 0 && dy === 1))) {
+            this.showMessage('You can only move to adjacent squares!', 'error');
+            return;
+        }
+
+        // If end square is already selected and clicked again, submit solution
+        if (isEndSquare && this.state.userPath.includes(cellIndex)) {
+            this.checkSolution();
+            return;
+        }
+
+        // Handle path selection
+        if (this.state.userPath.includes(cellIndex)) {
+            // Remove subsequent squares if already selected
+            const index = this.state.userPath.indexOf(cellIndex);
+            this.state.userPath = this.state.userPath.slice(0, index);
+        } else {
+            // Add cell to path
+            this.state.userPath.push(cellIndex);
+        }
+
+        // Update visual state
+        this.updatePathDisplay();
+    } catch (error) {
+        console.error('Error handling cell click:', error);
     }
+}
 
     isValidNextCell(coord) {
         if (this.state.userPath.length === 0) return true;
@@ -301,21 +363,31 @@ class GameController {
     }
 
     updatePathDisplay() {
-        try {
-            // Clear all cell highlights
-            document.querySelectorAll('.grid-cell').forEach(cell => {
-                cell.classList.remove('selected');
-            });
+    try {
+        // Clear all cell highlights
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.classList.remove('selected');
+        });
 
-            // Highlight selected path
-            this.state.userPath.forEach(cellIndex => {
-                const cell = document.querySelector(`[data-index="${cellIndex}"]`);
-                if (cell) cell.classList.add('selected');
-            });
-        } catch (error) {
-            console.error('Error updating path display:', error);
-        }
+        // Highlight selected path
+        this.state.userPath.forEach((cellIndex, index) => {
+            const cell = document.querySelector(`[data-index="${cellIndex}"]`);
+            if (cell) {
+                cell.classList.add('selected');
+                
+                // Special styling for start and end squares
+                if (this.isStartSquare(cellIndex)) {
+                    cell.classList.add('start-cell-selected');
+                }
+                if (this.isEndSquare(cellIndex)) {
+                    cell.classList.add('end-cell-selected');
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error updating path display:', error);
     }
+}
 
     checkSolution() {
         try {
