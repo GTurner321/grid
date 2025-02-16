@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Path Puzzle Game</title>
+    <title>PATH PUZZLE</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
@@ -24,21 +24,16 @@
     <div class="game-container">
         <!-- Header Section -->
         <header class="game-header">
-            <h1>Math Path Puzzle</h1>
+            <h1>PATH PUZZLE</h1>
             
-            <!-- Game Instructions Modal Trigger -->
-            <button id="instructions-btn" class="info-button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M12 16v-4"></path>
-                    <path d="M12 8h.01"></path>
-                </svg>
-            </button>
+            <!-- Score Display -->
+            <div class="score-display">
+                Score: <span id="score">0</span>
+            </div>
         </header>
 
         <!-- Level Selector -->
         <section class="level-selector">
-            <h2>Select Difficulty</h2>
             <div class="level-buttons">
                 <button class="level-btn" data-level="1">Level 1</button>
                 <button class="level-btn" data-level="2">Level 2</button>
@@ -49,64 +44,59 @@
         </section>
 
         <!-- Main Game Area -->
-<main class="game-board">
-    <!-- Grid Container -->
-    <div id="grid-container"></div>
-    
-    <!-- Sequence of Sums Container -->
-    <div class="sequence-container">
-        <h3>Sequence of Sums</h3>
-        <div id="sequence-sums" class="sequence-list"></div>
-    </div>
-    
-    <!-- Game Controls -->
-    <div class="game-controls">
-        <button id="check-solution" disabled>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6 9 17l-5-5"/>
-            </svg>
-            Check Solution
-        </button>
+        <main class="game-board">
+            <!-- Grid Container -->
+            <div id="grid-container"></div>
+            
+            <!-- Sequence Container (hidden but maintained for functionality) -->
+            <div class="sequence-container" style="display: none;">
+                <div id="sequence-sums" class="sequence-list"></div>
+            </div>
+            
+            <!-- Game Controls -->
+            <div class="game-controls">
+                <button id="check-solution" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                    Check Solution
+                </button>
+                
+                <button id="remove-spare" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                    Remove Spare Cells
+                </button>
+            </div>
+
+            <!-- Game Messages -->
+            <div id="game-messages" class="message-box"></div>
+        </main>
         
-        <button id="remove-spare" disabled>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-            Remove Spare Cells
-        </button>
-        
-        <!-- Score Display -->
-        <div class="score-display">
-            Score: <span id="score">0</span>
+        <!-- Rules Overlay -->
+        <div class="command-box">
+            <div class="title">RULES</div>
+            <div class="content">
+                <h3>How to Play</h3>
+                <ol>
+                    <li>Select a difficulty level</li>
+                    <li>Find the path by following the mathematical sequence, from green to red</li>
+                    <li>Move to adjacent cells only, left / right / up / down; you cannot go back to the same cell</li>
+                    <li>The answer to each sum is the first number in the next sum</li>
+                </ol>
+                
+                <h3>More</h3>
+                <ol>
+                    <li>You can remove all the cells which are not in the path (cost: 1/2 points)</li>
+                    <li>You can check whether you've made any mistakes, but the right Maths doesn't always mean you're on the right path (cost: 1/4 points)</li>
+                    <li>Bonus points depend on time</li>
+                </ol>
+            </div>
         </div>
     </div>
 
-    <!-- Game Messages -->
-    <div id="game-messages" class="message-box"></div>
-</main>
-        
-        <!-- Rules Overlay -->
-<div class="command-box">
-    <div class="title">RULES</div>
-    <div class="content">
-        <h3>How to Play</h3>
-        <ol>
-            <li>Select a difficulty level</li>
-            <li>Find the path by following the mathematical sequence, from green to red</li>
-            <li>Move to adjacent cells only, left / right / up / down; you cannot go back to the same cell</li>
-            <li>The answer to each sum is the first number in the next sum</li>
-        </ol>
-        
-        <h3>More</h3>
-        <ol>
-            <li>You can remove all the cells which are not in the path (cost: 1/2 points)</li>
-            <li>You can check whether you've made any mistakes, but the right Maths doesn't always mean you're on the right path (cost: 1/4 points)</li>
-            <li>Bonus points depend on time</li>
-        </ol>
-    </div>
-
-</div>
     <!-- Game Modules -->
     <script type="module" src="js/gameLogic.js"></script>
     <script type="module" src="js/pathGenerator.js"></script>
