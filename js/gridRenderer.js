@@ -101,20 +101,8 @@ function createSymbolSVG(value, size = 40) {
     if (PuzzleSymbols.validSymbols.includes(value) || 
         (Number.isInteger(value) && value >= 1 && value <= 9)) {
         
-        // Create a temporary container
-        const tempDiv = document.createElement('div');
-        
-        // Use React to create the symbol
-        const symbolElement = React.createElement(PuzzleSymbols, { 
-            symbol: value, 
-            size: size 
-        });
-
-        // Render the React element
-        ReactDOM.render(symbolElement, tempDiv);
-
-        // Return the first child (SVG element)
-        return tempDiv.firstChild;
+        // Use the new createSymbol method
+        return PuzzleSymbols.createSymbol(value, size);
     }
 
     return null;
