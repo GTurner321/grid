@@ -12,6 +12,9 @@ export class ScoreManager {
         
         // Puzzle start time for bonus calculations
         this.puzzleStartTime = null;
+
+        // Track spare cell removal attempts
+        this.spareRemovalCount = 0;
     }
 
     /**
@@ -20,18 +23,16 @@ export class ScoreManager {
      */
     initializeLevel(level) {
         this.currentLevel = level;
-        
-        // Base points: 1000 * level number
         this.maxLevelPoints = 1000 * level;
         this.remainingPoints = this.maxLevelPoints;
-        
-        // Reset puzzle start time
         this.puzzleStartTime = new Date();
+        this.spareRemovalCount = 0;
     }
 
     /**
      * Reduce points when checking solution
      * Reduces remaining points by 1/4, rounding up
+     * @returns {number} Updated remaining points
      */
     reducePointsOnCheck() {
         this.remainingPoints = Math.ceil(this.remainingPoints * 0.75);
@@ -41,26 +42,51 @@ export class ScoreManager {
     /**
      * Reduce points when removing spare cells
      * Reduces remaining points by 1/2, rounding up
+     * Also tracks the number of removals used
+     * @returns {Object} Information about the removal operation
      */
     reducePointsOnRemoveSpareCells() {
+        if (this.spareRemovalCount >= 2) {
+            return {
+                success: false,
+                message: 'No more spare cell removals available'
+            };
+        }
+
         this.remainingPoints = Math.ceil(this.remainingPoints / 2);
-        return this.remainingPoints;
+        this.spareRemovalCount++;
+
+        return {
+            success: true,
+            remainingPoints: this.remainingPoints,
+            spareRemovalStage: this.spareRemovalCount,
+            isFirstRemoval: this.spareRemovalCount === 1,
+            isSecondRemoval: this.spareRemovalCount === 2,
+            percentToRemove: this.spareRemovalCount === 1 ? 0.5 : 1 // 50% first time, 100% second time
+        };
     }
 
     /**
      * Calculate bonus points based on time taken
+     * Rounds seconds up to nearest 10 and uses formula: 1000 * level * (20/rounded_seconds)
      * @returns {number} Bonus points rounded up
      */
     calculateBonusPoints() {
         if (!this.puzzleStartTime) return 0;
-
-        const secondsTaken = (new Date() - this.puzzleStartTime) / 1000;
-        const bonusMultiplier = 20 / secondsTaken;
         
-        // Calculate bonus points: 1000 * level * (20/seconds)
+        const secondsTaken = (new Date() - this.puzzleStartTime) / 1000;
+        // Round up to nearest 10 seconds
+        const roundedSeconds = Math.ceil(secondsTaken / 10) * 10;
+        
+        // Handle special cases
+        if (roundedSeconds === 0) {
+            return this.maxLevelPoints * 2; // Maximum bonus for instant solve
+        }
+        
+        // Calculate bonus: 1000 * level * (20/rounded_seconds)
+        const bonusMultiplier = 20 / roundedSeconds;
         const bonusPoints = 1000 * this.currentLevel * bonusMultiplier;
         
-        // Round up bonus points
         return Math.ceil(bonusPoints);
     }
 
@@ -84,13 +110,27 @@ export class ScoreManager {
     }
 
     /**
-     * Reset scoring for a new game
+     * Get information about spare removal availability
+     * @returns {Object} Spare removal status
+     */
+    getSpareRemovalInfo() {
+        return {
+            remainingAttempts: 2 - this.spareRemovalCount,
+            isFirstRemoval: this.spareRemovalCount === 0,
+            isSecondRemoval: this.spareRemovalCount === 1,
+            canRemoveMore: this.spareRemovalCount < 2
+        };
+    }
+
+    /**
+     * Reset scoring for a new game while preserving total score
      */
     reset() {
         this.maxLevelPoints = 0;
         this.remainingPoints = 0;
         this.currentLevel = null;
         this.puzzleStartTime = null;
+        this.spareRemovalCount = 0;
     }
 }
 
