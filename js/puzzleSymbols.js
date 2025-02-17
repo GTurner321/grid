@@ -129,7 +129,8 @@ const createSymbol = (symbol, size = 40) => {
   // Handle fractions (passed as "n/d" string)
   if (typeof symbol === 'string' && symbol.includes('/')) {
     const [num, den] = symbol.split('/').map(Number);
-    if (den <= 8 && den !== 7 && isSimplifiedFraction(num, den)) {
+    // Modify this condition to explicitly list allowed denominators
+    if ([2, 3, 4, 5, 6, 8].includes(den) && isSimplifiedFraction(num, den)) {
       return createFractionSymbolSVG(num, den, size);
     }
   }
