@@ -5,6 +5,22 @@
  * @param {string|number} val - Value to convert
  * @returns {number} Converted numeric value
  */
+function convertToNumber(val) {
+    console.log('Converting value:', val, 'Type:', typeof val);
+    
+    // Handle fractions
+    if (typeof val === 'string' && val.includes('/')) {
+        const [numerator, denominator] = val.split('/').map(Number);
+        console.log('Fraction conversion:', numerator, '/', denominator);
+        return numerator / denominator;
+    }
+    
+    // Handle other numeric values
+    const convertedValue = Number(val);
+    console.log('Converted value:', convertedValue);
+    
+    return convertedValue;
+}
 
 // When getting cell values, use the dataset value if available
 function getCellValue(cell) {
@@ -49,17 +65,28 @@ function getCellValue(cell) {
  * @returns {number|null} Result of calculation or null if invalid
  */
 function calculateStep(num1, operator, num2) {
-    const a = convertToNumber(num1);
-    const b = convertToNumber(num2);
+    console.log('Calculate Step Input:', { num1, operator, num2 });
+    
+    try {
+        const a = convertToNumber(num1);
+        const b = convertToNumber(num2);
 
-    switch(operator) {
-        case '+': return a + b;
-        case '-': return a - b;
-        case 'x': return a * b;
-        case '/': 
-            // Prevent division by zero
-            return b !== 0 ? a / b : null;
-        default: return null;
+        console.log('Converted values:', { a, b });
+
+        switch(operator) {
+            case '+': return a + b;
+            case '-': return a - b;
+            case 'x': return a * b;
+            case '/': 
+                // Prevent division by zero
+                return b !== 0 ? a / b : null;
+            default: 
+                console.warn('Invalid operator:', operator);
+                return null;
+        }
+    } catch (error) {
+        console.error('Error in calculateStep:', error);
+        return null;
     }
 }
 
@@ -91,6 +118,8 @@ export function validateMathematicalSequence(pathEntries) {
         console.log('Extracted values:', { num1, operator, num2 });
 
         const result = calculateStep(num1, operator, num2);
+
+        console.log('Calculation result:', result);
 
         if (result === null) {
             return {
