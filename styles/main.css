@@ -16,6 +16,7 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
+    position: relative;  /* Added for absolute positioning of score */
 }
 
 .game-header h1 {
@@ -26,16 +27,27 @@ body {
     margin-bottom: 1.5rem;
 }
 
+/* Updated score display styles */
 .score-display {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: #fef08a;
-    border: 2px solid black;
-    padding: 8px 16px;
-    border-radius: 6px;
-    color: black;
-    font-weight: bold;
+}
+
+/* Hide the old score span but maintain it for compatibility */
+#score {
+    display: none;
+}
+
+/* New score component specific styles */
+#score-component {
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.05em;
+}
+
+#score-component span {
+    display: inline-block;
+    line-height: 1.2;
 }
 
 #grid-container {
@@ -71,7 +83,7 @@ body {
 }
 
 .grid-cell {
-    cursor: pointer;  /* Ensure the entire cell is clickable */
+    cursor: pointer;
 }
 
 .grid-cell:hover {
@@ -130,6 +142,9 @@ button {
     border-radius: 6px;
     cursor: pointer;
     transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 button:disabled {
@@ -214,9 +229,16 @@ button:disabled {
     display: block;
 }
 
+.command-box .content ul {
+    margin: 0.5em 0 1em 2em;
+}
+
 .level-selector {
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-bottom: 20px;
 }
+
+/* Added for better font loading */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
