@@ -24,10 +24,11 @@ export function renderGrid(gridEntries, options = {}) {
         gridContainer.innerHTML = '';
 
        // Create grid cells
-        gridEntries.forEach((entry, index) => {
-        const cell = document.createElement('div');
-        cell.classList.add('grid-cell');
-        cell.dataset.index = index;
+       // Create grid cells
+gridEntries.forEach((entry, index) => {
+    const cell = document.createElement('div');
+    cell.classList.add('grid-cell');
+    cell.dataset.index = index;
 
     // Handle different types of entries
     if (entry) {
@@ -36,10 +37,14 @@ export function renderGrid(gridEntries, options = {}) {
             const symbolContainer = document.createElement('div');
             symbolContainer.classList.add('symbol-container');
             
-            // Convert value to string for symbol rendering
-            const symbolValue = entry.value.toString().includes('/') 
-                ? entry.value 
-                : parseInt(entry.value);
+            // Ensure value is converted to a string representation for fractions
+            const symbolValue = entry.value instanceof Object 
+                ? (entry.value.numerator && entry.value.denominator 
+                    ? `${entry.value.numerator}/${entry.value.denominator}` 
+                    : entry.value.toString())
+                : (entry.value.toString().includes('/') 
+                    ? entry.value 
+                    : parseInt(entry.value));
             
             // Create SVG element for the symbol
             const symbolSvg = createSymbolSVG(symbolValue);
@@ -49,10 +54,10 @@ export function renderGrid(gridEntries, options = {}) {
                 cell.appendChild(symbolContainer);
                 
                 // Ensure the original value is preserved for calculations
-                cell.dataset.value = entry.value;
+                cell.dataset.value = symbolValue;
             } else {
                 // Fallback to text if symbol creation fails
-                cell.textContent = entry.value.toString();
+                cell.textContent = symbolValue;
             }
             
             cell.classList.add('number');
@@ -99,10 +104,11 @@ export function renderGrid(gridEntries, options = {}) {
  * @param {number} size - Size of the symbol (default 40)
  * @returns {SVGSVGElement|null} Created SVG element or null
  */
+// Modify createSymbolSVG function
 function createSymbolSVG(value, size = 40) {
     console.log('Creating symbol for value:', value, 'Type:', typeof value);
     
-    // Check if the value is a valid symbol
+    // Expanded validation to include fraction strings
     const isValidSymbol = PuzzleSymbols.validSymbols.includes(value) || 
         (Number.isInteger(value) && value >= 1 && value <= 9) ||
         (typeof value === 'string' && value.includes('/'));
