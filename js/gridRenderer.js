@@ -23,55 +23,52 @@ export function renderGrid(gridEntries, options = {}) {
         // Clear existing grid
         gridContainer.innerHTML = '';
 
-       // Create grid cells
-       // Create grid cells
-gridEntries.forEach((entry, index) => {
-    // When creating grid cells
-const cell = document.createElement('div');
-cell.classList.add('grid-cell');
-cell.dataset.index = index;
+        // Create grid cells
+        gridEntries.forEach((entry, index) => {
+            const cell = document.createElement('div');
+            cell.classList.add('grid-cell');
+            cell.dataset.index = index;
 
-if (entry) {
-    if (entry.type === 'number') {
-        const symbolContainer = document.createElement('div');
-        symbolContainer.classList.add('symbol-container');
-        
-        // Ensure the whole cell remains clickable
-        symbolContainer.style.pointerEvents = 'none';
-        
-        const symbolValue = entry.value instanceof Object 
-            ? (entry.value.numerator && entry.value.denominator 
-                ? `${entry.value.numerator}/${entry.value.denominator}` 
-                : entry.value.toString())
-            : (entry.value.toString().includes('/') 
-                ? entry.value 
-                : parseInt(entry.value));
-        
-        const symbolSvg = createSymbolSVG(symbolValue);
-        
-        if (symbolSvg) {
-            symbolContainer.appendChild(symbolSvg);
-            cell.appendChild(symbolContainer);
-            
-            // Preserve original value for calculations
-            cell.dataset.value = symbolValue;
-        } else {
-            cell.textContent = symbolValue;
-        }
-        
-        cell.classList.add('number');
+            if (entry) {
+                if (entry.type === 'number') {
+                    const symbolContainer = document.createElement('div');
+                    symbolContainer.classList.add('symbol-container');
+                    
+                    // Ensure the whole cell remains clickable
+                    symbolContainer.style.pointerEvents = 'none';
+                    
+                    const symbolValue = entry.value instanceof Object 
+                        ? (entry.value.numerator && entry.value.denominator 
+                            ? `${entry.value.numerator}/${entry.value.denominator}` 
+                            : entry.value.toString())
+                        : (entry.value.toString().includes('/') 
+                            ? entry.value 
+                            : parseInt(entry.value));
+                    
+                    const symbolSvg = createSymbolSVG(symbolValue);
+                    
+                    if (symbolSvg) {
+                        symbolContainer.appendChild(symbolSvg);
+                        cell.appendChild(symbolContainer);
+                        
+                        // Preserve original value for calculations
+                        cell.dataset.value = symbolValue;
+                    } else {
+                        cell.textContent = symbolValue;
+                    }
+                    
+                    cell.classList.add('number');
+                } else if (entry.type === 'operator') {
+                    cell.textContent = entry.value;
+                    cell.classList.add('operator');
+                }
+            } else {
+                // Empty cell
+                cell.textContent = '';
+            }
 
-        } else if (entry.type === 'operator') {
-            cell.textContent = entry.value;
-            cell.classList.add('operator');
-        }
-    } else {
-        // Empty cell
-        cell.textContent = '';
-    }
-
-    gridContainer.appendChild(cell);
-});
+            gridContainer.appendChild(cell);
+        });
 
         // Highlight start square if coordinates are provided
         if (options.startCoord) {
