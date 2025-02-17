@@ -33,36 +33,34 @@ class GameState {
     }
 
     updateUI() {
-        try {
-            // Update total score and current level score
-            const totalScoreElement = document.getElementById('total-score');
-            const currentScoreElement = document.getElementById('score');
-            
-            if (totalScoreElement) {
-                totalScoreElement.textContent = scoreManager.totalScore;
-            }
-            
-            if (currentScoreElement) {
-                currentScoreElement.textContent = scoreManager.remainingPoints;
-            }
-            
-            // Update button states
-            const checkSolutionBtn = document.getElementById('check-solution');
-            const removeSpareBtn = document.getElementById('remove-spare');
-            
-            if (checkSolutionBtn) checkSolutionBtn.disabled = !this.gameActive;
-            if (removeSpareBtn) removeSpareBtn.disabled = !this.gameActive;
-            
-            // Update level buttons
-            document.querySelectorAll('.level-btn').forEach(btn => {
-                btn.classList.toggle('active', 
-                    parseInt(btn.dataset.level) === this.currentLevel
-                );
-            });
-        } catch (error) {
-            console.error('Error updating UI:', error);
+    try {
+        // Update score display
+        const scoreComponentElement = document.getElementById('score-component');
+        
+        if (scoreComponentElement) {
+            scoreComponentElement.innerHTML = `
+                <span>Total Score: ${scoreManager.totalScore}</span>
+                <span>Current Level Points: ${scoreManager.remainingPoints}</span>
+            `;
         }
+        
+        // Update button states
+        const checkSolutionBtn = document.getElementById('check-solution');
+        const removeSpareBtn = document.getElementById('remove-spare');
+        
+        if (checkSolutionBtn) checkSolutionBtn.disabled = !this.gameActive;
+        if (removeSpareBtn) removeSpareBtn.disabled = !this.gameActive;
+        
+        // Update level buttons
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.classList.toggle('active', 
+                parseInt(btn.dataset.level) === this.currentLevel
+            );
+        });
+    } catch (error) {
+        console.error('Error updating UI:', error);
     }
+}
 }
 
 class GameController {
