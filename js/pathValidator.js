@@ -8,17 +8,25 @@
 
 // When getting cell values, use the dataset value if available
 function getCellValue(cell) {
-    return cell.dataset.value 
-        ? cell.dataset.value 
-        : cell.textContent;
-}
-
-function convertToNumber(val) {
-    if (typeof val === 'string' && val.includes('/')) {
-        const [numerator, denominator] = val.split('/').map(Number);
-        return numerator / denominator;
+    // First, check for dataset value (which should contain the actual numeric value)
+    if (cell.dataset.value) {
+        return cell.dataset.value;
     }
-    return Number(val);
+
+    // If no dataset value, fall back to textContent
+    // This helps handle operator cells
+    if (cell.textContent) {
+        return cell.textContent;
+    }
+
+    // If the cell is an object with a value property (fallback)
+    if (cell.value) {
+        return cell.value;
+    }
+
+    // If all else fails
+    console.warn('Unable to extract value from cell', cell);
+    return null;
 }
 
 /**
@@ -53,13 +61,22 @@ export function validateMathematicalSequence(pathEntries) {
     const calculationSteps = [];
     let currentResult = null;
 
+    console.log('Path Entries:', pathEntries);
+
     for (let i = 0; i < pathEntries.length; i += 3) {
         // Ensure we have enough entries to form a complete calculation
         if (i + 2 >= pathEntries.length) break;
 
+        // Log detailed information about each entry
+        console.log(`Entry ${i}:`, pathEntries[i]);
+        console.log(`Entry ${i+1}:`, pathEntries[i + 1]);
+        console.log(`Entry ${i+2}:`, pathEntries[i + 2]);
+
         const num1 = currentResult !== null ? currentResult : getCellValue(pathEntries[i]);
         const operator = pathEntries[i + 1].value;
         const num2 = getCellValue(pathEntries[i + 2]);
+
+        console.log('Calculation:', num1, operator, num2);
 
         const result = calculateStep(num1, operator, num2);
 
