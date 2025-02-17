@@ -32,16 +32,32 @@ class GameState {
         }
     }
 
-    updateUI() {
+    updateUI(options = {}) {
     try {
         const scoreComponentElement = document.getElementById('score-component');
         
         if (scoreComponentElement) {
-            // Calculate bonus points
-            const calculateCurrentBonus = () => {
-                const bonusPoints = scoreManager.calculateBonusPoints();
-                return bonusPoints;
-            };
+            // Default or reset values
+            let possiblePoints = 0;
+            let bonusPoints = 0;
+            let scoreForRound = 0;
+            let totalScore = scoreManager.totalScore;
+
+            // Handle different UI update scenarios
+            if (options.resetScores) {
+                // Reset possible points and bonus for new level
+                possiblePoints = scoreManager.maxLevelPoints;
+                bonusPoints = 0;
+                scoreForRound = 0;
+            }
+
+            if (options.roundComplete && options.pointsBreakdown) {
+                // Update scores after puzzle completion
+                possiblePoints = options.pointsBreakdown.remainingPoints;
+                bonusPoints = options.pointsBreakdown.bonusPoints;
+                scoreForRound = options.pointsBreakdown.totalPuzzlePoints;
+                totalScore = options.pointsBreakdown.totalScore;
+            }
 
             // Create the container
             const scoreBoxContainer = document.createElement('div');
@@ -56,19 +72,19 @@ class GameState {
                 <div class="font-['Orbitron'] text-center grid grid-cols-2 gap-2">
                     <div class="bg-yellow-300 p-1 border border-black flex justify-between items-center">
                         <span class="font-bold text-left">POSSIBLE POINTS</span>
-                        <span class="font-bold text-right">${scoreManager.remainingPoints}</span>
+                        <span class="font-bold text-right">${possiblePoints}</span>
                     </div>
                     <div class="bg-yellow-300 p-1 border border-black flex justify-between items-center">
                         <span class="font-bold text-left">BONUS</span>
-                        <span id="bonus-points" class="font-bold text-right">${calculateCurrentBonus()}</span>
+                        <span id="bonus-points" class="font-bold text-right">${bonusPoints}</span>
                     </div>
                     <div class="bg-yellow-300 p-1 border border-black flex justify-between items-center">
                         <span class="font-bold text-left">SCORE FOR ROUND</span>
-                        <span class="font-bold text-right">${scoreManager.remainingPoints + calculateCurrentBonus()}</span>
+                        <span class="font-bold text-right">${scoreForRound}</span>
                     </div>
                     <div class="bg-yellow-300 p-1 border border-black flex justify-between items-center">
                         <span class="font-bold text-left">SCORE TOTAL</span>
-                        <span class="font-bold text-right">${scoreManager.totalScore}</span>
+                        <span class="font-bold text-right">${totalScore}</span>
                     </div>
                 </div>
             `;
@@ -79,31 +95,6 @@ class GameState {
             // Clear previous content and add new
             scoreComponentElement.innerHTML = '';
             scoreComponentElement.appendChild(scoreBoxContainer);
-
-            // Bonus points dynamic update
-            let remainingTime = 10;
-            const bonusElement = document.getElementById('bonus-points');
-            
-            const bonusUpdateInterval = setInterval(() => {
-                remainingTime--;
-                
-                // Recalculate bonus points
-                const currentBonus = calculateCurrentBonus();
-                
-                if (bonusElement) {
-                    bonusElement.textContent = currentBonus;
-                }
-
-                // Reset timer
-                if (remainingTime <= 0) {
-                    remainingTime = 10;
-                }
-            }, 1000); // Updates every second, recalculates bonus every 10 seconds
-
-            // Cleanup interval when game state changes
-            if (!this.gameActive) {
-                clearInterval(bonusUpdateInterval);
-            }
         }
         
         // Update button states
