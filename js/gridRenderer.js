@@ -26,41 +26,41 @@ export function renderGrid(gridEntries, options = {}) {
        // Create grid cells
        // Create grid cells
 gridEntries.forEach((entry, index) => {
-    const cell = document.createElement('div');
-    cell.classList.add('grid-cell');
-    cell.dataset.index = index;
+    // When creating grid cells
+const cell = document.createElement('div');
+cell.classList.add('grid-cell');
+cell.dataset.index = index;
 
-    // Handle different types of entries
-    if (entry) {
-        if (entry.type === 'number') {
-            // Create symbol element
-            const symbolContainer = document.createElement('div');
-            symbolContainer.classList.add('symbol-container');
+if (entry) {
+    if (entry.type === 'number') {
+        const symbolContainer = document.createElement('div');
+        symbolContainer.classList.add('symbol-container');
+        
+        // Ensure the whole cell remains clickable
+        symbolContainer.style.pointerEvents = 'none';
+        
+        const symbolValue = entry.value instanceof Object 
+            ? (entry.value.numerator && entry.value.denominator 
+                ? `${entry.value.numerator}/${entry.value.denominator}` 
+                : entry.value.toString())
+            : (entry.value.toString().includes('/') 
+                ? entry.value 
+                : parseInt(entry.value));
+        
+        const symbolSvg = createSymbolSVG(symbolValue);
+        
+        if (symbolSvg) {
+            symbolContainer.appendChild(symbolSvg);
+            cell.appendChild(symbolContainer);
             
-            // Ensure value is converted to a string representation for fractions
-            const symbolValue = entry.value instanceof Object 
-                ? (entry.value.numerator && entry.value.denominator 
-                    ? `${entry.value.numerator}/${entry.value.denominator}` 
-                    : entry.value.toString())
-                : (entry.value.toString().includes('/') 
-                    ? entry.value 
-                    : parseInt(entry.value));
-            
-            // Create SVG element for the symbol
-            const symbolSvg = createSymbolSVG(symbolValue);
-            
-            if (symbolSvg) {
-                symbolContainer.appendChild(symbolSvg);
-                cell.appendChild(symbolContainer);
-                
-                // Ensure the original value is preserved for calculations
-                cell.dataset.value = symbolValue;
-            } else {
-                // Fallback to text if symbol creation fails
-                cell.textContent = symbolValue;
-            }
-            
-            cell.classList.add('number');
+            // Preserve original value for calculations
+            cell.dataset.value = symbolValue;
+        } else {
+            cell.textContent = symbolValue;
+        }
+        
+        cell.classList.add('number');
+
         } else if (entry.type === 'operator') {
             cell.textContent = entry.value;
             cell.classList.add('operator');
