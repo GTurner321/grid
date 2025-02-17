@@ -8,23 +8,35 @@
 
 // When getting cell values, use the dataset value if available
 function getCellValue(cell) {
-    // First, check for dataset value (which should contain the actual numeric value)
-    if (cell.dataset.value) {
-        return cell.dataset.value;
+    console.log('Getting cell value:', cell);
+
+    // If cell is a DOM element
+    if (cell instanceof HTMLElement) {
+        // First, check dataset value
+        if (cell.dataset.value) {
+            console.log('Using dataset value:', cell.dataset.value);
+            return cell.dataset.value;
+        }
+        
+        // Then check textContent
+        if (cell.textContent) {
+            console.log('Using textContent:', cell.textContent);
+            return cell.textContent;
+        }
     }
 
-    // If no dataset value, fall back to textContent
-    // This helps handle operator cells
-    if (cell.textContent) {
-        return cell.textContent;
-    }
-
-    // If the cell is an object with a value property (fallback)
-    if (cell.value) {
+    // If cell is an object with a value property
+    if (cell && cell.value !== undefined) {
+        console.log('Using object value:', cell.value);
         return cell.value;
     }
 
-    // If all else fails
+    // If cell is an object with type 'number'
+    if (cell && cell.type === 'number') {
+        console.log('Using number value:', cell.value);
+        return cell.value;
+    }
+
     console.warn('Unable to extract value from cell', cell);
     return null;
 }
