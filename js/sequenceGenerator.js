@@ -69,12 +69,23 @@ const isValidNumber = (num, config) => {
  * @param {number} maxDenominator - Maximum denominator allowed
  * @returns {Fraction}
  */
+// Modify the fraction generation to explicitly create fraction objects
 const generateFraction = (maxDenominator = 12) => {
     const denominator = Math.floor(Math.random() * (maxDenominator - 1)) + 2;
     const numerator = Math.floor(Math.random() * 11) + 1;
     if (numerator >= denominator) return generateFraction(maxDenominator);
-    // Constructor will automatically reduce the fraction
-    return new Fraction(numerator, denominator);
+    
+    // Return an object with clear numerator and denominator
+    return {
+        numerator,
+        denominator,
+        toString() {
+            return `${this.numerator}/${this.denominator}`;
+        },
+        toDecimal() {
+            return this.numerator / this.denominator;
+        }
+    };
 };
 
 /**
