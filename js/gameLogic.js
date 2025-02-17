@@ -306,6 +306,17 @@ class GameController {
         if (!this.state.gameActive) return;
 
         const cellIndex = parseInt(cell.dataset.index);
+        
+        // Find the actual clickable element
+        const actualCell = cell.classList.contains('grid-cell') 
+            ? cell 
+            : cell.closest('.grid-cell');
+
+        if (!actualCell) {
+            console.warn('No grid cell found for selection');
+            return;
+        }
+
         const cellCoord = [cellIndex % 10, Math.floor(cellIndex / 10)];
 
         // Check if this is the start square
@@ -359,7 +370,7 @@ class GameController {
         console.error('Error handling cell click:', error);
     }
 }
-
+    
 isStartSquare(cellIndex) {
     const coord = [cellIndex % 10, Math.floor(cellIndex / 10)];
     const startCoord = this.state.path[0];
