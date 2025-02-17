@@ -109,6 +109,19 @@ class ScoreManager {
         };
     }
 
+/**
+ * Get information about spare removal availability
+ * @returns {Object} Spare removal status
+ */
+getSpareRemovalInfo() {
+    return {
+        remainingAttempts: 2 - this.spareRemovalCount,
+        isFirstRemoval: this.spareRemovalCount === 0,
+        isSecondRemoval: this.spareRemovalCount === 1,
+        canRemoveMore: this.spareRemovalCount < 2
+    };
+}
+    
     /**
      * Reset scoring for a new game while preserving total score
      */
