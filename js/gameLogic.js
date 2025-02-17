@@ -182,6 +182,7 @@ class GameController {
             debugGridInfo(this.state.gridEntries);
 
             // Update UI
+            this.updateRemoveButtonText();
             this.state.updateUI();
 
             this.showMessage('Game started! Find the path by following the mathematical sequence.');
