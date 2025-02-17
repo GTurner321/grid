@@ -34,13 +34,39 @@ class GameState {
 
     updateUI() {
     try {
-        // Update score display
         const scoreComponentElement = document.getElementById('score-component');
         
         if (scoreComponentElement) {
+            // Calculate bonus points
+            const bonusPoints = scoreManager.calculateBonusPoints();
+
             scoreComponentElement.innerHTML = `
-                <span>Total Score: ${scoreManager.totalScore}</span>
-                <span>Current Level Points: ${scoreManager.remainingPoints}</span>
+                <div class="fixed top-2 right-2 z-50 scale-75 origin-top-right">
+                    <div class="p-2 bg-yellow-200 border-4 border-black shadow-lg">
+                        <div class="font-['Orbitron'] text-center">
+                            <div class="grid grid-cols-2 gap-1 mb-1">
+                                <div class="bg-yellow-300 p-1 border border-black">
+                                    <div class="text-[0.6rem] font-bold">POSSIBLE POINTS</div>
+                                    <div class="text-xl font-black">${scoreManager.remainingPoints}</div>
+                                </div>
+                                <div class="bg-yellow-300 p-1 border border-black">
+                                    <div class="text-[0.6rem] font-bold">BONUS</div>
+                                    <div class="text-xl font-black">${bonusPoints}</div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1">
+                                <div class="bg-yellow-300 p-1 border border-black">
+                                    <div class="text-[0.6rem] font-bold">SCORE FOR ROUND</div>
+                                    <div class="text-xl font-black">${scoreManager.remainingPoints + bonusPoints}</div>
+                                </div>
+                                <div class="bg-yellow-300 p-1 border border-black">
+                                    <div class="text-[0.6rem] font-bold">SCORE TOTAL</div>
+                                    <div class="text-xl font-black">${scoreManager.totalScore}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             `;
         }
         
