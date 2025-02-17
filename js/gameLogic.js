@@ -192,57 +192,62 @@ class GameController {
 }
     
     async startLevel(level) {
-        try {
-            console.log(`Starting Level ${level}`);
-            
-            // Reset game state
-            this.state.reset();
-            this.state.currentLevel = level;
-            this.state.gameActive = true;
+    try {
+        console.log(`Starting Level ${level}`);
+        
+        // Reset game state
+        this.state.reset();
+        this.state.currentLevel = level;
+        this.state.gameActive = true;
 
-            // Initialize scoring for this level
-            scoreManager.initializeLevel(level);
+        // Initialize scoring for this level
+        scoreManager.initializeLevel(level);
 
-            // Generate path
-            this.state.path = await generatePath();
-            console.log('Generated Path:', this.state.path);
+        // Generate path
+        this.state.path = await generatePath();
+        console.log('Generated Path:', this.state.path);
 
-            // Generate sequence
-            this.state.sequence = await generateSequence(level);
-            
-            // Convert sequence to flat list of entries
-            this.state.sequenceEntries = sequenceToEntries(this.state.sequence);
-            console.log('Sequence Entries:', this.state.sequenceEntries);
+        // Generate sequence
+        this.state.sequence = await generateSequence(level);
+        
+        // Convert sequence to flat list of entries
+        this.state.sequenceEntries = sequenceToEntries(this.state.sequence);
+        console.log('Sequence Entries:', this.state.sequenceEntries);
 
-            // Place sequence entries along the path
-            this.placeMathSequence();
+        // Place sequence entries along the path
+        this.placeMathSequence();
 
-            // Fill remaining cells
-            this.fillRemainingCells();
+        // Fill remaining cells
+        this.fillRemainingCells();
 
-            // Render the grid with start and end coordinates
-            renderGrid(this.state.gridEntries, {
-                startCoord: this.state.path[0],
-                endCoord: this.state.path[this.state.path.length - 1]
-            });
+        // Render the grid with start and end coordinates
+        renderGrid(this.state.gridEntries, {
+            startCoord: this.state.path[0],
+            endCoord: this.state.path[this.state.path.length - 1]
+        });
 
-            // Display the sequence of sums
-            this.displaySequenceSums();
+        // Display the sequence of sums
+        this.displaySequenceSums();
 
-            // Debug grid information
-            debugGridInfo(this.state.gridEntries);
+        // Debug grid information
+        debugGridInfo(this.state.gridEntries);
 
-            // Update UI
-            this.updateRemoveButtonText();
-            this.state.updateUI();
+        // Update UI with reset scores
+        this.state.updateUI({
+            resetScores: true,
+            preserveTotalScore: true
+        });
 
-            this.showMessage('Game started! Find the path by following the mathematical sequence.');
-        } catch (error) {
-            console.error('Error starting level:', error);
-            this.showMessage('Error starting game. Please try again.', 'error');
-        }
+        // Update remove button text
+        this.updateRemoveButtonText();
+
+        this.showMessage('Game started! Find the path by following the mathematical sequence.');
+    } catch (error) {
+        console.error('Error starting level:', error);
+        this.showMessage('Error starting game. Please try again.', 'error');
     }
-
+}
+    
     displaySequenceSums() {
         const sumsContainer = document.getElementById('sequence-sums');
         if (sumsContainer) {
@@ -554,26 +559,32 @@ isEndSquare(cellIndex) {
     }
 
     handlePuzzleSolved() {
-        // Complete puzzle and get points breakdown
-        const pointsBreakdown = scoreManager.completePuzzle();
-        
-        // Highlight user path
-        this.highlightUserPath();
+    // Complete puzzle and get points breakdown
+    const pointsBreakdown = scoreManager.completePuzzle();
+    
+    // Highlight user path
+    this.highlightUserPath();
 
-        // Show detailed message
-        this.showMessage(
-            `Congratulations! 
-            Remaining Points: ${pointsBreakdown.remainingPoints}
-            Bonus Points: ${pointsBreakdown.bonusPoints}
-            Total Puzzle Points: ${pointsBreakdown.totalPuzzlePoints}
-            Total Score: ${pointsBreakdown.totalScore}`, 
-            'success'
-        );
+    // Update UI with completed puzzle scores
+    this.state.updateUI({
+        roundComplete: true,
+        pointsBreakdown: pointsBreakdown
+    });
 
-        // Disable game
-        this.state.gameActive = false;
-    }
+    // Show detailed message
+    this.showMessage(
+        `Congratulations! 
+        Remaining Points: ${pointsBreakdown.remainingPoints}
+        Bonus Points: ${pointsBreakdown.bonusPoints}
+        Total Puzzle Points: ${pointsBreakdown.totalPuzzlePoints}
+        Total Score: ${pointsBreakdown.totalScore}`, 
+        'success'
+    );
 
+    // Disable game
+    this.state.gameActive = false;
+}
+    
     handleMathematicalError(validationResult) {
         // Truncate user path to the point of error
         const errorIndex = validationResult.errorStep * 3;
