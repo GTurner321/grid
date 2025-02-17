@@ -70,25 +70,25 @@ function calculateStep(num1, operator, num2) {
  */
 
 export function validateMathematicalSequence(pathEntries) {
+    console.log('Full path entries:', pathEntries);
     const calculationSteps = [];
     let currentResult = null;
-
-    console.log('Path Entries:', pathEntries);
 
     for (let i = 0; i < pathEntries.length; i += 3) {
         // Ensure we have enough entries to form a complete calculation
         if (i + 2 >= pathEntries.length) break;
 
-        // Log detailed information about each entry
-        console.log(`Entry ${i}:`, pathEntries[i]);
-        console.log(`Entry ${i+1}:`, pathEntries[i + 1]);
-        console.log(`Entry ${i+2}:`, pathEntries[i + 2]);
+        console.log(`Processing step ${i/3}:`, {
+            num1: pathEntries[i],
+            operator: pathEntries[i + 1],
+            num2: pathEntries[i + 2]
+        });
 
         const num1 = currentResult !== null ? currentResult : getCellValue(pathEntries[i]);
-        const operator = pathEntries[i + 1].value;
+        const operator = pathEntries[i + 1].value || pathEntries[i + 1];
         const num2 = getCellValue(pathEntries[i + 2]);
 
-        console.log('Calculation:', num1, operator, num2);
+        console.log('Extracted values:', { num1, operator, num2 });
 
         const result = calculateStep(num1, operator, num2);
 
