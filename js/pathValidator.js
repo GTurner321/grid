@@ -5,6 +5,14 @@
  * @param {string|number} val - Value to convert
  * @returns {number} Converted numeric value
  */
+
+// When getting cell values, use the dataset value if available
+function getCellValue(cell) {
+    return cell.dataset.value 
+        ? cell.dataset.value 
+        : cell.textContent;
+}
+
 function convertToNumber(val) {
     if (typeof val === 'string' && val.includes('/')) {
         const [numerator, denominator] = val.split('/').map(Number);
@@ -40,6 +48,7 @@ function calculateStep(num1, operator, num2) {
  * @param {Array} pathEntries - Array of grid entries representing the path
  * @returns {Object} Validation result
  */
+
 export function validateMathematicalSequence(pathEntries) {
     const calculationSteps = [];
     let currentResult = null;
@@ -48,9 +57,9 @@ export function validateMathematicalSequence(pathEntries) {
         // Ensure we have enough entries to form a complete calculation
         if (i + 2 >= pathEntries.length) break;
 
-        const num1 = currentResult !== null ? currentResult : pathEntries[i].value;
+        const num1 = currentResult !== null ? currentResult : getCellValue(pathEntries[i]);
         const operator = pathEntries[i + 1].value;
-        const num2 = pathEntries[i + 2].value;
+        const num2 = getCellValue(pathEntries[i + 2]);
 
         const result = calculateStep(num1, operator, num2);
 
