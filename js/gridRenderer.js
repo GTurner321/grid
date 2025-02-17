@@ -100,17 +100,23 @@ export function renderGrid(gridEntries, options = {}) {
  * @returns {SVGSVGElement|null} Created SVG element or null
  */
 function createSymbolSVG(value, size = 40) {
+    console.log('Creating symbol for value:', value, 'Type:', typeof value);
+    
     // Check if the value is a valid symbol
-    if (PuzzleSymbols.validSymbols.includes(value) || 
-        (Number.isInteger(value) && value >= 1 && value <= 9)) {
-        
-        // Use the new createSymbol method
-        return PuzzleSymbols.createSymbol(value, size);
+    const isValidSymbol = PuzzleSymbols.validSymbols.includes(value) || 
+        (Number.isInteger(value) && value >= 1 && value <= 9) ||
+        (typeof value === 'string' && value.includes('/'));
+
+    console.log('Is valid symbol:', isValidSymbol);
+
+    if (isValidSymbol) {
+        const symbol = PuzzleSymbols.createSymbol(value, size);
+        console.log('Created symbol:', symbol);
+        return symbol;
     }
 
     return null;
 }
-
 /**
  * Updates a specific cell in the grid
  * @param {number} index - Index of the cell to update
