@@ -1,6 +1,6 @@
-// scoreManager.js
+// In scoreManager.js
 
-export class ScoreManager {
+class ScoreManager {
     constructor() {
         // Total score across all games
         this.totalScore = 0;
@@ -23,10 +23,34 @@ export class ScoreManager {
      */
     initializeLevel(level) {
         this.currentLevel = level;
-        this.maxLevelPoints = 1000 * level;
+        this.maxLevelPoints = 1000 * level;  // Base points scale with level
         this.remainingPoints = this.maxLevelPoints;
         this.puzzleStartTime = new Date();
         this.spareRemovalCount = 0;
+    }
+
+    /**
+     * Calculate bonus points based on time taken
+     * Rounds seconds up to nearest 10 and uses formula: 1000 * level * (20/rounded_seconds)
+     * @returns {number} Bonus points rounded up
+     */
+    calculateBonusPoints() {
+        if (!this.puzzleStartTime) return 0;
+        
+        const secondsTaken = (new Date() - this.puzzleStartTime) / 1000;
+        // Round up to nearest 10 seconds
+        const roundedSeconds = Math.ceil(secondsTaken / 10) * 10;
+        
+        // Handle special cases
+        if (roundedSeconds === 0) {
+            return this.maxLevelPoints * 2; // Maximum bonus for instant solve
+        }
+        
+        // Calculate bonus: 1000 * level * (20/rounded_seconds)
+        const bonusMultiplier = 20 / roundedSeconds;
+        const bonusPoints = 1000 * this.currentLevel * bonusMultiplier;
+        
+        return Math.ceil(bonusPoints);
     }
 
     /**
@@ -67,30 +91,6 @@ export class ScoreManager {
     }
 
     /**
-     * Calculate bonus points based on time taken
-     * Rounds seconds up to nearest 10 and uses formula: 1000 * level * (20/rounded_seconds)
-     * @returns {number} Bonus points rounded up
-     */
-    calculateBonusPoints() {
-        if (!this.puzzleStartTime) return 0;
-        
-        const secondsTaken = (new Date() - this.puzzleStartTime) / 1000;
-        // Round up to nearest 10 seconds
-        const roundedSeconds = Math.ceil(secondsTaken / 10) * 10;
-        
-        // Handle special cases
-        if (roundedSeconds === 0) {
-            return this.maxLevelPoints * 2; // Maximum bonus for instant solve
-        }
-        
-        // Calculate bonus: 1000 * level * (20/rounded_seconds)
-        const bonusMultiplier = 20 / roundedSeconds;
-        const bonusPoints = 1000 * this.currentLevel * bonusMultiplier;
-        
-        return Math.ceil(bonusPoints);
-    }
-
-    /**
      * Complete puzzle and calculate total points
      * @returns {Object} Points breakdown
      */
@@ -106,19 +106,6 @@ export class ScoreManager {
             bonusPoints: bonusPoints,
             totalPuzzlePoints: totalPuzzlePoints,
             totalScore: this.totalScore
-        };
-    }
-
-    /**
-     * Get information about spare removal availability
-     * @returns {Object} Spare removal status
-     */
-    getSpareRemovalInfo() {
-        return {
-            remainingAttempts: 2 - this.spareRemovalCount,
-            isFirstRemoval: this.spareRemovalCount === 0,
-            isSecondRemoval: this.spareRemovalCount === 1,
-            canRemoveMore: this.spareRemovalCount < 2
         };
     }
 
