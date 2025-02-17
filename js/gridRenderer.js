@@ -23,47 +23,50 @@ export function renderGrid(gridEntries, options = {}) {
         // Clear existing grid
         gridContainer.innerHTML = '';
 
-        // Create grid cells
+       // Create grid cells
         gridEntries.forEach((entry, index) => {
-            const cell = document.createElement('div');
-            cell.classList.add('grid-cell');
-            cell.dataset.index = index;
+        const cell = document.createElement('div');
+        cell.classList.add('grid-cell');
+        cell.dataset.index = index;
 
-            // Handle different types of entries
-            if (entry) {
-                if (entry.type === 'number') {
-                    // Create symbol element
-                    const symbolContainer = document.createElement('div');
-                    symbolContainer.classList.add('symbol-container');
-                    
-                    // Convert value to string for symbol rendering
-                    const symbolValue = entry.value.toString().includes('/') 
-                        ? entry.value 
-                        : parseInt(entry.value);
-                    
-                    // Create SVG element for the symbol
-                    const symbolSvg = createSymbolSVG(symbolValue);
-                    
-                    if (symbolSvg) {
-                        symbolContainer.appendChild(symbolSvg);
-                        cell.appendChild(symbolContainer);
-                    } else {
-                        // Fallback to text if symbol creation fails
-                        cell.textContent = entry.value.toString();
-                    }
-                    
-                    cell.classList.add('number');
-                } else if (entry.type === 'operator') {
-                    cell.textContent = entry.value;
-                    cell.classList.add('operator');
-                }
+    // Handle different types of entries
+    if (entry) {
+        if (entry.type === 'number') {
+            // Create symbol element
+            const symbolContainer = document.createElement('div');
+            symbolContainer.classList.add('symbol-container');
+            
+            // Convert value to string for symbol rendering
+            const symbolValue = entry.value.toString().includes('/') 
+                ? entry.value 
+                : parseInt(entry.value);
+            
+            // Create SVG element for the symbol
+            const symbolSvg = createSymbolSVG(symbolValue);
+            
+            if (symbolSvg) {
+                symbolContainer.appendChild(symbolSvg);
+                cell.appendChild(symbolContainer);
+                
+                // Ensure the original value is preserved for calculations
+                cell.dataset.value = entry.value;
             } else {
-                // Empty cell
-                cell.textContent = '';
+                // Fallback to text if symbol creation fails
+                cell.textContent = entry.value.toString();
             }
+            
+            cell.classList.add('number');
+        } else if (entry.type === 'operator') {
+            cell.textContent = entry.value;
+            cell.classList.add('operator');
+        }
+    } else {
+        // Empty cell
+        cell.textContent = '';
+    }
 
-            gridContainer.appendChild(cell);
-        });
+    gridContainer.appendChild(cell);
+});
 
         // Highlight start square if coordinates are provided
         if (options.startCoord) {
