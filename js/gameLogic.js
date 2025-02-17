@@ -278,29 +278,74 @@ class GameController {
     }
 
     removeAllSpareCells() {
-        try {
-            // Find and remove all spare cells (not part of the original path)
-            const spareCells = this.state.gridEntries
-                .map((entry, index) => (!entry.isPartOfPath && !this.state.removedCells.has(index)) ? index : null)
-                .filter(index => index !== null);
+    try {
+        // Get removal info from score manager
+        const removalResult = scoreManager.reducePointsOnRemoveSpareCells();
+        
+        if (!removalResult.success) {
+            this.showMessage(removalResult.message, 'error');
+            return;
+        }
 
+        // Find all spare cells that haven't been removed yet
+        const spareCells = this.state.gridEntries
+            .map((entry, index) => (!entry?.isPartOfPath && !this.state.removedCells.has(index)) ? index : null)
+            .filter(index => index !== null);
+
+        if (spareCells.length === 0) {
+            this.showMessage('No spare cells to remove!', 'info');
+            return;
+        }
+
+        // For first removal, randomly select 50% of spare cells
+        if (removalResult.isFirstRemoval) {
+            const numCellsToRemove = Math.ceil(spareCells.length * 0.5);
+            const shuffledCells = spareCells.sort(() => Math.random() - 0.5);
+            const cellsToRemove = shuffledCells.slice(0, numCellsToRemove);
+
+            cellsToRemove.forEach(cellIndex => {
+                this.state.removedCells.add(cellIndex);
+                updateCell(cellIndex, null);
+            });
+
+            this.showMessage(`Removed ${cellsToRemove.length} spare cells (50%). One more removal available.`, 'info');
+        } 
+        // For second removal, remove all remaining spare cells
+        else if (removalResult.isSecondRemoval) {
             spareCells.forEach(cellIndex => {
                 this.state.removedCells.add(cellIndex);
                 updateCell(cellIndex, null);
             });
 
-            // Reduce points for removing spare cells
-            scoreManager.reducePointsOnRemoveSpareCells();
-
-            this.showMessage(`Removed ${spareCells.length} spare cells. Remaining points reduced.`, 'info');
-            
-            // Update UI to reflect new score
-            this.state.updateUI();
-        } catch (error) {
-            console.error('Error removing spare cells:', error);
+            this.showMessage(`Removed remaining ${spareCells.length} spare cells. No more removals available.`, 'info');
         }
-    }
 
+        // Update UI to reflect new score
+        this.state.updateUI();
+        
+        // Update remove button text
+        this.updateRemoveButtonText();
+    } catch (error) {
+        console.error('Error removing spare cells:', error);
+    }
+}
+
+updateRemoveButtonText() {
+    const removeSpareBtn = document.getElementById('remove-spare');
+    if (!removeSpareBtn) return;
+
+    const spareInfo = scoreManager.getSpareRemovalInfo();
+    
+    if (spareInfo.remainingAttempts === 2) {
+        removeSpareBtn.textContent = 'Remove 50% of Spare Cells';
+    } else if (spareInfo.remainingAttempts === 1) {
+        removeSpareBtn.textContent = 'Remove Remaining Spare Cells';
+    } else {
+        removeSpareBtn.textContent = 'No More Removals';
+        removeSpareBtn.disabled = true;
+    }
+}
+    
     handleCellClick(cell) {
     try {
         if (!this.state.gameActive) return;
