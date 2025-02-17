@@ -210,23 +210,33 @@ class GameController {
     }
 
     placeMathSequence() {
-        try {
-            // Use the path coordinates to place sequence entries
-            this.state.path.forEach((coord, index) => {
-                // Ensure we don't exceed available sequence entries
-                if (index < this.state.sequenceEntries.length) {
-                    const cellIndex = coord[1] * 10 + coord[0];
-                    this.state.gridEntries[cellIndex] = {
-                        ...this.state.sequenceEntries[index],
-                        isPartOfPath: true,
-                        pathIndex: index
-                    };
-                }
-            });
-        } catch (error) {
-            console.error('Error placing math sequence:', error);
-        }
+    try {
+        // Use the path coordinates to place sequence entries
+        this.state.path.forEach((coord, index) => {
+            // Ensure we don't exceed available sequence entries
+            if (index < this.state.sequenceEntries.length) {
+                const cellIndex = coord[1] * 10 + coord[0];
+                
+                // Convert value to string for fraction rendering
+                const value = this.state.sequenceEntries[index].value;
+                const formattedValue = value instanceof Object 
+                    ? (value.numerator && value.denominator 
+                        ? `${value.numerator}/${value.denominator}` 
+                        : value.toString()) 
+                    : value;
+
+                this.state.gridEntries[cellIndex] = {
+                    ...this.state.sequenceEntries[index],
+                    value: formattedValue,
+                    isPartOfPath: true,
+                    pathIndex: index
+                };
+            }
+        });
+    } catch (error) {
+        console.error('Error placing math sequence:', error);
     }
+}
 
     fillRemainingCells() {
         try {
