@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+// scoreBox.js
+/** @jsx React.createElement */
+import React from 'react';
+import { useState, useEffect } from 'react';
 
 const ScoreBox = ({ 
-  level,
-  possiblePoints,
-  spareRemovalCount = 0,
-  checkCount = 0,
-  startTime,
-  isComplete = false,
-  totalScore = 0  // Add totalScore as a prop to preserve between puzzles
+    level,
+    possiblePoints,
+    spareRemovalCount = 0,
+    checkCount = 0,
+    startTime,
+    isComplete = false,
+    totalScore = 0
 }) => {
   const [bonus, setBonus] = useState(0);
   const [currentPossiblePoints, setCurrentPossiblePoints] = useState(possiblePoints);
