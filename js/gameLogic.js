@@ -37,67 +37,21 @@ class GameState {
         const scoreComponentElement = document.getElementById('score-component');
         
         if (scoreComponentElement) {
-            // Default or reset values
-            let possiblePoints = 0;
-            let bonusPoints = 0;
-            let scoreForRound = 0;
-            let totalScore = scoreManager.totalScore;
-
-            // Handle different UI update scenarios
-            if (options.resetScores) {
-                // Reset possible points and bonus for new level
-                possiblePoints = scoreManager.maxLevelPoints;
-                bonusPoints = 0;
-                scoreForRound = 0;
-            }
-
-            if (options.roundComplete && options.pointsBreakdown) {
-                // Update scores after puzzle completion
-                possiblePoints = options.pointsBreakdown.remainingPoints;
-                bonusPoints = options.pointsBreakdown.bonusPoints;
-                scoreForRound = options.pointsBreakdown.totalPuzzlePoints;
-                totalScore = options.pointsBreakdown.totalScore;
-            }
-
-            // Create the container
-            const scoreBoxContainer = document.createElement('div');
-            scoreBoxContainer.className = 'fixed top-2 right-2 z-50 scale-75 origin-top-right';
-
-            // Create the card
-            const card = document.createElement('div');
-            card.className = 'p-2 bg-yellow-200 border-4 border-black shadow-lg';
-
-            // Create content
-            card.innerHTML = `
-                <div class="font-['Orbitron'] text-center grid grid-cols-2 gap-2">
-                    <div class="bg-yellow-300 p-1 border border-black flex justify-between items-center">
-                        <span class="font-bold text-left">POSSIBLE POINTS</span>
-                        <span class="font-bold text-right">${possiblePoints}</span>
-                    </div>
-                    <div class="bg-yellow-300 p-1 border border-black flex justify-between items-center">
-                        <span class="font-bold text-left">BONUS</span>
-                        <span id="bonus-points" class="font-bold text-right">${bonusPoints}</span>
-                    </div>
-                    <div class="bg-yellow-300 p-1 border border-black flex justify-between items-center">
-                        <span class="font-bold text-left">SCORE FOR ROUND</span>
-                        <span class="font-bold text-right">${scoreForRound}</span>
-                    </div>
-                    <div class="bg-yellow-300 p-1 border border-black flex justify-between items-center">
-                        <span class="font-bold text-left">SCORE TOTAL</span>
-                        <span class="font-bold text-right">${totalScore}</span>
-                    </div>
-                </div>
-            `;
-
-            // Append card to container
-            scoreBoxContainer.appendChild(card);
-
-            // Clear previous content and add new
-            scoreComponentElement.innerHTML = '';
-            scoreComponentElement.appendChild(scoreBoxContainer);
+            const root = ReactDOM.createRoot(scoreComponentElement);
+            root.render(
+                <ScoreBox 
+                    level={this.currentLevel}
+                    possiblePoints={scoreManager.maxLevelPoints}
+                    spareRemovalCount={scoreManager.spareRemovalCount}
+                    checkCount={scoreManager.checkCount}
+                    startTime={scoreManager.puzzleStartTime}
+                    isComplete={options.roundComplete || false}
+                    totalScore={scoreManager.totalScore} // Pass the total score
+                />
+            );
         }
         
-        // Update button states
+        // Update other UI elements...
         const checkSolutionBtn = document.getElementById('check-solution');
         const removeSpareBtn = document.getElementById('remove-spare');
         
