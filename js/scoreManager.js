@@ -1,4 +1,4 @@
-// In scoreManager.js
+// scoreManager.js
 
 class ScoreManager {
     constructor() {
@@ -13,8 +13,13 @@ class ScoreManager {
         // Puzzle start time for bonus calculations
         this.puzzleStartTime = null;
 
-        // Track spare cell removal attempts
+        // Track counts for point reductions
         this.spareRemovalCount = 0;
+        this.checkCount = 0;
+
+        // Bonus points tracking
+        this.currentBonus = 0;
+        this.bonusUpdateInterval = null;
     }
 
     /**
@@ -22,16 +27,38 @@ class ScoreManager {
      * @param {number} level - Current game level
      */
     initializeLevel(level) {
+        // Clear any existing bonus interval
+        if (this.bonusUpdateInterval) {
+            clearInterval(this.bonusUpdateInterval);
+        }
+
         this.currentLevel = level;
         this.maxLevelPoints = 1000 * level;  // Base points scale with level
         this.remainingPoints = this.maxLevelPoints;
         this.puzzleStartTime = new Date();
         this.spareRemovalCount = 0;
+        this.checkCount = 0;
+        this.currentBonus = 0;
+
+        // Start bonus point updates
+        this.startBonusUpdates();
+    }
+
+    /**
+     * Start interval for updating bonus points
+     */
+    startBonusUpdates() {
+        // Initial calculation
+        this.currentBonus = this.calculateBonusPoints();
+
+        // Update every 10 seconds
+        this.bonusUpdateInterval = setInterval(() => {
+            this.currentBonus = this.calculateBonusPoints();
+        }, 10000);
     }
 
     /**
      * Calculate bonus points based on time taken
-     * Rounds seconds up to nearest 10 and uses formula: 1000 * level * (20/rounded_seconds)
      * @returns {number} Bonus points rounded up
      */
     calculateBonusPoints() {
@@ -54,19 +81,32 @@ class ScoreManager {
     }
 
     /**
+     * Get current bonus points
+     * @returns {number} Current bonus points
+     */
+    getCurrentBonus() {
+        return this.currentBonus;
+    }
+
+    /**
      * Reduce points when checking solution
-     * Reduces remaining points by 1/4, rounding up
-     * @returns {number} Updated remaining points
+     * Reduces remaining points by 25%, rounding up
+     * @returns {Object} Updated points information
      */
     reducePointsOnCheck() {
+        this.checkCount++;
         this.remainingPoints = Math.ceil(this.remainingPoints * 0.75);
-        return this.remainingPoints;
+        
+        return {
+            remainingPoints: this.remainingPoints,
+            checkCount: this.checkCount,
+            bonusPoints: this.currentBonus
+        };
     }
 
     /**
      * Reduce points when removing spare cells
-     * Reduces remaining points by 1/2, rounding up
-     * Also tracks the number of removals used
+     * Reduces remaining points by 50%, rounding up
      * @returns {Object} Information about the removal operation
      */
     reducePointsOnRemoveSpareCells() {
@@ -95,42 +135,71 @@ class ScoreManager {
      * @returns {Object} Points breakdown
      */
     completePuzzle() {
-        const bonusPoints = this.calculateBonusPoints();
-        const totalPuzzlePoints = this.remainingPoints + bonusPoints;
+        // Stop bonus updates
+        if (this.bonusUpdateInterval) {
+            clearInterval(this.bonusUpdateInterval);
+        }
+
+        const finalBonus = this.calculateBonusPoints();
+        const totalPuzzlePoints = this.remainingPoints + finalBonus;
         
         // Add to total score
         this.totalScore += totalPuzzlePoints;
 
         return {
             remainingPoints: this.remainingPoints,
-            bonusPoints: bonusPoints,
+            bonusPoints: finalBonus,
             totalPuzzlePoints: totalPuzzlePoints,
             totalScore: this.totalScore
         };
     }
 
-/**
- * Get information about spare removal availability
- * @returns {Object} Spare removal status
- */
-getSpareRemovalInfo() {
-    return {
-        remainingAttempts: 2 - this.spareRemovalCount,
-        isFirstRemoval: this.spareRemovalCount === 0,
-        isSecondRemoval: this.spareRemovalCount === 1,
-        canRemoveMore: this.spareRemovalCount < 2
-    };
-}
+    /**
+     * Get information about spare removal availability
+     * @returns {Object} Spare removal status
+     */
+    getSpareRemovalInfo() {
+        return {
+            remainingAttempts: 2 - this.spareRemovalCount,
+            isFirstRemoval: this.spareRemovalCount === 0,
+            isSecondRemoval: this.spareRemovalCount === 1,
+            canRemoveMore: this.spareRemovalCount < 2
+        };
+    }
+
+    /**
+     * Get current score state
+     * @returns {Object} Current score state
+     */
+    getCurrentScoreState() {
+        return {
+            totalScore: this.totalScore,
+            currentLevel: this.currentLevel,
+            maxLevelPoints: this.maxLevelPoints,
+            remainingPoints: this.remainingPoints,
+            bonusPoints: this.currentBonus,
+            spareRemovalCount: this.spareRemovalCount,
+            checkCount: this.checkCount
+        };
+    }
     
     /**
      * Reset scoring for a new game while preserving total score
      */
     reset() {
+        // Clear bonus interval if it exists
+        if (this.bonusUpdateInterval) {
+            clearInterval(this.bonusUpdateInterval);
+        }
+
         this.maxLevelPoints = 0;
         this.remainingPoints = 0;
         this.currentLevel = null;
         this.puzzleStartTime = null;
         this.spareRemovalCount = 0;
+        this.checkCount = 0;
+        this.currentBonus = 0;
+        // Note: totalScore is not reset
     }
 }
 
