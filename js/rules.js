@@ -1,82 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Rules = () => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  const handleStart = () => {
+    setIsVisible(false);
+    // If you need to trigger any game start logic, you can do it here
+  };
+
   return (
     <>
-      <style>
-        {`
-          .command-box {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background-color: #f5f5dc;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 8px;
-            width: 45px;
-            height: 20px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            z-index: 1000;
-            color: #666;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-          }
+      {isVisible && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-blue-950 p-4 rounded-lg shadow-xl w-full max-w-2xl mx-4">
+            <div className="text-center font-['Share_Tech_Mono']">
+              <h2 className="text-red-500 text-xl font-bold mb-2">RULES</h2>
+              
+              <div className="text-yellow-300 text-xs font-bold leading-tight">
+                <p>FIND THE PATH BY FOLLOWING THE MATHEMATICAL SEQUENCE - GREEN TO RED</p>
+                <p>MOVE TO ADJACENT CELLS ONLY - LEFT / RIGHT / UP / DOWN</p>
+                <p>THE ANSWER TO EACH SUM IS THE FIRST NUMBER OF THE NEXT SUM</p>
+                <p>A SQUARE CANNOT BE REUSED</p>
+              </div>
 
-          .command-box:hover {
-            width: 600px;
-            height: 400px;
-            overflow-y: auto;
-            background-color: #f5f5dc;
-            display: block;
-            padding: 15px;
-          }
+              <h2 className="text-red-500 text-lg font-bold mt-3 mb-2">MORE</h2>
+              
+              <div className="text-yellow-300 text-xs font-bold leading-tight">
+                <p>REMOVE CELLS NOT IN THE PATH (-1/2 POINTS)</p>
+                <p>CHECK FOR MISTAKES (-1/4 POINTS)</p>
+                <p>... THE RIGHT MATHS DOESN'T ALWAYS MEAN YOU'RE ON THE RIGHT PATH!</p>
+              </div>
 
-          .command-box .title {
-            text-align: center;
-            font-weight: bold;
-            font-size: 12px;
-            line-height: 1;
-          }
-
-          .command-box:hover .title {
-            display: none;
-          }
-
-          .command-box .content {
-            display: none;
-            margin-top: 15px;
-            font-size: 14px;
-            line-height: 1.6;
-          }
-
-          .command-box:hover .content {
-            display: block;
-          }
-        `}
-      </style>
-      <div className="command-box">
-        <div className="title">RULES</div>
-        <div className="content">
-          <h3>How to Play</h3>
-          <ol>
-            <li>Select a difficulty level</li>
-            <li>Find the path by following the mathematical sequence, from green to red</li>
-            <li>Move to adjacent cells only, left / right / up / down; you cannot go back to the same cell</li>
-            <li>The answer to each sum is the first number in the next sum</li>
-          </ol>
-          
-          <h3>More</h3>
-          <ol>
-            <li>You can remove all the cells which are not in the path (cost: 1/2 points)</li>
-            <li>You can check whether you've made any mistakes, but the right Maths doesn't always mean you're on the right path (cost: 1/4 points)</li>
-            <li>Bonus points depend on time</li>
-          </ol>
+              <button
+                onClick={handleStart}
+                className="mt-4 px-6 py-2 bg-transparent border-2 border-red-500 text-red-500 text-xl font-bold rounded-lg hover:bg-blue-950 hover:text-white transition-colors font-['Share_Tech_Mono']"
+              >
+                START
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 };
