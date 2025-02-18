@@ -32,13 +32,22 @@ class GameState {
         }
     }
 
-    updateUI(options = {}) {
+    // Add these imports at the top of gameLogic.js
+import { createRoot } from 'react-dom/client';
+import ScoreBox from './scoreBox.js';
+
+// Then update the updateUI method in your GameState class
+updateUI(options = {}) {
     try {
         const scoreComponentElement = document.getElementById('score-component');
         
         if (scoreComponentElement) {
-            const root = ReactDOM.createRoot(scoreComponentElement);
-            root.render(
+            // Create root only once
+            if (!this.scoreRoot) {
+                this.scoreRoot = createRoot(scoreComponentElement);
+            }
+            
+            this.scoreRoot.render(
                 <ScoreBox 
                     level={this.currentLevel}
                     possiblePoints={scoreManager.maxLevelPoints}
@@ -46,12 +55,12 @@ class GameState {
                     checkCount={scoreManager.checkCount}
                     startTime={scoreManager.puzzleStartTime}
                     isComplete={options.roundComplete || false}
-                    totalScore={scoreManager.totalScore} // Pass the total score
+                    totalScore={scoreManager.totalScore}
                 />
             );
         }
         
-        // Update other UI elements...
+        // Update button states
         const checkSolutionBtn = document.getElementById('check-solution');
         const removeSpareBtn = document.getElementById('remove-spare');
         
