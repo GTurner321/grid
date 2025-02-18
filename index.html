@@ -13,12 +13,13 @@
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles/main.css">
-    
+
     <!-- Module Preloading -->
     <link rel="modulepreload" href="js/gameLogic.js">
     <link rel="modulepreload" href="js/pathGenerator.js">
     <link rel="modulepreload" href="js/sequenceGenerator.js">
     <link rel="modulepreload" href="js/gridRenderer.js">
+    <link rel="modulepreload" href="js/scoreBox.js">
     
     <style>
         .level-buttons {
@@ -117,6 +118,15 @@
         </div>
     </div>
 
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom": "https://esm.sh/react-dom@18.2.0"
+  }
+}
+</script>
+    
     <!-- Game Modules -->
     <script type="module" src="js/gameLogic.js"></script>
     <script type="module" src="js/pathGenerator.js"></script>
