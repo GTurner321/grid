@@ -619,6 +619,9 @@ isEndSquare(cellIndex) {
     }
 }
 
+// Export the GameController class
+export default GameController;
+
 // Initialize game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     try {
@@ -628,5 +631,3 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error initializing game:', error);
     }
 });
-
-export default GameController;
