@@ -1,4 +1,8 @@
-// gameLogic.js
+// At the top of gameLogic.js
+/** @jsx React.createElement */
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import ScoreBox from './scoreBox.js';
 import { generatePath } from './pathGenerator.js';
 import { generateSequence, sequenceToEntries, formatNumber } from './sequenceGenerator.js';
 import { renderGrid, updateCell, debugGridInfo } from './gridRenderer.js';
@@ -32,11 +36,6 @@ class GameState {
         }
     }
 
-    // Add these imports at the top of gameLogic.js
-import { createRoot } from 'react-dom/client';
-import ScoreBox from './scoreBox.js';
-
-// Then update the updateUI method in your GameState class
 updateUI(options = {}) {
     try {
         const scoreComponentElement = document.getElementById('score-component');
@@ -46,26 +45,44 @@ updateUI(options = {}) {
             if (!this.scoreRoot) {
                 this.scoreRoot = createRoot(scoreComponentElement);
             }
-            
-            this.scoreRoot.render(
-                <ScoreBox 
-                    level={this.currentLevel}
-                    possiblePoints={scoreManager.maxLevelPoints}
-                    spareRemovalCount={scoreManager.spareRemovalCount}
-                    checkCount={scoreManager.checkCount}
-                    startTime={scoreManager.puzzleStartTime}
-                    isComplete={options.roundComplete || false}
-                    totalScore={scoreManager.totalScore}
-                />
-            );
+
+            // Create the ScoreBox element with all necessary props
+            const scoreElement = React.createElement(ScoreBox, {
+                level: this.currentLevel,
+                possiblePoints: scoreManager.maxLevelPoints,
+                spareRemovalCount: scoreManager.spareRemovalCount,
+                checkCount: scoreManager.checkCount,
+                startTime: scoreManager.puzzleStartTime,
+                isComplete: options.roundComplete || false,
+                totalScore: scoreManager.totalScore
+            });
+
+            // Render the score component
+            this.scoreRoot.render(scoreElement);
         }
         
         // Update button states
         const checkSolutionBtn = document.getElementById('check-solution');
         const removeSpareBtn = document.getElementById('remove-spare');
         
-        if (checkSolutionBtn) checkSolutionBtn.disabled = !this.gameActive;
-        if (removeSpareBtn) removeSpareBtn.disabled = !this.gameActive;
+        if (checkSolutionBtn) {
+            checkSolutionBtn.disabled = !this.gameActive;
+        }
+        
+        if (removeSpareBtn) {
+            removeSpareBtn.disabled = !this.gameActive;
+            
+            // Update remove button text based on remaining attempts
+            const spareInfo = scoreManager.getSpareRemovalInfo();
+            if (spareInfo.remainingAttempts === 2) {
+                removeSpareBtn.textContent = 'Remove 50% of Spare Cells';
+            } else if (spareInfo.remainingAttempts === 1) {
+                removeSpareBtn.textContent = 'Remove Remaining Spare Cells';
+            } else {
+                removeSpareBtn.textContent = 'No More Removals';
+                removeSpareBtn.disabled = true;
+            }
+        }
         
         // Update level buttons
         document.querySelectorAll('.level-btn').forEach(btn => {
@@ -73,10 +90,23 @@ updateUI(options = {}) {
                 parseInt(btn.dataset.level) === this.currentLevel
             );
         });
+
+        // Handle round completion UI updates
+        if (options.roundComplete && options.pointsBreakdown) {
+            this.showMessage(
+                `Congratulations! 
+                Remaining Points: ${options.pointsBreakdown.remainingPoints}
+                Bonus Points: ${options.pointsBreakdown.bonusPoints}
+                Total Puzzle Points: ${options.pointsBreakdown.totalPuzzlePoints}
+                Total Score: ${options.pointsBreakdown.totalScore}`, 
+                'success'
+            );
+        }
+        
     } catch (error) {
         console.error('Error updating UI:', error);
+        this.showMessage('Error updating game display', 'error');
     }
-}
 }
 
 class GameController {
