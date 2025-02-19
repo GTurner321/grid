@@ -4,8 +4,6 @@ window.Rules = (() => {
     
     const handleStart = () => {
       setIsVisible(false);
-      // Dispatch a custom event that your game can listen for
-      window.dispatchEvent(new CustomEvent('gameStart'));
     };
 
     if (!isVisible) return null;
@@ -59,12 +57,18 @@ window.Rules = (() => {
             React.createElement('p', null, '... THE RIGHT MATHS DOESN\'T ALWAYS MEAN YOU\'RE ON THE RIGHT PATH!')
           ),
           React.createElement(
-            'button',
+            'div',
             {
-              onClick: handleStart,
-              className: 'mt-4 px-6 py-2 bg-transparent border-2 border-red-500 text-red-500 text-xl font-bold rounded-lg hover:bg-blue-950 hover:text-white transition-colors font-mono'
+              className: 'flex justify-center mt-4'
             },
-            'START'
+            React.createElement(
+              'button',
+              {
+                onClick: handleStart,
+                className: 'px-6 py-2 bg-transparent border-2 border-red-500 text-red-500 text-xl font-bold rounded-lg hover:bg-blue-950 hover:text-white transition-colors font-mono'
+              },
+              'START'
+            )
           )
         )
       )
