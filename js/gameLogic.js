@@ -117,9 +117,14 @@ class GameController {
         this.initializeEventListeners();
     }
 
-    initializeEventListeners() {
+   initializeEventListeners() {
     try {
         console.log('Setting up event listeners');
+        
+        window.addEventListener('gameStart', () => {
+            console.log('Game start event received');
+            this.startLevel(1); // Start with level 1 when the game begins
+        });
         
         // Level selection
         document.querySelectorAll('.level-btn').forEach(btn => {
