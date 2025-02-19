@@ -1,14 +1,14 @@
-const Rules = () => {
-  const [isVisible, setIsVisible] = React.useState(true);
-  
-  const handleStart = () => {
-    setIsVisible(false);
-  };
+const Rules = (() => {
+  function RulesComponent() {
+    const [isVisible, setIsVisible] = React.useState(true);
+    
+    const handleStart = () => {
+      setIsVisible(false);
+    };
 
-  return isVisible ? React.createElement(
-    React.Fragment,
-    null,
-    React.createElement(
+    if (!isVisible) return null;
+
+    return React.createElement(
       'div',
       {
         className: 'fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50'
@@ -66,8 +66,8 @@ const Rules = () => {
           )
         )
       )
-    )
-  ) : null;
-};
+    );
+  }
 
-export default Rules;
+  return RulesComponent;
+})();
