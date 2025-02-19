@@ -117,16 +117,20 @@ class GameController {
         this.initializeEventListeners();
     }
 
-   initializeEventListeners() {
+initializeEventListeners() {
     try {
         console.log('Setting up event listeners');
 
+        // Game start event listener
         window.addEventListener('gameStart', () => {
-    console.log('Game start event received');
-    this.state.gameActive = true;  // Just enable the game interface
-    this.state.updateUI();  // Update UI to reflect that game is active
-    this.showMessage('Select a level to begin!', 'info');
-});
+            console.log('Game start event received');
+            this.state.gameActive = true;
+            this.state.updateUI();
+            this.showMessage('Select a level to begin!', 'info');
+        });
+
+        // Dispatch game start event explicitly
+        window.dispatchEvent(new Event('gameStart'));
         
         // Level selection
         document.querySelectorAll('.level-btn').forEach(btn => {
@@ -137,16 +141,20 @@ class GameController {
             });
         });
 
-        // Game controls
+        // Game control buttons
         const checkSolutionBtn = document.getElementById('check-solution');
         const removeSpareBtn = document.getElementById('remove-spare');
 
         if (checkSolutionBtn) {
             checkSolutionBtn.addEventListener('click', () => this.checkSolution());
+        } else {
+            console.warn('Check solution button not found');
         }
 
         if (removeSpareBtn) {
             removeSpareBtn.addEventListener('click', () => this.removeAllSpareCells());
+        } else {
+            console.warn('Remove spare cells button not found');
         }
 
         // Grid cell interactions
@@ -160,8 +168,6 @@ class GameController {
             });
 
             // Touch support
-            let touchStartCell = null;
-            
             gridContainer.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 const cell = document.elementFromPoint(
@@ -170,7 +176,6 @@ class GameController {
                 );
                 
                 if (cell && cell.classList.contains('grid-cell')) {
-                    touchStartCell = cell;
                     this.handleCellClick(cell);
                 }
             });
@@ -186,9 +191,13 @@ class GameController {
                     this.handleCellClick(cell);
                 }
             });
+        } else {
+            console.warn('Grid container not found');
         }
+
     } catch (error) {
         console.error('Error setting up event listeners:', error);
+        this.showMessage('Error initializing game controls', 'error');
     }
 }
     
