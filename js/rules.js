@@ -1,10 +1,11 @@
-// Define Rules component globally
 window.Rules = (() => {
   function RulesComponent() {
     const [isVisible, setIsVisible] = React.useState(true);
     
     const handleStart = () => {
       setIsVisible(false);
+      // Dispatch a custom event that your game can listen for
+      window.dispatchEvent(new CustomEvent('gameStart'));
     };
 
     if (!isVisible) return null;
