@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
-
 const Rules = () => {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = React.useState(true);
   
   const handleStart = () => {
     setIsVisible(false);
