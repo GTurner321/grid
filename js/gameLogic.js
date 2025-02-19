@@ -9,6 +9,8 @@ import { renderGrid, updateCell, debugGridInfo } from './gridRenderer.js';
 import { scoreManager } from './scoreManager.js';
 import { validatePath } from './pathValidator.js';
 
+console.log('🎮 GameLogic.js Loaded Successfully');
+
 class GameState {
     constructor() {
         this.currentLevel = null;
