@@ -1,4 +1,7 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
 const createRoot = ReactDOM.createRoot;
+
 import ScoreBox from './scoreBox.js';
 import { generatePath } from './pathGenerator.js';
 import { generateSequence, sequenceToEntries, formatNumber } from './sequenceGenerator.js';
