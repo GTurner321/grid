@@ -1,4 +1,5 @@
-const Rules = (() => {
+// Define Rules component globally
+window.Rules = (() => {
   function RulesComponent() {
     const [isVisible, setIsVisible] = React.useState(true);
     
