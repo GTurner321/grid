@@ -1,3 +1,6 @@
+/* Font family loading */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
 :root {
     --primary-color: #3b82f6;
     --secondary-color: #60a5fa;
@@ -186,9 +189,6 @@ button:disabled {
     z-index: 9999; /* Make sure it's above everything else */
 }
 
-/* Font family loading - Update to include both monospace options */
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
 /* Add these font fallbacks to ensure consistent monospace display */
 .font-mono {
     font-family: 'Share Tech Mono', monospace, Consolas, Monaco, 'Courier New';
@@ -200,6 +200,3 @@ button:disabled {
     gap: 10px;
     margin-bottom: 20px;
 }
-
-/* Added for better font loading */
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
