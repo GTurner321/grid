@@ -4,6 +4,8 @@ window.Rules = (() => {
     
     const handleStart = () => {
       setIsVisible(false);
+      // Optionally dispatch a game start event
+      window.dispatchEvent(new Event('gameStart'));
     };
 
     if (!isVisible) return null;
@@ -74,6 +76,5 @@ window.Rules = (() => {
       )
     );
   }
-
   return RulesComponent;
 })();
