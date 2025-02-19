@@ -121,13 +121,20 @@ class GameController {
 
 initializeEventListeners() {
     try {
-        console.log('Setting up event listeners');
-
+        console.log('🔍 Setting up event listeners - DETAILED');
+        
         // Game start event listener
         window.addEventListener('gameStart', () => {
-            console.log('Game start event received');
+            console.log('🚀 Game start event FULLY received');
+            console.log('Current game state:', this.state);
+            
             this.state.gameActive = true;
             this.state.updateUI();
+            
+            // Add more diagnostic logging
+            console.log('Level buttons:', document.querySelectorAll('.level-btn'));
+            console.log('Grid container:', document.getElementById('grid-container'));
+            
             this.showMessage('Select a level to begin!', 'info');
         });
 
@@ -135,11 +142,20 @@ initializeEventListeners() {
         window.dispatchEvent(new Event('gameStart'));
         
         // Level selection
-        document.querySelectorAll('.level-btn').forEach(btn => {
+        const levelButtons = document.querySelectorAll('.level-btn');
+        console.log('Total level buttons found:', levelButtons.length);
+
+        levelButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 const level = parseInt(btn.dataset.level);
-                console.log(`Selected Level: ${level}`);
-                this.startLevel(level);
+                console.log(`✨ Level selected: ${level}`);
+                
+                try {
+                    this.startLevel(level);
+                } catch (startError) {
+                    console.error(`❌ Error starting level ${level}:`, startError);
+                    this.showMessage(`Error starting level ${level}`, 'error');
+                }
             });
         });
 
@@ -148,23 +164,32 @@ initializeEventListeners() {
         const removeSpareBtn = document.getElementById('remove-spare');
 
         if (checkSolutionBtn) {
-            checkSolutionBtn.addEventListener('click', () => this.checkSolution());
+            checkSolutionBtn.addEventListener('click', () => {
+                console.log('🕵️ Check solution clicked');
+                this.checkSolution();
+            });
         } else {
-            console.warn('Check solution button not found');
+            console.warn('❗ Check solution button not found');
         }
 
         if (removeSpareBtn) {
-            removeSpareBtn.addEventListener('click', () => this.removeAllSpareCells());
+            removeSpareBtn.addEventListener('click', () => {
+                console.log('🗑️ Remove spare cells clicked');
+                this.removeAllSpareCells();
+            });
         } else {
-            console.warn('Remove spare cells button not found');
+            console.warn('❗ Remove spare cells button not found');
         }
 
         // Grid cell interactions
         const gridContainer = document.getElementById('grid-container');
         if (gridContainer) {
+            console.log('🟩 Grid container found');
+
             // Mouse/click events
             gridContainer.addEventListener('click', (e) => {
                 if (e.target.classList.contains('grid-cell')) {
+                    console.log('🖱️ Grid cell clicked:', e.target);
                     this.handleCellClick(e.target);
                 }
             });
@@ -178,6 +203,7 @@ initializeEventListeners() {
                 );
                 
                 if (cell && cell.classList.contains('grid-cell')) {
+                    console.log('👆 Touch start on grid cell:', cell);
                     this.handleCellClick(cell);
                 }
             });
@@ -190,15 +216,16 @@ initializeEventListeners() {
                 );
                 
                 if (cell && cell.classList.contains('grid-cell')) {
+                    console.log('👆 Touch move on grid cell:', cell);
                     this.handleCellClick(cell);
                 }
             });
         } else {
-            console.warn('Grid container not found');
+            console.warn('❗ Grid container not found');
         }
 
     } catch (error) {
-        console.error('Error setting up event listeners:', error);
+        console.error('❌ COMPLETE Error setting up event listeners:', error);
         this.showMessage('Error initializing game controls', 'error');
     }
 }
