@@ -120,11 +120,13 @@ class GameController {
    initializeEventListeners() {
     try {
         console.log('Setting up event listeners');
-        
+
         window.addEventListener('gameStart', () => {
-            console.log('Game start event received');
-            this.startLevel(1); // Start with level 1 when the game begins
-        });
+    console.log('Game start event received');
+    this.state.gameActive = true;  // Just enable the game interface
+    this.state.updateUI();  // Update UI to reflect that game is active
+    this.showMessage('Select a level to begin!', 'info');
+});
         
         // Level selection
         document.querySelectorAll('.level-btn').forEach(btn => {
