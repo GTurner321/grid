@@ -177,60 +177,21 @@ button:disabled {
     color: #991b1b;
 }
 
-.command-box {
+#rules-container {
     position: fixed;
-    top: 20px;
-    left: 20px;
-    background-color: #f5f5dc;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 8px;
-    width: 45px;
-    height: 20px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    z-index: 1000;
-    color: #666;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999; /* Make sure it's above everything else */
 }
 
-.command-box:hover {
-    width: 600px;
-    height: 400px;
-    overflow-y: auto;
-    background-color: #f5f5dc;
-    display: block;
-    padding: 15px;
-}
+/* Font family loading - Update to include both monospace options */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-.command-box .title {
-    text-align: center;
-    font-weight: bold;
-    font-size: 12px;
-    line-height: 1;
-}
-
-.command-box:hover .title {
-    display: none;
-}
-
-.command-box .content {
-    display: none;
-    margin-top: 15px;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-.command-box:hover .content {
-    display: block;
-}
-
-.command-box .content ul {
-    margin: 0.5em 0 1em 2em;
+/* Add these font fallbacks to ensure consistent monospace display */
+.font-mono {
+    font-family: 'Share Tech Mono', monospace, Consolas, Monaco, 'Courier New';
 }
 
 .level-selector {
