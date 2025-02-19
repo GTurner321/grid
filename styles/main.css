@@ -19,7 +19,7 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    position: relative;  /* Added for absolute positioning of score */
+    position: relative;
 }
 
 .game-header h1 {
@@ -30,19 +30,17 @@ body {
     margin-bottom: 1.5rem;
 }
 
-/* Updated score display styles */
+/* Score Display */
 .score-display {
     position: absolute;
     top: 20px;
     right: 20px;
 }
 
-/* Hide the old score span but maintain it for compatibility */
 #score {
     display: none;
 }
 
-/* New score component specific styles */
 #score-component {
     font-family: 'Share Tech Mono', monospace;
     letter-spacing: 0.05em;
@@ -53,6 +51,7 @@ body {
     line-height: 1.2;
 }
 
+/* Grid */
 #grid-container {
     display: grid;
     grid-template-columns: repeat(10, var(--grid-cell-size));
@@ -74,19 +73,6 @@ body {
     transition: background-color 0.2s;
     user-select: none;
     border: 1px solid #e5e7eb;
-}
-
-.symbol-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
-
-.grid-cell {
-    cursor: pointer;
 }
 
 .grid-cell:hover {
@@ -130,8 +116,20 @@ body {
     background-color: yellow;
 }
 
+/* Symbol Container */
+.symbol-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Game Controls */
 .game-controls {
     display: flex;
+    justify-content: center;
     gap: 10px;
     margin-bottom: 20px;
 }
@@ -155,6 +153,14 @@ button:disabled {
     cursor: not-allowed;
 }
 
+/* Level Controls */
+.level-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
 .level-btn {
     background-color: #4b5563;
 }
@@ -163,6 +169,7 @@ button:disabled {
     background-color: var(--primary-color);
 }
 
+/* Messages */
 #game-messages {
     margin-top: 15px;
     padding: 10px;
@@ -180,23 +187,17 @@ button:disabled {
     color: #991b1b;
 }
 
+/* Rules Container */
 #rules-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 9999; /* Make sure it's above everything else */
+    z-index: 9999;
 }
 
-/* Add these font fallbacks to ensure consistent monospace display */
+/* Font Fallbacks */
 .font-mono {
     font-family: 'Share Tech Mono', monospace, Consolas, Monaco, 'Courier New';
-}
-
-.level-selector {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
 }
