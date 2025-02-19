@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A mathematical path puzzle game">
     <title>PATH PUZZLE</title>
     
     <!-- Favicon -->
@@ -14,14 +15,15 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles/main.css">
 
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom": "https://esm.sh/react-dom@18.2.0"
-  }
-}
-</script>
+    <!-- Import map for React -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom": "https://esm.sh/react-dom@18.2.0"
+      }
+    }
+    </script>
     
     <!-- Module Preloading -->
     <link rel="modulepreload" href="js/gameLogic.js">
@@ -46,12 +48,17 @@
     </style>
 </head>
 <body>
+    <noscript>You need to enable JavaScript to run this game.</noscript>
+
+    <!-- React Rules Component Container -->
+    <div id="rules-container"></div>
+
     <div class="game-container">
         <!-- Header Section -->
         <header class="game-header">
             <h1>PATH PUZZLE</h1>
             
-            <!-- Score Display - both old and new to maintain compatibility during transition -->
+            <!-- Score Display -->
             <div class="score-display">
                 <div id="score-component"></div>
                 <span id="score" style="display: none;">0</span>
@@ -74,7 +81,7 @@
             <!-- Grid Container -->
             <div id="grid-container"></div>
             
-            <!-- Sequence Container (hidden but maintained for functionality) -->
+            <!-- Sequence Container -->
             <div class="sequence-container" style="display: none;">
                 <div id="sequence-sums" class="sequence-list"></div>
             </div>
@@ -135,5 +142,16 @@
     <script type="module" src="js/gridRenderer.js"></script>
     <script type="module" src="js/scoreBox.js"></script>
     <script type="module" src="js/rules.js"></script>
+
+    <!-- React Component Mounting -->
+    <script type="module">
+        import React from 'react';
+        import ReactDOM from 'react-dom/client';
+        import Rules from './js/rules.js';
+        
+        ReactDOM.createRoot(document.getElementById('rules-container')).render(
+            React.createElement(Rules)
+        );
+    </script>
 </body>
 </html>
