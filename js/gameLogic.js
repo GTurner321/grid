@@ -1,7 +1,4 @@
-// At the top of gameLogic.js
-/** @jsx React.createElement */
-import React from 'react';
-import { createRoot } from 'react-dom/client';
+const createRoot = ReactDOM.createRoot;
 import ScoreBox from './scoreBox.js';
 import { generatePath } from './pathGenerator.js';
 import { generateSequence, sequenceToEntries, formatNumber } from './sequenceGenerator.js';
