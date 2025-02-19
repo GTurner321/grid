@@ -202,7 +202,12 @@ initializeEventListeners() {
 }
     
     async startLevel(level) {
-    try {
+        console.log(`☢️ Starting Level ${level} - Detailed Debugging`);
+    console.log('Path:', this.state.path);
+    console.log('Sequence:', this.state.sequence);
+    console.log('Sequence Entries:', this.state.sequenceEntries);
+        
+        try {
         console.log(`Starting Level ${level}`);
         
         // Reset game state
