@@ -170,5 +170,37 @@
         root.render(React.createElement(Rules));
     });
 </script>
+        <script>
+    // Direct DOM test
+    window.addEventListener('load', () => {
+        console.error('DIRECT TEST: Window loaded');
+        
+        // Test button container
+        const container = document.querySelector('.level-buttons');
+        console.error('Container exists:', !!container);
+        
+        if (container) {
+            // Add test click handler
+            container.addEventListener('click', (e) => {
+                console.error('DIRECT TEST: Container clicked at:', e.clientX, e.clientY);
+                const btn = e.target.closest('.level-btn');
+                if (btn) {
+                    console.error('DIRECT TEST: Button clicked:', btn.textContent);
+                }
+            });
+            
+            // Log all buttons
+            const buttons = container.querySelectorAll('.level-btn');
+            console.error('DIRECT TEST: Found buttons:', buttons.length);
+            
+            // Add direct click handlers
+            buttons.forEach((btn, i) => {
+                btn.addEventListener('click', () => {
+                    console.error(`DIRECT TEST: Button ${i + 1} direct handler`);
+                });
+            });
+        }
+    });
+</script>
 </body>
 </html>
