@@ -8,85 +8,87 @@ import GridEventHandler from './GridEventHandler.js';
 
 class GameController {
     constructor() {
-        console.log('Initializing GameController');
+        console.error('CONSTRUCTOR: GameController Initializing');
+        // Log if buttons exist at construction time
+        const initialButtons = document.querySelectorAll('.level-btn');
+        console.error('Initial button check:', initialButtons.length, 'buttons found');
+        
         this.state = new GameState();
         this.gridEventHandler = new GridEventHandler(this.state);
         
-        // Only initialize after state is set up
-        requestAnimationFrame(() => {
+        // Ensure DOM is ready before setting up event listeners
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.initializeEventListeners());
+        } else {
             this.initializeEventListeners();
-            // Dispatch game start event after initialization
-            window.dispatchEvent(new CustomEvent('gameStart'));
-        });
+        }
     }
 
     initializeEventListeners() {
-    try {
-        console.log('Setting up event listeners');
-        
-        // Add level button setup first
-        this.setupLevelButtons();
-        
-        // Then your existing listeners
-        this.setupGameStartListener();
-        this.setupGameControlButtons();
-        this.gridEventHandler.setupGridInteractions();
-    } catch (error) {
-        console.error('Error setting up event listeners:', error);
-        this.state.showMessage('Error initializing game controls', 'error');
-    }
-}
-
-setupLevelButtons() {
-    console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE');
-    
-    const levelButtons = document.querySelectorAll('.level-btn');
-    console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
-
-    levelButtons.forEach((btn, index) => {
-        // Remove all existing event listeners
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-
-        // Multiple event attachment methods
-        newBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            console.error(`CRITICAL: Button ${index + 1} CLICKED!`);
-            console.error('Button details:', {
-                level: newBtn.getAttribute('data-level'),
-                text: newBtn.textContent.trim()
-            });
-
-            const level = parseInt(newBtn.getAttribute('data-level'));
+        try {
+            console.error('INIT: Setting up event listeners');
             
-            // Use setTimeout to ensure logging and to separate event handling
-            setTimeout(() => {
+            // Ensure buttons exist before setup
+            const buttons = document.querySelectorAll('.level-btn');
+            console.error('INIT: Found', buttons.length, 'level buttons');
+            
+            if (buttons.length === 0) {
+                console.error('CRITICAL ERROR: No level buttons found in DOM!');
+                return;
+            }
+            
+            this.setupLevelButtons();
+            this.setupGameStartListener();
+            this.setupGameControlButtons();
+            this.gridEventHandler.setupGridInteractions();
+        } catch (error) {
+            console.error('Error in initializeEventListeners:', error);
+        }
+    }
+
+    setupLevelButtons() {
+        console.error('SETUP: Beginning level button setup');
+        
+        const levelButtons = document.querySelectorAll('.level-btn');
+        console.error(`SETUP: Found ${levelButtons.length} level buttons to setup`);
+
+        levelButtons.forEach((btn, index) => {
+            console.error(`Setting up button ${index + 1}`);
+            
+            // Direct click handler
+            btn.onclick = (e) => {
+                e.preventDefault();
+                console.error(`Button ${index + 1} clicked!`);
+                
+                const level = parseInt(btn.dataset.level);
+                console.error(`Starting level ${level}`);
+                
                 this.startLevel(level)
                     .then(() => console.error(`Level ${level} started successfully`))
                     .catch(error => console.error(`Error starting level ${level}:`, error));
-            }, 0);
-        }, true);  // Use capture phase
+            };
 
-        // Inline onclick backup
-        newBtn.onclick = (e) => {
-            console.error(`INLINE onclick for Button ${index + 1}`);
-        };
-    });
-
-    // Global event delegation as backup
-    document.querySelector('.level-buttons').addEventListener('click', (e) => {
-        const button = e.target.closest('.level-btn');
-        if (button) {
-            console.error('DELEGATION: Level button clicked via delegation');
-            console.error('Delegated button details:', {
-                level: button.getAttribute('data-level'),
-                text: button.textContent.trim()
+            // Add visual feedback
+            btn.addEventListener('mouseenter', () => {
+                console.error(`Mouse entered button ${index + 1}`);
+                btn.style.cursor = 'pointer';
             });
-        }
-    });
-}
+
+            // Log that button setup is complete
+            console.error(`Button ${index + 1} setup complete`);
+        });
+
+        // Test click simulation
+        console.error('SETUP: Testing first button click simulation');
+        setTimeout(() => {
+            const firstButton = levelButtons[0];
+            if (firstButton) {
+                console.error('Simulating click on first button');
+                // Don't actually click, just log
+                console.error('Click simulation would happen here');
+            }
+        }, 1000);
+    }
     
 setupGameStartListener() {
         window.addEventListener('gameStart', (event) => {
