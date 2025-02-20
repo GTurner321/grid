@@ -32,75 +32,112 @@ class GameController {
         }
     }
 
-    setupLevelButtons() {
-    console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE');
-    
-    const levelButtons = document.querySelectorAll('.level-btn');
-    console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
+setupLevelButtons() {
+        console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE');
+        
+        const levelButtons = document.querySelectorAll('.level-btn');
+        console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
 
-    // Debug check for button visibility
-    levelButtons.forEach((btn, index) => {
-        const rect = btn.getBoundingClientRect();
-        console.error(`Button ${index + 1} position:`, {
-            top: rect.top,
-            left: rect.left,
-            width: rect.width,
-            height: rect.height,
-            visible: rect.width > 0 && rect.height > 0
-        });
-    });
+        // Add a direct click handler to document for debugging
+        document.addEventListener('click', (e) => {
+            console.error('Document clicked at:', e.clientX, e.clientY);
+            console.error('Clicked element:', e.target.tagName, e.target.className);
+        }, true);
 
-    levelButtons.forEach((btn, index) => {
-        // Force some critical styles
-        btn.style.cssText += `
-            cursor: pointer !important;
-            position: relative !important;
-            z-index: 100 !important;
-        `;
-
-        // Main click handler
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            console.error(`CRITICAL: Button ${index + 1} CLICKED!`);
-            console.error('Button details:', {
-                level: btn.getAttribute('data-level'),
-                text: btn.textContent.trim()
-            });
-
-            const level = parseInt(btn.getAttribute('data-level'));
-            
-            this.startLevel(level)
-                .then(() => console.error(`Level ${level} started successfully`))
-                .catch(error => console.error(`Error starting level ${level}:`, error));
-        });
-
-        // Debug mouseover
-        btn.addEventListener('mouseover', () => {
-            console.error(`HOVER: Mouse entered button ${index + 1}`);
-            console.error('Button state:', {
-                clickable: window.getComputedStyle(btn).cursor === 'pointer',
-                zIndex: window.getComputedStyle(btn).zIndex,
-                position: window.getComputedStyle(btn).position
-            });
-        });
-    });
-
-    // Test element overlapping
-    setTimeout(() => {
         levelButtons.forEach((btn, index) => {
-            const rect = btn.getBoundingClientRect();
-            const elements = document.elementsFromPoint(
+            // Remove existing click listeners
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            // Add new click handler
+            newBtn.onclick = (e) => {
+                console.error(`Direct onclick - Button ${index + 1} clicked`);
+                const level = parseInt(newBtn.dataset.level);
+                this.startLevel(level);
+            };
+
+            // Add alternate click handler
+            newBtn.addEventListener('click', (e) => {
+                console.error(`addEventListener - Button ${index + 1} clicked`);
+                e.stopPropagation();
+            }, true);
+
+            // Force button styles
+            newBtn.style.cssText = `
+                cursor: pointer !important;
+                position: relative !important;
+                z-index: 1000 !important;
+                pointer-events: auto !important;
+                background-color: rgb(34, 197, 94) !important;
+            `;
+
+            // Test if button is clickable
+            const rect = newBtn.getBoundingClientRect();
+            const elementAtPoint = document.elementFromPoint(
                 rect.left + rect.width / 2,
                 rect.top + rect.height / 2
             );
-            console.error(`Button ${index + 1} stack:`, 
-                elements.map(el => `${el.tagName}.${el.className}`));
+            console.error(`Button ${index + 1} clickable test:`, {
+                isButtonAtPoint: elementAtPoint === newBtn,
+                elementFound: elementAtPoint ? `${elementAtPoint.tagName}.${elementAtPoint.className}` : 'none',
+                buttonPosition: rect
+            });
         });
-    }, 1000);
-}
+    }
+    
+    setupLevelButtons() {
+        console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE');
+        
+        const levelButtons = document.querySelectorAll('.level-btn');
+        console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
 
+        // Add a direct click handler to document for debugging
+        document.addEventListener('click', (e) => {
+            console.error('Document clicked at:', e.clientX, e.clientY);
+            console.error('Clicked element:', e.target.tagName, e.target.className);
+        }, true);
+
+        levelButtons.forEach((btn, index) => {
+            // Remove existing click listeners
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            // Add new click handler
+            newBtn.onclick = (e) => {
+                console.error(`Direct onclick - Button ${index + 1} clicked`);
+                const level = parseInt(newBtn.dataset.level);
+                this.startLevel(level);
+            };
+
+            // Add alternate click handler
+            newBtn.addEventListener('click', (e) => {
+                console.error(`addEventListener - Button ${index + 1} clicked`);
+                e.stopPropagation();
+            }, true);
+
+            // Force button styles
+            newBtn.style.cssText = `
+                cursor: pointer !important;
+                position: relative !important;
+                z-index: 1000 !important;
+                pointer-events: auto !important;
+                background-color: rgb(34, 197, 94) !important;
+            `;
+
+            // Test if button is clickable
+            const rect = newBtn.getBoundingClientRect();
+            const elementAtPoint = document.elementFromPoint(
+                rect.left + rect.width / 2,
+                rect.top + rect.height / 2
+            );
+            console.error(`Button ${index + 1} clickable test:`, {
+                isButtonAtPoint: elementAtPoint === newBtn,
+                elementFound: elementAtPoint ? `${elementAtPoint.tagName}.${elementAtPoint.className}` : 'none',
+                buttonPosition: rect
+            });
+        });
+    }
+    
     setupGameStartListener() {
         window.addEventListener('gameStart', (event) => {
             console.error('CRITICAL: Game Start Event Received');
