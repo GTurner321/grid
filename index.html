@@ -49,6 +49,8 @@
         <link rel="modulepreload" href="js/scoreBox.js">
         <link rel="modulepreload" href="js/scoreManager.js">
         <link rel="modulepreload" href="js/pathValidator.js">
+        <link rel="modulepreload" href="js/puzzleSymbols.js">
+        <link rel="modulepreload" href="js/rules.js">
             
         <!-- Add this to your HTML's style section -->
 <style>
@@ -187,16 +189,43 @@
 
         <!-- React Component Mounting -->
         <script type="module">
-            import GameController from './js/GameController.js';
-            import Rules from './js/rules.js';
+    import GameController from './js/GameController.js';
+    import Rules from './js/rules.js';
+    
+    console.error('DEBUG: Starting initialization');
+    console.error('DEBUG: GameController imported:', typeof GameController);
+    console.error('DEBUG: Rules imported:', typeof Rules);
+
+    window.addEventListener('DOMContentLoaded', () => {
+        try {
+            console.error('DOM Loaded - Starting GameController initialization');
             
-            window.addEventListener('DOMContentLoaded', () => {
-                console.error('DOM Loaded - Initializing Game Controller');
-                window.gameController = new GameController();
-                
-                const root = window.ReactDOM.createRoot(document.getElementById('rules-container'));
-                root.render(React.createElement(Rules));
-            });
-        </script>
+            // Create game controller
+            const controller = new GameController();
+            console.error('GameController instance created:', controller);
+            
+            // Store in window
+            window._gameController = controller;
+            console.error('GameController stored in window:', window._gameController);
+            
+            // Mount React components
+            const root = window.ReactDOM.createRoot(document.getElementById('rules-container'));
+            root.render(React.createElement(Rules));
+            
+            console.error('Initialization complete');
+        } catch (error) {
+            console.error('CRITICAL ERROR during initialization:', error);
+            console.error('Error stack:', error.stack);
+        }
+    });
+
+    // Add backup initialization check
+    setTimeout(() => {
+        console.error('Delayed initialization check:', {
+            hasController: !!window._gameController,
+            controllerType: typeof window._gameController
+        });
+    }, 2000);
+</script>
     </body>
 </html>
