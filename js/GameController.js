@@ -8,89 +8,102 @@ import GridEventHandler from './GridEventHandler.js';
 
 class GameController {
     constructor() {
-        console.error('CONSTRUCTOR: GameController Initializing');
-        // Log if buttons exist at construction time
-        const initialButtons = document.querySelectorAll('.level-btn');
-        console.error('Initial button check:', initialButtons.length, 'buttons found');
-        
+        // Basic initialization
+        console.error('BASIC: GameController constructor start');
         this.state = new GameState();
         this.gridEventHandler = new GridEventHandler(this.state);
         
-        // Ensure DOM is ready before setting up event listeners
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.initializeEventListeners());
+        // Wait for DOM to be fully loaded
+        if (document.readyState === 'complete') {
+            this.init();
         } else {
-            this.initializeEventListeners();
+            window.addEventListener('load', () => this.init());
         }
     }
 
-    initializeEventListeners() {
-        try {
-            console.error('INIT: Setting up event listeners');
-            
-            // Ensure buttons exist before setup
-            const buttons = document.querySelectorAll('.level-btn');
-            console.error('INIT: Found', buttons.length, 'level buttons');
-            
-            if (buttons.length === 0) {
-                console.error('CRITICAL ERROR: No level buttons found in DOM!');
-                return;
-            }
-            
-            this.setupLevelButtons();
-            this.setupGameStartListener();
-            this.setupGameControlButtons();
-            this.gridEventHandler.setupGridInteractions();
-        } catch (error) {
-            console.error('Error in initializeEventListeners:', error);
-        }
-    }
-
-    setupLevelButtons() {
-        console.error('SETUP: Beginning level button setup');
+    init() {
+        console.error('INIT: Starting initialization');
         
-        const levelButtons = document.querySelectorAll('.level-btn');
-        console.error(`SETUP: Found ${levelButtons.length} level buttons to setup`);
-
-        levelButtons.forEach((btn, index) => {
-            console.error(`Setting up button ${index + 1}`);
-            
-            // Direct click handler
-            btn.onclick = (e) => {
-                e.preventDefault();
-                console.error(`Button ${index + 1} clicked!`);
-                
-                const level = parseInt(btn.dataset.level);
-                console.error(`Starting level ${level}`);
-                
-                this.startLevel(level)
-                    .then(() => console.error(`Level ${level} started successfully`))
-                    .catch(error => console.error(`Error starting level ${level}:`, error));
-            };
-
-            // Add visual feedback
-            btn.addEventListener('mouseenter', () => {
-                console.error(`Mouse entered button ${index + 1}`);
-                btn.style.cursor = 'pointer';
-            });
-
-            // Log that button setup is complete
-            console.error(`Button ${index + 1} setup complete`);
-        });
-
-        // Test click simulation
-        console.error('SETUP: Testing first button click simulation');
-        setTimeout(() => {
-            const firstButton = levelButtons[0];
-            if (firstButton) {
-                console.error('Simulating click on first button');
-                // Don't actually click, just log
-                console.error('Click simulation would happen here');
-            }
-        }, 1000);
+        // Test direct DOM access
+        const container = document.querySelector('.level-buttons');
+        console.error('Container found:', !!container);
+        
+        // Create fresh buttons programmatically
+        this.createButtons();
+        
+        // Setup other listeners
+        this.setupGameStartListener();
+        this.setupGameControlButtons();
+        this.gridEventHandler.setupGridInteractions();
     }
-    
-setupGameStartListener() {
+
+    createButtons() {
+        console.error('CREATE: Starting button creation');
+        
+        // Get container
+        const container = document.querySelector('.level-buttons');
+        if (!container) {
+            console.error('ERROR: Button container not found!');
+            return;
+        }
+        
+        // Clear existing buttons
+        container.innerHTML = '';
+        
+        // Create new buttons
+        for (let i = 1; i <= 5; i++) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'level-btn bg-green-500 hover:bg-green-700 p-2 m-1 transition-colors cursor-pointer';
+            button.dataset.level = i;
+            button.textContent = `Level ${i}`;
+            
+            // Direct event handler
+            button.addEventListener('click', (e) => {
+                console.error(`Direct click on level ${i}`);
+                this.handleLevelClick(i);
+            });
+            
+            container.appendChild(button);
+            console.error(`Created button for level ${i}`);
+            
+            // Test click handler immediately
+            button.addEventListener('click', () => {
+                console.error(`Test click handler for level ${i}`);
+            });
+        }
+        
+        // Add global click handler to container
+        container.addEventListener('click', (e) => {
+            const btn = e.target.closest('.level-btn');
+            if (btn) {
+                const level = parseInt(btn.dataset.level);
+                console.error(`Container caught click for level ${level}`);
+            }
+        });
+        
+        // Test click simulation
+        setTimeout(() => {
+            const firstButton = container.querySelector('.level-btn');
+            if (firstButton) {
+                console.error('TEST: Simulating click');
+                firstButton.click();
+            }
+        }, 2000);
+    }
+
+    handleLevelClick(level) {
+        console.error(`HANDLER: Level ${level} clicked`);
+        try {
+            this.startLevel(level)
+                .then(() => console.error(`Level ${level} started`))
+                .catch(err => console.error('Level start error:', err));
+        } catch (error) {
+            console.error('Click handler error:', error);
+        }
+    }
+
+    setupGameStartListener() {
         window.addEventListener('gameStart', (event) => {
             console.error('CRITICAL: Game Start Event Received');
             console.error('Event details:', event);
@@ -104,114 +117,114 @@ setupGameStartListener() {
         });
     }
 
-setupGameControlButtons() {
-    this.setupCheckSolutionButton();
-    this.setupRemoveSpareButton();
-}
-
-setupCheckSolutionButton() {
-    const checkSolutionBtn = document.getElementById('check-solution');
-    if (checkSolutionBtn) {
-        checkSolutionBtn.addEventListener('click', () => {
-            console.log('Check solution clicked');
-            this.checkSolution();
-        });
+    setupGameControlButtons() {
+        this.setupCheckSolutionButton();
+        this.setupRemoveSpareButton();
     }
-}
 
-setupRemoveSpareButton() {
-    const removeSpareBtn = document.getElementById('remove-spare');
-    if (removeSpareBtn) {
-        removeSpareBtn.addEventListener('click', () => {
-            console.log('Remove spare cells clicked');
-            this.removeAllSpareCells();
-        });
-    }
-}
-    
-async startLevel(level) {
-    console.error(`CRITICAL: startLevel method CALLED with level: ${level}`);
-    
-    try {
-        console.log(`DETAILED: Starting Level ${level}`);
-        
-        // Reset game state
-        console.log('1. Resetting game state...');
-        this.state.reset();
-        
-        // Set current level
-        console.log('2. Setting current level...');
-        this.state.currentLevel = level;
-        
-        // Activate game
-        console.log('3. Setting game as active...');
-        this.state.gameActive = true;
-
-        // Initialize scoring
-        console.log('4. Initializing scoring...');
-        scoreManager.initializeLevel(level);
-
-        // Generate path
-        console.log('5. Generating path...');
-        this.state.path = await generatePath();
-        console.log('Path generated:', this.state.path);
-
-        // Generate sequence
-        console.log('6. Generating sequence...');
-        this.state.sequence = await generateSequence(level);
-        console.log('Sequence generated:', this.state.sequence);
-        
-        // Convert sequence to entries
-        console.log('7. Converting sequence to entries...');
-        this.state.sequenceEntries = sequenceToEntries(this.state.sequence);
-        console.log('Sequence entries:', this.state.sequenceEntries);
-
-        // Place math sequence
-        console.log('8. Placing math sequence...');
-        this.placeMathSequence();
-        
-        // Fill remaining cells
-        console.log('9. Filling remaining cells...');
-        this.fillRemainingCells();
-
-        // Make sequence container visible
-        console.log('10. Making sequence container visible...');
-        const sequenceContainer = document.querySelector('.sequence-container');
-        if (sequenceContainer) {
-            sequenceContainer.style.display = 'block';
+    setupCheckSolutionButton() {
+        const checkSolutionBtn = document.getElementById('check-solution');
+        if (checkSolutionBtn) {
+            checkSolutionBtn.addEventListener('click', () => {
+                console.log('Check solution clicked');
+                this.checkSolution();
+            });
         }
-
-        // Render grid
-        console.log('11. Rendering grid...');
-        renderGrid(this.state.gridEntries, {
-            startCoord: this.state.path[0],
-            endCoord: this.state.path[this.state.path.length - 1]
-        });
-
-        // Display sequence sums
-        console.log('12. Displaying sequence sums...');
-        this.displaySequenceSums();
-
-        // Update UI
-        console.log('13. Updating UI...');
-        this.state.updateUI({
-            resetScores: true,
-            preserveTotalScore: true
-        });
-
-        // Show start message
-        console.log('14. Showing start message...');
-        this.state.showMessage('Game started! Find the path by following the mathematical sequence.');
-
-        console.log('Level start COMPLETE');
-    } catch (error) {
-        console.error('DETAILED Error starting level:', error);
-        console.error('Error stack:', error.stack);
-        this.state.showMessage('Error starting game. Please try again.', 'error');
-        throw error;
     }
-}
-    
+
+    setupRemoveSpareButton() {
+        const removeSpareBtn = document.getElementById('remove-spare');
+        if (removeSpareBtn) {
+            removeSpareBtn.addEventListener('click', () => {
+                console.log('Remove spare cells clicked');
+                this.removeAllSpareCells();
+            });
+        }
+    }
+
+    async startLevel(level) {
+        console.error(`CRITICAL: startLevel method CALLED with level: ${level}`);
+        
+        try {
+            console.log(`DETAILED: Starting Level ${level}`);
+            
+            // Reset game state
+            console.log('1. Resetting game state...');
+            this.state.reset();
+            
+            // Set current level
+            console.log('2. Setting current level...');
+            this.state.currentLevel = level;
+            
+            // Activate game
+            console.log('3. Setting game as active...');
+            this.state.gameActive = true;
+
+            // Initialize scoring
+            console.log('4. Initializing scoring...');
+            scoreManager.initializeLevel(level);
+
+            // Generate path
+            console.log('5. Generating path...');
+            this.state.path = await generatePath();
+            console.log('Path generated:', this.state.path);
+
+            // Generate sequence
+            console.log('6. Generating sequence...');
+            this.state.sequence = await generateSequence(level);
+            console.log('Sequence generated:', this.state.sequence);
+            
+            // Convert sequence to entries
+            console.log('7. Converting sequence to entries...');
+            this.state.sequenceEntries = sequenceToEntries(this.state.sequence);
+            console.log('Sequence entries:', this.state.sequenceEntries);
+
+            // Place math sequence
+            console.log('8. Placing math sequence...');
+            this.placeMathSequence();
+            
+            // Fill remaining cells
+            console.log('9. Filling remaining cells...');
+            this.fillRemainingCells();
+
+            // Make sequence container visible
+            console.log('10. Making sequence container visible...');
+            const sequenceContainer = document.querySelector('.sequence-container');
+            if (sequenceContainer) {
+                sequenceContainer.style.display = 'block';
+            }
+
+            // Render grid
+            console.log('11. Rendering grid...');
+            renderGrid(this.state.gridEntries, {
+                startCoord: this.state.path[0],
+                endCoord: this.state.path[this.state.path.length - 1]
+            });
+
+            // Display sequence sums
+            console.log('12. Displaying sequence sums...');
+            this.displaySequenceSums();
+
+            // Update UI
+            console.log('13. Updating UI...');
+            this.state.updateUI({
+                resetScores: true,
+                preserveTotalScore: true
+            });
+
+            // Show start message
+            console.log('14. Showing start message...');
+            this.state.showMessage('Game started! Find the path by following the mathematical sequence.');
+
+            console.log('Level start COMPLETE');
+        } catch (error) {
+            console.error('DETAILED Error starting level:', error);
+            console.error('Error stack:', error.stack);
+            this.state.showMessage('Error starting game. Please try again.', 'error');
+            throw error;
+        }
+    }
+
     displaySequenceSums() {
         const sumsContainer = document.getElementById('sequence-sums');
         if (sumsContainer) {
@@ -396,18 +409,5 @@ async startLevel(level) {
         });
     }
 }
-
-// Initialize game when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.error('DOM CONTENT LOADED - INITIALIZING GAME');
-    try {
-        const gameController = new GameController();
-        window.gameController = gameController;
-        console.error('Game initialized successfully - VERBOSE');
-    } catch (error) {
-        console.error('CRITICAL ERROR initializing game:', error);
-        console.error('Error stack:', error.stack);
-    }
-});
 
 export default GameController;
