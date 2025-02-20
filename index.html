@@ -51,11 +51,24 @@
     <link rel="modulepreload" href="js/pathValidator.js">
         
     <style>
-        .level-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
+     .level-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 20px 0;
+        /* Debug outline */
+        border: 1px solid red;
+    }
+    
+    .level-btn {
+        cursor: pointer !important;
+        position: relative;
+        z-index: 100;
+        min-width: 80px;
+        padding: 8px 16px;
+        /* Debug outline */
+        border: 2px solid blue;
+    }
         
         .game-controls {
             display: flex;
@@ -84,24 +97,44 @@
 
         <section class="level-selector">
     <div class="level-buttons">
-        <button type="button" class="level-btn bg-green-500 hover:bg-green-700 p-2 m-1 transition-colors cursor-pointer" 
-                data-level="1" onclick="console.error('Direct HTML click - Level 1');">
+        <button 
+            type="button" 
+            class="level-btn bg-green-500 hover:bg-green-700 text-white font-bold rounded" 
+            data-level="1"
+            style="cursor: pointer !important;"
+            onclick="console.error('Level 1 clicked')">
             Level 1
         </button>
-        <button type="button" class="level-btn bg-green-500 hover:bg-green-700 p-2 m-1 transition-colors cursor-pointer" 
-                data-level="2" onclick="console.error('Direct HTML click - Level 2');">
+        <button 
+            type="button" 
+            class="level-btn bg-green-500 hover:bg-green-700 text-white font-bold rounded" 
+            data-level="2"
+            style="cursor: pointer !important;"
+            onclick="console.error('Level 2 clicked')">
             Level 2
         </button>
-        <button type="button" class="level-btn bg-green-500 hover:bg-green-700 p-2 m-1 transition-colors cursor-pointer" 
-                data-level="3" onclick="console.error('Direct HTML click - Level 3');">
+        <button 
+            type="button" 
+            class="level-btn bg-green-500 hover:bg-green-700 text-white font-bold rounded" 
+            data-level="3"
+            style="cursor: pointer !important;"
+            onclick="console.error('Level 3 clicked')">
             Level 3
         </button>
-        <button type="button" class="level-btn bg-green-500 hover:bg-green-700 p-2 m-1 transition-colors cursor-pointer" 
-                data-level="4" onclick="console.error('Direct HTML click - Level 4');">
+        <button 
+            type="button" 
+            class="level-btn bg-green-500 hover:bg-green-700 text-white font-bold rounded" 
+            data-level="4"
+            style="cursor: pointer !important;"
+            onclick="console.error('Level 4 clicked')">
             Level 4
         </button>
-        <button type="button" class="level-btn bg-green-500 hover:bg-green-700 p-2 m-1 transition-colors cursor-pointer" 
-                data-level="5" onclick="console.error('Direct HTML click - Level 5');">
+        <button 
+            type="button" 
+            class="level-btn bg-green-500 hover:bg-green-700 text-white font-bold rounded" 
+            data-level="5"
+            style="cursor: pointer !important;"
+            onclick="console.error('Level 5 clicked')">
             Level 5
         </button>
     </div>
