@@ -85,59 +85,6 @@ setupLevelButtons() {
         });
     }
     
-    setupLevelButtons() {
-        console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE');
-        
-        const levelButtons = document.querySelectorAll('.level-btn');
-        console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
-
-        // Add a direct click handler to document for debugging
-        document.addEventListener('click', (e) => {
-            console.error('Document clicked at:', e.clientX, e.clientY);
-            console.error('Clicked element:', e.target.tagName, e.target.className);
-        }, true);
-
-        levelButtons.forEach((btn, index) => {
-            // Remove existing click listeners
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn);
-            
-            // Add new click handler
-            newBtn.onclick = (e) => {
-                console.error(`Direct onclick - Button ${index + 1} clicked`);
-                const level = parseInt(newBtn.dataset.level);
-                this.startLevel(level);
-            };
-
-            // Add alternate click handler
-            newBtn.addEventListener('click', (e) => {
-                console.error(`addEventListener - Button ${index + 1} clicked`);
-                e.stopPropagation();
-            }, true);
-
-            // Force button styles
-            newBtn.style.cssText = `
-                cursor: pointer !important;
-                position: relative !important;
-                z-index: 1000 !important;
-                pointer-events: auto !important;
-                background-color: rgb(34, 197, 94) !important;
-            `;
-
-            // Test if button is clickable
-            const rect = newBtn.getBoundingClientRect();
-            const elementAtPoint = document.elementFromPoint(
-                rect.left + rect.width / 2,
-                rect.top + rect.height / 2
-            );
-            console.error(`Button ${index + 1} clickable test:`, {
-                isButtonAtPoint: elementAtPoint === newBtn,
-                elementFound: elementAtPoint ? `${elementAtPoint.tagName}.${elementAtPoint.className}` : 'none',
-                buttonPosition: rect
-            });
-        });
-    }
-    
     setupGameStartListener() {
         window.addEventListener('gameStart', (event) => {
             console.error('CRITICAL: Game Start Event Received');
