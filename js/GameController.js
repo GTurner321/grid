@@ -39,29 +39,36 @@ setupLevelButtons() {
     console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
 
     levelButtons.forEach((btn, index) => {
-        // Completely remove and recreate the event listener
-        btn.onclick = null; // Remove any existing onclick
+        // Remove all existing event listeners
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
         
-        btn.addEventListener('click', (e) => {
+        // Add new event listener with explicit logging
+        newBtn.addEventListener('click', (e) => {
             console.error(`CRITICAL: Level Button ${index + 1} CLICKED!`);
+            console.error(`CRITICAL: Button details:`, {
+                level: newBtn.getAttribute('data-level'),
+                text: newBtn.textContent,
+                classList: Array.from(newBtn.classList)
+            });
             
             e.preventDefault();
             e.stopPropagation();
             
-            const level = btn.getAttribute('data-level');
+            const level = parseInt(newBtn.getAttribute('data-level'));
+            
             console.error(`CRITICAL: Attempting to start level: ${level}`);
             
-            // Bind the method to ensure correct 'this' context
-            const boundStartLevel = this.startLevel.bind(this);
-            
-            boundStartLevel(parseInt(level))
+            // Directly call startLevel with error logging
+            this.startLevel(level)
                 .then(() => {
                     console.error(`CRITICAL: Level ${level} started SUCCESSFULLY`);
                 })
                 .catch((error) => {
                     console.error(`CRITICAL: Error starting level ${level}:`, error);
+                    console.error(`CRITICAL: Error stack:`, error.stack);
                 });
-        }, { once: false }); // Ensure listener can be called multiple times
+        });
     });
 }
     
