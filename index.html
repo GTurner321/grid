@@ -50,28 +50,43 @@
         <link rel="modulepreload" href="js/scoreManager.js">
         <link rel="modulepreload" href="js/pathValidator.js">
             
-        <style>
-            .level-buttons {
-                display: flex;
-                justify-content: center;
-                gap: 10px;
-                margin: 20px 0;
-            }
-            
-            .level-btn {
-                cursor: pointer !important;
-                position: relative;
-                z-index: 100;
-                min-width: 80px;
-                padding: 8px 16px;
-            }
-                
-            .game-controls {
-                display: flex;
-                justify-content: center;
-                gap: 10px;
-            }
-        </style>
+        <!-- Add this to your HTML's style section -->
+<style>
+    .level-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 20px 0;
+        position: relative;
+        z-index: 1000;
+    }
+    
+    .level-btn {
+        cursor: pointer !important;
+        position: relative;
+        z-index: 1000 !important;
+        min-width: 80px;
+        padding: 8px 16px;
+        background-color: rgb(34, 197, 94) !important;  /* bg-green-500 */
+        pointer-events: auto !important;
+    }
+
+    /* Force parent containers to pass through events */
+    .level-selector,
+    .game-container {
+        pointer-events: none;
+    }
+    
+    /* But allow events on the buttons container */
+    .level-buttons {
+        pointer-events: auto;
+    }
+
+    /* Add hover effect */
+    .level-btn:hover {
+        background-color: rgb(21, 128, 61) !important;  /* bg-green-700 */
+    }
+</style>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this game.</noscript>
@@ -91,40 +106,40 @@
                 </div>
             </header>
 
-            <section class="level-selector">
-                <div class="level-buttons">
-                    <button 
-                        type="button" 
-                        class="level-btn bg-green-500 hover:bg-green-700 text-white font-bold rounded" 
-                        data-level="1">
-                        Level 1
-                    </button>
-                    <button 
-                        type="button" 
-                        class="level-btn bg-green-500 hover:bg-green-700 text-white font-bold rounded" 
-                        data-level="2">
-                        Level 2
-                    </button>
-                    <button 
-                        type="button" 
-                        class="level-btn bg-green-500 hover:bg-green-700 text-white font-bold rounded" 
-                        data-level="3">
-                        Level 3
-                    </button>
-                    <button 
-                        type="button" 
-                        class="level-btn bg-green-500 hover:bg-green-700 text-white font-bold rounded" 
-                        data-level="4">
-                        Level 4
-                    </button>
-                    <button 
-                        type="button" 
-                        class="level-btn bg-green-500 hover:bg-green-700 text-white font-bold rounded" 
-                        data-level="5">
-                        Level 5
-                    </button>
-                </div>
-            </section>
+<section class="level-selector" style="position: relative; z-index: 1000;">
+    <div class="level-buttons">
+        <button 
+            type="button" 
+            class="level-btn rounded text-white font-bold" 
+            data-level="1">
+            Level 1
+        </button>
+        <button 
+            type="button" 
+            class="level-btn rounded text-white font-bold" 
+            data-level="2">
+            Level 2
+        </button>
+        <button 
+            type="button" 
+            class="level-btn rounded text-white font-bold" 
+            data-level="3">
+            Level 3
+        </button>
+        <button 
+            type="button" 
+            class="level-btn rounded text-white font-bold" 
+            data-level="4">
+            Level 4
+        </button>
+        <button 
+            type="button" 
+            class="level-btn rounded text-white font-bold" 
+            data-level="5">
+            Level 5
+        </button>
+    </div>
+</section>
             
             <!-- Main Game Area -->
             <main class="game-board">
