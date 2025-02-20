@@ -15,51 +15,90 @@ class GameController {
     }
 
     initializeEventListeners() {
-        try {
-            console.log('Setting up event listeners');
-            this.setupGameStartListener();
-            this.setupGameControlButtons();
-            this.gridEventHandler.setupGridInteractions();
-        } catch (error) {
-            console.error('Error setting up event listeners:', error);
-            this.state.showMessage('Error initializing game controls', 'error');
-        }
+    try {
+        console.log('Setting up event listeners');
+        
+        // Add level button setup first
+        this.setupLevelButtons();
+        
+        // Then your existing listeners
+        this.setupGameStartListener();
+        this.setupGameControlButtons();
+        this.gridEventHandler.setupGridInteractions();
+    } catch (error) {
+        console.error('Error setting up event listeners:', error);
+        this.state.showMessage('Error initializing game controls', 'error');
     }
+}
 
-    setupGameStartListener() {
-        window.addEventListener('gameStart', () => {
-            console.log('Game start event received');
-            this.state.gameActive = true;
-            this.state.updateUI();
-            this.state.showMessage('Select a level to begin!', 'info');
+setupLevelButtons() {
+    console.log('Setting up level buttons');
+    const levelButtons = document.querySelectorAll('.level-btn');
+    console.log('Found level buttons:', levelButtons.length);
+
+    levelButtons.forEach(btn => {
+        // Remove any existing listeners
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        newBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const level = parseInt(newBtn.dataset.level);
+            console.log('Level button clicked:', level);
+            
+            // Update active state
+            document.querySelectorAll('.level-btn').forEach(b => {
+                b.classList.remove('active');
+                b.classList.remove('bg-green-700');
+                b.classList.add('bg-green-500');
+            });
+            newBtn.classList.add('active');
+            newBtn.classList.remove('bg-green-500');
+            newBtn.classList.add('bg-green-700');
+            
+            // Start level
+            this.startLevel(level).catch(error => {
+                console.error('Error starting level:', error);
+                this.state.showMessage('Error starting level', 'error');
+            });
+        });
+    });
+}
+
+setupGameStartListener() {
+    window.addEventListener('gameStart', () => {
+        console.log('Game start event received');
+        this.state.gameActive = true;
+        this.state.updateUI();
+        this.state.showMessage('Select a level to begin!', 'info');
+    });
+}
+
+setupGameControlButtons() {
+    this.setupCheckSolutionButton();
+    this.setupRemoveSpareButton();
+}
+
+setupCheckSolutionButton() {
+    const checkSolutionBtn = document.getElementById('check-solution');
+    if (checkSolutionBtn) {
+        checkSolutionBtn.addEventListener('click', () => {
+            console.log('Check solution clicked');
+            this.checkSolution();
         });
     }
+}
 
-    setupGameControlButtons() {
-        this.setupCheckSolutionButton();
-        this.setupRemoveSpareButton();
+setupRemoveSpareButton() {
+    const removeSpareBtn = document.getElementById('remove-spare');
+    if (removeSpareBtn) {
+        removeSpareBtn.addEventListener('click', () => {
+            console.log('Remove spare cells clicked');
+            this.removeAllSpareCells();
+        });
     }
-
-    setupCheckSolutionButton() {
-        const checkSolutionBtn = document.getElementById('check-solution');
-        if (checkSolutionBtn) {
-            checkSolutionBtn.addEventListener('click', () => {
-                console.log('Check solution clicked');
-                this.checkSolution();
-            });
-        }
-    }
-
-    setupRemoveSpareButton() {
-        const removeSpareBtn = document.getElementById('remove-spare');
-        if (removeSpareBtn) {
-            removeSpareBtn.addEventListener('click', () => {
-                console.log('Remove spare cells clicked');
-                this.removeAllSpareCells();
-            });
-        }
-    }
-
+}
+    
     async startLevel(level) {
         console.log(`Starting Level ${level}`);
         try {
