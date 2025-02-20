@@ -357,13 +357,14 @@ async startLevel(level) {
 
 // Initialize game when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.error('DOM CONTENT LOADED - INITIALIZING GAME');
     try {
-        // Create and attach the game controller to window
         const gameController = new GameController();
         window.gameController = gameController;
-        console.log('Game initialized successfully');
+        console.error('Game initialized successfully - VERBOSE');
     } catch (error) {
-        console.error('Error initializing game:', error);
+        console.error('CRITICAL ERROR initializing game:', error);
+        console.error('Error stack:', error.stack);
     }
 });
 
