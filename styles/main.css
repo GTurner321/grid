@@ -32,9 +32,8 @@ body {
 
 /* Score Display */
 .score-display {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+    position: relative; /* Change from absolute to relative */
+    margin-bottom: 20px; /* Add some space */
 }
 
 #score {
