@@ -161,27 +161,14 @@
     
     window.addEventListener('DOMContentLoaded', () => {
         console.log('DOM Loaded - Initializing Game Controller');
+        
+        // Create game controller first
         window.gameController = new GameController();
+        
+        // Then mount React components
         const root = window.ReactDOM.createRoot(document.getElementById('rules-container'));
         root.render(React.createElement(Rules));
-        // Add logging for game start event
-        console.log('Checking game start event listener');
     });
 </script>
-
-<script>
-    console.error('SITE LOADING CHECK');
-    console.error('Current URL:', window.location.href);
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        console.error('DOM CONTENT LOADED');
-        console.error('Level Buttons:', document.querySelectorAll('.level-btn'));
-    });
-
-    window.addEventListener('load', () => {
-        console.error('WINDOW LOADED');
-        console.error('Level Buttons:', document.querySelectorAll('.level-btn'));
-    });
-</script>        
 </body>
 </html>
