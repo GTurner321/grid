@@ -6,102 +6,101 @@ import { validatePath } from './pathValidator.js';
 import GameState from './GameState.js';
 import GridEventHandler from './GridEventHandler.js';
 
-class GameController {
-    constructor() {
-        // Basic initialization
-        console.error('BASIC: GameController constructor start');
-        this.state = new GameState();
-        this.gridEventHandler = new GridEventHandler(this.state);
-        
-        // Wait for DOM to be fully loaded
-        if (document.readyState === 'complete') {
-            this.init();
-        } else {
-            window.addEventListener('load', () => this.init());
-        }
-    }
+// In your GameController class:
 
-    init() {
-        console.error('INIT: Starting initialization');
+constructor() {
+    console.error('Initializing GameController');
+    console.error('Level Buttons:', document.querySelectorAll('.level-btn'));
+    this.state = new GameState();
+    this.gridEventHandler = new GridEventHandler(this.state);
+    this.initializeEventListeners();
+}
+
+initializeEventListeners() {
+    try {
+        console.error('Setting up event listeners');
         
-        // Test direct DOM access
-        const container = document.querySelector('.level-buttons');
-        console.error('Container found:', !!container);
+        // Add level button setup first
+        this.setupLevelButtons();
         
-        // Create fresh buttons programmatically
-        this.createButtons();
-        
-        // Setup other listeners
+        // Then your existing listeners
         this.setupGameStartListener();
         this.setupGameControlButtons();
         this.gridEventHandler.setupGridInteractions();
+    } catch (error) {
+        console.error('Error setting up event listeners:', error);
+        this.state.showMessage('Error initializing game controls', 'error');
     }
+}
 
-    createButtons() {
-        console.error('CREATE: Starting button creation');
-        
-        // Get container
-        const container = document.querySelector('.level-buttons');
-        if (!container) {
-            console.error('ERROR: Button container not found!');
-            return;
-        }
-        
-        // Clear existing buttons
-        container.innerHTML = '';
-        
-        // Create new buttons
-        for (let i = 1; i <= 5; i++) {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'level-btn bg-green-500 hover:bg-green-700 p-2 m-1 transition-colors cursor-pointer';
-            button.dataset.level = i;
-            button.textContent = `Level ${i}`;
-            
-            // Direct event handler
-            button.addEventListener('click', (e) => {
-                console.error(`Direct click on level ${i}`);
-                this.handleLevelClick(i);
-            });
-            
-            container.appendChild(button);
-            console.error(`Created button for level ${i}`);
-            
-            // Test click handler immediately
-            button.addEventListener('click', () => {
-                console.error(`Test click handler for level ${i}`);
-            });
-        }
-        
-        // Add global click handler to container
-        container.addEventListener('click', (e) => {
-            const btn = e.target.closest('.level-btn');
-            if (btn) {
-                const level = parseInt(btn.dataset.level);
-                console.error(`Container caught click for level ${level}`);
-            }
+setupLevelButtons() {
+    console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE');
+    
+    const levelButtons = document.querySelectorAll('.level-btn');
+    console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
+
+    // Debug check for button visibility
+    levelButtons.forEach((btn, index) => {
+        const rect = btn.getBoundingClientRect();
+        console.error(`Button ${index + 1} position:`, {
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+            visible: rect.width > 0 && rect.height > 0
         });
-        
-        // Test click simulation
-        setTimeout(() => {
-            const firstButton = container.querySelector('.level-btn');
-            if (firstButton) {
-                console.error('TEST: Simulating click');
-                firstButton.click();
-            }
-        }, 2000);
-    }
+    });
 
-    handleLevelClick(level) {
-        console.error(`HANDLER: Level ${level} clicked`);
-        try {
+    levelButtons.forEach((btn, index) => {
+        // Force some critical styles
+        btn.style.cssText += `
+            cursor: pointer !important;
+            position: relative !important;
+            z-index: 100 !important;
+        `;
+
+        // Main click handler
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            console.error(`CRITICAL: Button ${index + 1} CLICKED!`);
+            console.error('Button details:', {
+                level: btn.getAttribute('data-level'),
+                text: btn.textContent.trim()
+            });
+
+            const level = parseInt(btn.getAttribute('data-level'));
+            
             this.startLevel(level)
-                .then(() => console.error(`Level ${level} started`))
-                .catch(err => console.error('Level start error:', err));
-        } catch (error) {
-            console.error('Click handler error:', error);
-        }
-    }
+                .then(() => console.error(`Level ${level} started successfully`))
+                .catch(error => console.error(`Error starting level ${level}:`, error));
+        });
+
+        // Debug mouseover
+        btn.addEventListener('mouseover', () => {
+            console.error(`HOVER: Mouse entered button ${index + 1}`);
+            console.error('Button state:', {
+                clickable: window.getComputedStyle(btn).cursor === 'pointer',
+                zIndex: window.getComputedStyle(btn).zIndex,
+                position: window.getComputedStyle(btn).position
+            });
+        });
+    });
+
+    // Test element overlapping
+    setTimeout(() => {
+        levelButtons.forEach((btn, index) => {
+            const rect = btn.getBoundingClientRect();
+            const elements = document.elementsFromPoint(
+                rect.left + rect.width / 2,
+                rect.top + rect.height / 2
+            );
+            console.error(`Button ${index + 1} stack:`, 
+                elements.map(el => `${el.tagName}.${el.className}`));
+        });
+    }, 1000);
+}
 
     setupGameStartListener() {
         window.addEventListener('gameStart', (event) => {
