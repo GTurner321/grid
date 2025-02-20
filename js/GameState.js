@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
 import ScoreBox from './scoreBox.js';
 import { scoreManager } from './scoreManager.js';
 
@@ -15,7 +14,7 @@ class GameState {
         this.gameActive = false;
     }
 
-    reset() {
+    reset() {  // Add here, between constructor and updateUI
         try {
             this.userPath = [];
             this.path = [];
@@ -29,7 +28,7 @@ class GameState {
             console.error('Error resetting game state:', error);
         }
     }
-
+    
     updateUI(options = {}) {
         try {
             console.log('Updating UI - DETAILED', { options });
@@ -39,7 +38,7 @@ class GameState {
             if (scoreComponentElement) {
                 // Create root only once
                 if (!this.scoreRoot) {
-                    this.scoreRoot = ReactDOM.createRoot(scoreComponentElement);
+                    this.scoreRoot = window.ReactDOM.createRoot(scoreComponentElement);
                 }
 
                 // Create the ScoreBox element with all necessary props
@@ -68,7 +67,6 @@ class GameState {
             if (removeSpareBtn) {
                 removeSpareBtn.disabled = !this.gameActive;
                 
-                // Update remove button text based on remaining attempts
                 const spareInfo = scoreManager.getSpareRemovalInfo();
                 
                 if (spareInfo.remainingAttempts === 2) {
@@ -83,14 +81,12 @@ class GameState {
             
             // Update level buttons
             const levelButtons = document.querySelectorAll('.level-btn');
-            
             levelButtons.forEach(btn => {
                 const buttonLevel = parseInt(btn.dataset.level);
                 const isActive = buttonLevel === this.currentLevel;
                 btn.classList.toggle('active', isActive);
             });
 
-            // Handle round completion UI updates
             if (options.roundComplete && options.pointsBreakdown) {
                 this.showMessage(
                     `Congratulations! 
