@@ -46,22 +46,22 @@ setupLevelButtons() {
             e.preventDefault();
             const level = parseInt(newBtn.dataset.level);
             console.log('Level button clicked:', level);
+            console.log('Button element:', newBtn);
+            console.log('Event object:', e);
             
-            // Update active state
-            document.querySelectorAll('.level-btn').forEach(b => {
-                b.classList.remove('active');
-                b.classList.remove('bg-green-700');
-                b.classList.add('bg-green-500');
-            });
-            newBtn.classList.add('active');
-            newBtn.classList.remove('bg-green-500');
-            newBtn.classList.add('bg-green-700');
-            
-            // Start level
-            this.startLevel(level).catch(error => {
-                console.error('Error starting level:', error);
-                this.state.showMessage('Error starting level', 'error');
-            });
+            // Verify method exists and is callable
+            console.log('startLevel method exists:', typeof this.startLevel === 'function');
+
+            // Start level with additional error handling
+            this.startLevel(level)
+                .then(() => {
+                    console.log('Level started successfully');
+                })
+                .catch(error => {
+                    console.error('Detailed error starting level:', error);
+                    console.error('Error stack:', error.stack);
+                    this.state.showMessage('Error starting level. Check console for details.', 'error');
+                });
         });
     });
 }
