@@ -33,21 +33,23 @@ constructor() {
 }
 
 setupLevelButtons() {
-    console.log('CRITICAL: Setting up level buttons');
+    console.error('CRITICAL: Setting up level buttons - VERBOSE DEBUG');
     
     const levelButtons = document.querySelectorAll('.level-btn');
-    console.log(`CRITICAL: Found ${levelButtons.length} level buttons`);
+    console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
 
     levelButtons.forEach((btn, index) => {
-        // Simple alert-based debugging
-        btn.addEventListener('click', () => {
+        // Remove all existing event listeners
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        // Add new event listener with full stop and alert
+        newBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log(`Button ${index + 1} clicked - FULL STOP`);
             alert(`Button ${index + 1} clicked!`);
-        });
-
-        // Also add inline onclick as a backup
-        btn.onclick = () => {
-            console.log(`Button ${index + 1} clicked!`);
-        };
+        }, true);  // Use capture phase
     });
 }
     
