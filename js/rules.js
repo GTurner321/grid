@@ -1,20 +1,21 @@
-window.Rules = (() => {
-  function RulesComponent() {
-    const [isVisible, setIsVisible] = React.useState(true);
-    
-    const handleStart = () => {
-      setIsVisible(false);
-      // Optionally dispatch a game start event
-      window.dispatchEvent(new Event('gameStart'));
-    };
+import React from 'react';
 
-    if (!isVisible) return null;
+export default function RulesComponent() {
+  const [isVisible, setIsVisible] = React.useState(true);
+  
+  const handleStart = () => {
+    setIsVisible(false);
+    // Optionally dispatch a game start event
+    window.dispatchEvent(new Event('gameStart'));
+  };
 
-    return React.createElement(
-      'div',
-      {
-        className: 'fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50'
-      },
+  if (!isVisible) return null;
+  
+  return React.createElement(
+    'div',
+    {
+      className: 'fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50'
+    },
       React.createElement(
         'div',
         {
