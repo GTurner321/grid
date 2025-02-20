@@ -33,32 +33,53 @@ constructor() {
 }
 
 setupLevelButtons() {
-    console.log('DETAILED: Setting up level buttons');
+    console.error('CRITICAL: Setting up level buttons - VERBOSE DEBUG');
+    
+    // Ensure buttons exist
     const levelButtons = document.querySelectorAll('.level-btn');
-    console.log('DETAILED: Found level buttons:', levelButtons.length);
+    console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
+    
+    if (levelButtons.length === 0) {
+        console.error('CRITICAL: NO LEVEL BUTTONS FOUND! Check HTML structure.');
+        return;
+    }
 
-    levelButtons.forEach(btn => {
-        // Remove any existing listeners
+    levelButtons.forEach((btn, index) => {
+        console.error(`CRITICAL: Processing button ${index}:`, btn);
+        
+        // Remove existing listeners
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
         
-        newBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const level = parseInt(newBtn.dataset.level);
-            console.log('DETAILED: Level button clicked:', level);
-            console.log('DETAILED: Button element:', newBtn);
+        // Add click listener with maximum logging
+        newBtn.addEventListener('click', (e) => {
+            console.error('CRITICAL: Level button CLICKED!');
             
-            try {
-                await this.startLevel(level);
-                console.log('DETAILED: Level started successfully');
-            } catch (error) {
-                console.error('DETAILED: Error starting level:', error);
-                this.state.showMessage('Error starting level. Check console for details.', 'error');
+            e.preventDefault();
+            const level = newBtn.getAttribute('data-level');
+            
+            console.error(`CRITICAL: Clicked level: ${level}`);
+            console.error('CRITICAL: Button:', newBtn);
+            console.error('CRITICAL: Event:', e);
+            
+            // Verify startLevel method exists
+            if (typeof this.startLevel !== 'function') {
+                console.error('CRITICAL: startLevel is NOT A FUNCTION!');
+                return;
             }
+
+            // Attempt to start level with error handling
+            this.startLevel(parseInt(level))
+                .then(() => {
+                    console.error('CRITICAL: Level started SUCCESSFULLY');
+                })
+                .catch((error) => {
+                    console.error('CRITICAL: Error starting level:', error);
+                    console.error('CRITICAL: Error stack:', error.stack);
+                });
         });
     });
 }
-
 setupGameStartListener() {
     window.addEventListener('gameStart', () => {
         console.log('Game start event received');
