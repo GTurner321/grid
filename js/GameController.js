@@ -49,38 +49,34 @@ setupLevelButtons() {
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
             
-            // Add new click handler
-            newBtn.onclick = (e) => {
+            // Add new click handler with additional debugging
+            newBtn.onclick = async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
                 console.error(`Direct onclick - Button ${index + 1} clicked`);
                 const level = parseInt(newBtn.dataset.level);
-                this.startLevel(level);
+                console.error('About to call startLevel with:', level);
+                
+                try {
+                    console.error('DEBUG: this context:', this);
+                    console.error('DEBUG: startLevel exists:', typeof this.startLevel);
+                    await this.startLevel(level);
+                    console.error(`Level ${level} started successfully`);
+                } catch (error) {
+                    console.error('Error in click handler:', error);
+                    console.error('Error stack:', error.stack);
+                }
             };
 
-            // Add alternate click handler
-            newBtn.addEventListener('click', (e) => {
-                console.error(`addEventListener - Button ${index + 1} clicked`);
-                e.stopPropagation();
-            }, true);
-
-            // Force button styles
-            newBtn.style.cssText = `
-                cursor: pointer !important;
-                position: relative !important;
-                z-index: 1000 !important;
-                pointer-events: auto !important;
-                background-color: rgb(34, 197, 94) !important;
-            `;
-
-            // Test if button is clickable
-            const rect = newBtn.getBoundingClientRect();
-            const elementAtPoint = document.elementFromPoint(
-                rect.left + rect.width / 2,
-                rect.top + rect.height / 2
-            );
-            console.error(`Button ${index + 1} clickable test:`, {
-                isButtonAtPoint: elementAtPoint === newBtn,
-                elementFound: elementAtPoint ? `${elementAtPoint.tagName}.${elementAtPoint.className}` : 'none',
-                buttonPosition: rect
+            // Debug mouseover
+            newBtn.addEventListener('mouseover', () => {
+                console.error(`HOVER: Mouse entered button ${index + 1}`);
+                console.error('Button state:', {
+                    clickable: window.getComputedStyle(newBtn).cursor === 'pointer',
+                    zIndex: window.getComputedStyle(newBtn).zIndex,
+                    position: window.getComputedStyle(newBtn).position
+                });
             });
         });
     }
