@@ -7,12 +7,30 @@ import GameState from './GameState.js';
 import GridEventHandler from './GridEventHandler.js';
 
 class GameController {
-    constructor() {
-        console.error('Initializing GameController');
-        console.error('Level Buttons:', document.querySelectorAll('.level-btn'));
-        this.state = new GameState();
-        this.gridEventHandler = new GridEventHandler(this.state);
-        this.initializeEventListeners();
+constructor() {
+        console.error('CRITICAL: GameController constructor starting');
+        
+        // Debug instance creation
+        try {
+            this.state = new GameState();
+            this.gridEventHandler = new GridEventHandler(this.state);
+            
+            console.error('Instance created:', {
+                hasState: !!this.state,
+                hasGridHandler: !!this.gridEventHandler,
+                methods: Object.getOwnPropertyNames(Object.getPrototypeOf(this)),
+                startLevelExists: typeof this.startLevel === 'function'
+            });
+            
+            this.initializeEventListeners();
+            
+            // Make instance globally accessible for debugging
+            window._gameController = this;
+            console.error('GameController instance stored in window._gameController');
+        } catch (error) {
+            console.error('CRITICAL: Error in constructor:', error);
+            console.error('Stack:', error.stack);
+        }
     }
 
     initializeEventListeners() {
@@ -35,54 +53,69 @@ class GameController {
 setupLevelButtons() {
         console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE');
         
+        // Store instance reference
+        const self = this;
+        console.error('DEBUG: GameController instance:', self);
+        
         const levelButtons = document.querySelectorAll('.level-btn');
         console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
-
-        // Add a direct click handler to document for debugging
-        document.addEventListener('click', (e) => {
-            console.error('Document clicked at:', e.clientX, e.clientY);
-            console.error('Clicked element:', e.target.tagName, e.target.className);
-        }, true);
-
-        // Bind the click handler to maintain 'this' context
-        const handleClick = async (level, index) => {
-            console.error(`Direct onclick - Button ${index + 1} clicked`);
-            console.error('About to call startLevel with:', level);
-            
-            try {
-                console.error('DEBUG: this context:', this);
-                console.error('DEBUG: startLevel exists:', typeof this.startLevel);
-                await this.startLevel(level);
-                console.error(`Level ${level} started successfully`);
-            } catch (error) {
-                console.error('Error in click handler:', error);
-                console.error('Error stack:', error.stack);
-            }
-        };
 
         levelButtons.forEach((btn, index) => {
             // Remove existing click listeners
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
             
-            // Add new click handler with proper binding
-            newBtn.onclick = (e) => {
+            // Bind click handler directly using arrow function
+            newBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                
+                console.error(`Button ${index + 1} clicked`);
                 const level = parseInt(newBtn.dataset.level);
-                handleClick.call(this, level, index);
-            };
+                console.error('Starting level:', level);
+                
+                try {
+                    // Use the stored instance
+                    if (typeof self.startLevel !== 'function') {
+                        throw new Error('startLevel is not a function');
+                    }
+                    
+                    console.error('GameController instance at click:', self);
+                    console.error('About to call startLevel');
+                    
+                    // Call startLevel on the stored instance
+                    await self.startLevel(level);
+                } catch (err) {
+                    console.error('ERROR in click handler:', {
+                        error: err,
+                        errorName: err.name,
+                        errorMessage: err.message,
+                        stack: err.stack,
+                        self: self,
+                        startLevelType: typeof self.startLevel
+                    });
+                }
+            });
 
-            // Debug mouseover
-            newBtn.addEventListener('mouseover', () => {
-                console.error(`HOVER: Mouse entered button ${index + 1}`);
-                console.error('Button state:', {
-                    clickable: window.getComputedStyle(newBtn).cursor === 'pointer',
-                    zIndex: window.getComputedStyle(newBtn).zIndex,
-                    position: window.getComputedStyle(newBtn).position
-                });
+            // Log initial button setup
+            console.error(`Setup complete for button ${index + 1}`, {
+                level: newBtn.dataset.level,
+                hasClickHandler: typeof newBtn.onclick === 'function'
             });
         });
+
+        // Add global click debugging
+        document.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.matches('.level-btn')) {
+                console.error('Global click handler:', {
+                    element: target,
+                    level: target.dataset.level,
+                    self: self,
+                    hasStartLevel: typeof self.startLevel === 'function'
+                });
+            }
+        }, true);
     }
     
     setupGameStartListener() {
