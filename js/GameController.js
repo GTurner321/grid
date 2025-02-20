@@ -7,13 +7,18 @@ import GameState from './GameState.js';
 import GridEventHandler from './GridEventHandler.js';
 
 class GameController {
-constructor() {
-    console.log('Initializing GameController');
-    console.log('Level Buttons:', document.querySelectorAll('.level-btn'));
-    this.state = new GameState();
-    this.gridEventHandler = new GridEventHandler(this.state);
-    this.initializeEventListeners();
-}
+    constructor() {
+        console.log('Initializing GameController');
+        this.state = new GameState();
+        this.gridEventHandler = new GridEventHandler(this.state);
+        
+        // Only initialize after state is set up
+        requestAnimationFrame(() => {
+            this.initializeEventListeners();
+            // Dispatch game start event after initialization
+            window.dispatchEvent(new CustomEvent('gameStart'));
+        });
+    }
 
     initializeEventListeners() {
     try {
@@ -84,16 +89,18 @@ setupLevelButtons() {
 }
     
 setupGameStartListener() {
-    window.addEventListener('gameStart', (event) => {
-        console.error('CRITICAL: Game Start Event Received');
-        console.error('Event details:', event);
-        console.error('Current Game State:', this.state);
-        
-        this.state.gameActive = true;
-        this.state.updateUI();
-        this.state.showMessage('Select a level to begin!', 'info');
-    });
-}
+        window.addEventListener('gameStart', (event) => {
+            console.error('CRITICAL: Game Start Event Received');
+            console.error('Event details:', event);
+            console.error('Current Game State:', this.state);
+            
+            if (this.state.currentLevel === null) {
+                this.state.gameActive = true;
+                this.state.updateUI();
+                this.state.showMessage('Select a level to begin!', 'info');
+            }
+        });
+    }
 
 setupGameControlButtons() {
     this.setupCheckSolutionButton();
