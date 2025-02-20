@@ -134,6 +134,7 @@ body {
     margin-bottom: 20px;
 }
 
+/* General button styles */
 button {
     padding: 10px 20px;
     font-size: 1rem;
@@ -146,6 +147,7 @@ button {
     display: flex;
     align-items: center;
     gap: 8px;
+    pointer-events: auto;
 }
 
 button:disabled {
@@ -161,12 +163,26 @@ button:disabled {
     margin-bottom: 20px;
 }
 
-.level-btn {
-    background-color: #4b5563;
+.level-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
-.level-btn.active {
-    background-color: var(--primary-color);
+.level-buttons .level-btn {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    min-width: 80px;
+    font-weight: bold;
+}
+
+.level-buttons .level-btn:hover {
+    transform: translateY(-1px);
+}
+
+.level-buttons .level-btn.active {
+    background-color: #166534 !important; /* dark green */
+    transform: translateY(1px);
 }
 
 /* Messages */
