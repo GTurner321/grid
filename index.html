@@ -154,10 +154,18 @@
     <!-- React Component Mounting -->
 <script type="module">
     import GameController from './js/GameController.js';
+    import Rules from './js/rules.js';
     
     window.addEventListener('DOMContentLoaded', () => {
         console.log('DOM Loaded - Initializing Game Controller');
+        console.log('Rules component:', Rules);
+        console.log('ReactDOM:', window.ReactDOM);
+        console.log('Rules container:', document.getElementById('rules-container'));
+        
         window.gameController = new GameController();
+        
+        const root = window.ReactDOM.createRoot(document.getElementById('rules-container'));
+        root.render(React.createElement(Rules));
     });
 </script>
 </body>
