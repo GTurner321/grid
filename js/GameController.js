@@ -44,29 +44,33 @@ setupLevelButtons() {
             console.error('Clicked element:', e.target.tagName, e.target.className);
         }, true);
 
+        // Bind the click handler to maintain 'this' context
+        const handleClick = async (level, index) => {
+            console.error(`Direct onclick - Button ${index + 1} clicked`);
+            console.error('About to call startLevel with:', level);
+            
+            try {
+                console.error('DEBUG: this context:', this);
+                console.error('DEBUG: startLevel exists:', typeof this.startLevel);
+                await this.startLevel(level);
+                console.error(`Level ${level} started successfully`);
+            } catch (error) {
+                console.error('Error in click handler:', error);
+                console.error('Error stack:', error.stack);
+            }
+        };
+
         levelButtons.forEach((btn, index) => {
             // Remove existing click listeners
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
             
-            // Add new click handler with additional debugging
-            newBtn.onclick = async (e) => {
+            // Add new click handler with proper binding
+            newBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                
-                console.error(`Direct onclick - Button ${index + 1} clicked`);
                 const level = parseInt(newBtn.dataset.level);
-                console.error('About to call startLevel with:', level);
-                
-                try {
-                    console.error('DEBUG: this context:', this);
-                    console.error('DEBUG: startLevel exists:', typeof this.startLevel);
-                    await this.startLevel(level);
-                    console.error(`Level ${level} started successfully`);
-                } catch (error) {
-                    console.error('Error in click handler:', error);
-                    console.error('Error stack:', error.stack);
-                }
+                handleClick.call(this, level, index);
             };
 
             // Debug mouseover
