@@ -171,5 +171,19 @@
         root.render(React.createElement(Rules));
     });
 </script>
+<script>
+    console.error('SITE LOADING CHECK');
+    console.error('Current URL:', window.location.href);
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        console.error('DOM CONTENT LOADED');
+        console.error('Level Buttons:', document.querySelectorAll('.level-btn'));
+    });
+
+    window.addEventListener('load', () => {
+        console.error('WINDOW LOADED');
+        console.error('Level Buttons:', document.querySelectorAll('.level-btn'));
+    });
+</script>        
 </body>
 </html>
