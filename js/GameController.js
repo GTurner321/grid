@@ -106,10 +106,11 @@ setupRemoveSpareButton() {
     }
 }
     
-   async startLevel(level) {
-    console.log(`DETAILED: Starting Level ${level}`);
+async startLevel(level) {
+    console.error(`CRITICAL: startLevel method CALLED with level: ${level}`);
+    
     try {
-        console.log('Detailed step-by-step level start:');
+        console.log(`DETAILED: Starting Level ${level}`);
         
         // Reset game state
         console.log('1. Resetting game state...');
