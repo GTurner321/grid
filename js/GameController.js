@@ -33,28 +33,53 @@ constructor() {
 }
 
 setupLevelButtons() {
-    console.error('CRITICAL: Setting up level buttons');
+    console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE');
     
     const levelButtons = document.querySelectorAll('.level-btn');
     console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
 
     levelButtons.forEach((btn, index) => {
-        // Test direct event binding
-        btn.addEventListener('click', (e) => {
-            console.error(`CRITICAL: Button ${index + 1} CLICKED DIRECTLY`);
-            console.error('Button details:', {
-                computedStyle: window.getComputedStyle(btn),
-                pointerEvents: btn.style.pointerEvents,
-                isVisible: btn.offsetParent !== null
-            });
-        });
+        // Remove all existing event listeners
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
 
-        // Additional visibility check
-        console.error(`Button ${index + 1} visibility:`, {
-            display: btn.style.display,
-            visibility: btn.style.visibility,
-            offsetParent: btn.offsetParent !== null
-        });
+        // Multiple event attachment methods
+        newBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            console.error(`CRITICAL: Button ${index + 1} CLICKED!`);
+            console.error('Button details:', {
+                level: newBtn.getAttribute('data-level'),
+                text: newBtn.textContent.trim()
+            });
+
+            const level = parseInt(newBtn.getAttribute('data-level'));
+            
+            // Use setTimeout to ensure logging and to separate event handling
+            setTimeout(() => {
+                this.startLevel(level)
+                    .then(() => console.error(`Level ${level} started successfully`))
+                    .catch(error => console.error(`Error starting level ${level}:`, error));
+            }, 0);
+        }, true);  // Use capture phase
+
+        // Inline onclick backup
+        newBtn.onclick = (e) => {
+            console.error(`INLINE onclick for Button ${index + 1}`);
+        };
+    });
+
+    // Global event delegation as backup
+    document.querySelector('.level-buttons').addEventListener('click', (e) => {
+        const button = e.target.closest('.level-btn');
+        if (button) {
+            console.error('DELEGATION: Level button clicked via delegation');
+            console.error('Delegated button details:', {
+                level: button.getAttribute('data-level'),
+                text: button.textContent.trim()
+            });
+        }
     });
 }
     
