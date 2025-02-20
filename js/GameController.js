@@ -33,35 +33,28 @@ constructor() {
 }
 
 setupLevelButtons() {
-    console.log('Setting up level buttons');
+    console.log('DETAILED: Setting up level buttons');
     const levelButtons = document.querySelectorAll('.level-btn');
-    console.log('Found level buttons:', levelButtons.length);
+    console.log('DETAILED: Found level buttons:', levelButtons.length);
 
     levelButtons.forEach(btn => {
         // Remove any existing listeners
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
         
-        newBtn.addEventListener('click', (e) => {
+        newBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             const level = parseInt(newBtn.dataset.level);
-            console.log('Level button clicked:', level);
-            console.log('Button element:', newBtn);
-            console.log('Event object:', e);
+            console.log('DETAILED: Level button clicked:', level);
+            console.log('DETAILED: Button element:', newBtn);
             
-            // Verify method exists and is callable
-            console.log('startLevel method exists:', typeof this.startLevel === 'function');
-
-            // Start level with additional error handling
-            this.startLevel(level)
-                .then(() => {
-                    console.log('Level started successfully');
-                })
-                .catch(error => {
-                    console.error('Detailed error starting level:', error);
-                    console.error('Error stack:', error.stack);
-                    this.state.showMessage('Error starting level. Check console for details.', 'error');
-                });
+            try {
+                await this.startLevel(level);
+                console.log('DETAILED: Level started successfully');
+            } catch (error) {
+                console.error('DETAILED: Error starting level:', error);
+                this.state.showMessage('Error starting level. Check console for details.', 'error');
+            }
         });
     });
 }
