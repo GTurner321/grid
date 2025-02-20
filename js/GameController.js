@@ -8,6 +8,7 @@ import GridEventHandler from './GridEventHandler.js';
 
 class GameController {
     constructor() {
+        console.log('Initializing GameController');
         this.state = new GameState();
         this.gridEventHandler = new GridEventHandler(this.state);
         this.initializeEventListeners();
@@ -15,8 +16,8 @@ class GameController {
 
     initializeEventListeners() {
         try {
+            console.log('Setting up event listeners');
             this.setupGameStartListener();
-            this.setupLevelButtons();
             this.setupGameControlButtons();
             this.gridEventHandler.setupGridInteractions();
         } catch (error) {
@@ -27,25 +28,10 @@ class GameController {
 
     setupGameStartListener() {
         window.addEventListener('gameStart', () => {
+            console.log('Game start event received');
             this.state.gameActive = true;
             this.state.updateUI();
             this.state.showMessage('Select a level to begin!', 'info');
-        });
-        window.dispatchEvent(new Event('gameStart'));
-    }
-
-    setupLevelButtons() {
-        const levelButtons = document.querySelectorAll('.level-btn');
-        levelButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const level = parseInt(btn.dataset.level);
-                try {
-                    this.startLevel(level);
-                } catch (error) {
-                    console.error(`Error starting level ${level}:`, error);
-                    this.state.showMessage(`Error starting level ${level}`, 'error');
-                }
-            });
         });
     }
 
@@ -57,57 +43,78 @@ class GameController {
     setupCheckSolutionButton() {
         const checkSolutionBtn = document.getElementById('check-solution');
         if (checkSolutionBtn) {
-            checkSolutionBtn.addEventListener('click', () => this.checkSolution());
+            checkSolutionBtn.addEventListener('click', () => {
+                console.log('Check solution clicked');
+                this.checkSolution();
+            });
         }
     }
 
     setupRemoveSpareButton() {
         const removeSpareBtn = document.getElementById('remove-spare');
         if (removeSpareBtn) {
-            removeSpareBtn.addEventListener('click', () => this.removeAllSpareCells());
+            removeSpareBtn.addEventListener('click', () => {
+                console.log('Remove spare cells clicked');
+                this.removeAllSpareCells();
+            });
         }
     }
 
     async startLevel(level) {
+        console.log(`Starting Level ${level}`);
         try {
+            // Reset and initialize game state
             this.state.reset();
             this.state.currentLevel = level;
             this.state.gameActive = true;
 
+            // Initialize scoring
             scoreManager.initializeLevel(level);
+
+            // Generate path and sequence
+            console.log('Generating path...');
+            this.state.path = await generatePath();
+            console.log('Path generated:', this.state.path);
+
+            console.log('Generating sequence...');
+            this.state.sequence = await generateSequence(level);
+            console.log('Sequence generated:', this.state.sequence);
             
-            await this.generateLevelContent(level);
-            this.setupLevel();
-            
+            // Convert sequence to entries
+            this.state.sequenceEntries = sequenceToEntries(this.state.sequence);
+            console.log('Sequence entries:', this.state.sequenceEntries);
+
+            // Place entries and render grid
+            this.placeMathSequence();
+            this.fillRemainingCells();
+
+            // Make sequence container visible
+            const sequenceContainer = document.querySelector('.sequence-container');
+            if (sequenceContainer) {
+                sequenceContainer.style.display = 'block';
+            }
+
+            // Render grid with start/end coordinates
+            renderGrid(this.state.gridEntries, {
+                startCoord: this.state.path[0],
+                endCoord: this.state.path[this.state.path.length - 1]
+            });
+
+            // Display sequence sums
+            this.displaySequenceSums();
+
+            // Update UI
+            this.state.updateUI({
+                resetScores: true,
+                preserveTotalScore: true
+            });
+
             this.state.showMessage('Game started! Find the path by following the mathematical sequence.');
         } catch (error) {
             console.error('Error starting level:', error);
             this.state.showMessage('Error starting game. Please try again.', 'error');
+            throw error;
         }
-    }
-
-    async generateLevelContent(level) {
-        this.state.path = await generatePath();
-        this.state.sequence = await generateSequence(level);
-        this.state.sequenceEntries = sequenceToEntries(this.state.sequence);
-    }
-
-    setupLevel() {
-        this.placeMathSequence();
-        this.fillRemainingCells();
-        
-        renderGrid(this.state.gridEntries, {
-            startCoord: this.state.path[0],
-            endCoord: this.state.path[this.state.path.length - 1]
-        });
-
-        this.displaySequenceSums();
-        debugGridInfo(this.state.gridEntries);
-
-        this.state.updateUI({
-            resetScores: true,
-            preserveTotalScore: true
-        });
     }
 
     displaySequenceSums() {
@@ -224,10 +231,7 @@ class GameController {
             updateCell(cellIndex, null);
         });
 
-        this.state.showMessage(
-            `Removed ${cellsToRemove.length} spare cells (50%). One more removal available.`, 
-            'info'
-        );
+        this.state.showMessage(`Removed ${cellsToRemove.length} spare cells (50%). One more removal available.`, 'info');
     }
 
     handleSecondRemoval(spareCells) {
@@ -236,10 +240,7 @@ class GameController {
             updateCell(cellIndex, null);
         });
 
-        this.state.showMessage(
-            `Removed remaining ${spareCells.length} spare cells. No more removals available.`, 
-            'info'
-        );
+        this.state.showMessage(`Removed remaining ${spareCells.length} spare cells. No more removals available.`, 'info');
     }
 
     checkSolution() {
@@ -300,5 +301,33 @@ class GameController {
         });
     }
 }
+
+// Initialize game when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // Create and attach the game controller to window
+        const gameController = new GameController();
+        window.gameController = gameController;
+
+        // Set up level button listeners explicitly
+        const levelButtons = document.querySelectorAll('.level-btn');
+        levelButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const level = parseInt(e.target.dataset.level);
+                console.log('Level button clicked:', level);
+                if (gameController && gameController.startLevel) {
+                    gameController.startLevel(level)
+                        .catch(error => console.error('Error starting level:', error));
+                } else {
+                    console.error('GameController not properly initialized');
+                }
+            });
+        });
+
+        console.log('Game initialized successfully');
+    } catch (error) {
+        console.error('Error initializing game:', error);
+    }
+});
 
 export default GameController;
