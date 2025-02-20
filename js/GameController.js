@@ -7,12 +7,13 @@ import GameState from './GameState.js';
 import GridEventHandler from './GridEventHandler.js';
 
 class GameController {
-    constructor() {
-        console.log('Initializing GameController');
-        this.state = new GameState();
-        this.gridEventHandler = new GridEventHandler(this.state);
-        this.initializeEventListeners();
-    }
+constructor() {
+    console.log('Initializing GameController');
+    console.log('Level Buttons:', document.querySelectorAll('.level-btn'));
+    this.state = new GameState();
+    this.gridEventHandler = new GridEventHandler(this.state);
+    this.initializeEventListeners();
+}
 
     initializeEventListeners() {
     try {
