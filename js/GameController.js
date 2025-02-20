@@ -347,22 +347,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create and attach the game controller to window
         const gameController = new GameController();
         window.gameController = gameController;
-
-        // Set up level button listeners explicitly
-        const levelButtons = document.querySelectorAll('.level-btn');
-        levelButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const level = parseInt(e.target.dataset.level);
-                console.log('Level button clicked:', level);
-                if (gameController && gameController.startLevel) {
-                    gameController.startLevel(level)
-                        .catch(error => console.error('Error starting level:', error));
-                } else {
-                    console.error('GameController not properly initialized');
-                }
-            });
-        });
-
         console.log('Game initialized successfully');
     } catch (error) {
         console.error('Error initializing game:', error);
