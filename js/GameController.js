@@ -128,11 +128,20 @@ setupLevelButtons() {
         console.error(`CRITICAL: startLevel method CALLED with level: ${level}`);
         
         try {
+            // Debug check state and imports
+            console.error('DEBUG: Checking state and imports', {
+                state: this.state,
+                generatePath: typeof generatePath,
+                generateSequence: typeof generateSequence,
+                gridContainer: document.getElementById('grid-container')
+            });
+            
             console.log(`DETAILED: Starting Level ${level}`);
             
             // Reset game state
             console.log('1. Resetting game state...');
             this.state.reset();
+            console.error('DEBUG: State after reset:', this.state);
             
             // Set current level
             console.log('2. Setting current level...');
@@ -146,20 +155,22 @@ setupLevelButtons() {
             console.log('4. Initializing scoring...');
             scoreManager.initializeLevel(level);
 
-            // Generate path
+            // Generate path with debug
             console.log('5. Generating path...');
+            console.error('DEBUG: About to call generatePath');
             this.state.path = await generatePath();
-            console.log('Path generated:', this.state.path);
+            console.error('DEBUG: Path generated:', this.state.path);
 
-            // Generate sequence
+            // Generate sequence with debug
             console.log('6. Generating sequence...');
+            console.error('DEBUG: About to call generateSequence with level:', level);
             this.state.sequence = await generateSequence(level);
-            console.log('Sequence generated:', this.state.sequence);
+            console.error('DEBUG: Sequence generated:', this.state.sequence);
             
             // Convert sequence to entries
             console.log('7. Converting sequence to entries...');
             this.state.sequenceEntries = sequenceToEntries(this.state.sequence);
-            console.log('Sequence entries:', this.state.sequenceEntries);
+            console.error('DEBUG: Sequence entries:', this.state.sequenceEntries);
 
             // Place math sequence
             console.log('8. Placing math sequence...');
@@ -172,12 +183,19 @@ setupLevelButtons() {
             // Make sequence container visible
             console.log('10. Making sequence container visible...');
             const sequenceContainer = document.querySelector('.sequence-container');
+            console.error('DEBUG: Sequence container found:', !!sequenceContainer);
             if (sequenceContainer) {
                 sequenceContainer.style.display = 'block';
             }
 
-            // Render grid
+            // Render grid with debug
             console.log('11. Rendering grid...');
+            console.error('DEBUG: Grid data before render:', {
+                entries: this.state.gridEntries,
+                startCoord: this.state.path[0],
+                endCoord: this.state.path[this.state.path.length - 1]
+            });
+            
             renderGrid(this.state.gridEntries, {
                 startCoord: this.state.path[0],
                 endCoord: this.state.path[this.state.path.length - 1]
@@ -202,11 +220,16 @@ setupLevelButtons() {
         } catch (error) {
             console.error('DETAILED Error starting level:', error);
             console.error('Error stack:', error.stack);
+            console.error('DEBUG: Error context:', {
+                state: this.state,
+                level: level,
+                gridContainer: document.getElementById('grid-container')
+            });
             this.state.showMessage('Error starting game. Please try again.', 'error');
             throw error;
         }
     }
-
+    
     displaySequenceSums() {
         const sumsContainer = document.getElementById('sequence-sums');
         if (sumsContainer) {
