@@ -6,15 +6,14 @@ import { validatePath } from './pathValidator.js';
 import GameState from './GameState.js';
 import GridEventHandler from './GridEventHandler.js';
 
-// In your GameController class:
-
-constructor() {
-    console.error('Initializing GameController');
-    console.error('Level Buttons:', document.querySelectorAll('.level-btn'));
-    this.state = new GameState();
-    this.gridEventHandler = new GridEventHandler(this.state);
-    this.initializeEventListeners();
-}
+class GameController {
+    constructor() {
+        console.error('Initializing GameController');
+        console.error('Level Buttons:', document.querySelectorAll('.level-btn'));
+        this.state = new GameState();
+        this.gridEventHandler = new GridEventHandler(this.state);
+        this.initializeEventListeners();
+    }
 
 initializeEventListeners() {
     try {
