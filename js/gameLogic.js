@@ -11,6 +11,19 @@ import { validatePath } from './pathValidator.js';
 
 console.log('🎮 GameLogic.js Loaded Successfully');
 
+import React from 'react';
+import ReactDOM from 'react-dom';
+const createRoot = ReactDOM.createRoot;
+
+import ScoreBox from './scoreBox.js';
+import { generatePath } from './pathGenerator.js';
+import { generateSequence, sequenceToEntries, formatNumber } from './sequenceGenerator.js';
+import { renderGrid, updateCell, debugGridInfo } from './gridRenderer.js';
+import { scoreManager } from './scoreManager.js';
+import { validatePath } from './pathValidator.js';
+
+console.log('🎮 GameLogic.js Loaded Successfully');
+
 class GameState {
     constructor() {
         this.currentLevel = null;
@@ -38,98 +51,100 @@ class GameState {
         }
     }
 
-updateUI(options = {}) {
-    try {
-        console.log('🖥️ Updating UI - DETAILED', { options });
-        
-        const scoreComponentElement = document.getElementById('score-component');
-        
-        if (scoreComponentElement) {
-            // Create root only once
-            if (!this.scoreRoot) {
-                this.scoreRoot = createRoot(scoreComponentElement);
+    updateUI(options = {}) {
+        try {
+            console.log('🖥️ Updating UI - DETAILED', { options });
+            
+            const scoreComponentElement = document.getElementById('score-component');
+            
+            if (scoreComponentElement) {
+                // Create root only once
+                if (!this.scoreRoot) {
+                    this.scoreRoot = createRoot(scoreComponentElement);
+                }
+
+                // Create the ScoreBox element with all necessary props
+                const scoreElement = React.createElement(ScoreBox, {
+                    level: this.currentLevel,
+                    possiblePoints: scoreManager.maxLevelPoints,
+                    spareRemovalCount: scoreManager.spareRemovalCount,
+                    checkCount: scoreManager.checkCount,
+                    startTime: scoreManager.puzzleStartTime,
+                    isComplete: options.roundComplete || false,
+                    totalScore: scoreManager.totalScore
+                });
+
+                // Render the score component
+                this.scoreRoot.render(scoreElement);
             }
-
-            // Create the ScoreBox element with all necessary props
-            const scoreElement = React.createElement(ScoreBox, {
-                level: this.currentLevel,
-                possiblePoints: scoreManager.maxLevelPoints,
-                spareRemovalCount: scoreManager.spareRemovalCount,
-                checkCount: scoreManager.checkCount,
-                startTime: scoreManager.puzzleStartTime,
-                isComplete: options.roundComplete || false,
-                totalScore: scoreManager.totalScore
-            });
-
-            // Render the score component
-            this.scoreRoot.render(scoreElement);
-        }
-        
-        // Update button states
-        const checkSolutionBtn = document.getElementById('check-solution');
-        const removeSpareBtn = document.getElementById('remove-spare');
-        
-        if (checkSolutionBtn) {
-            checkSolutionBtn.disabled = !this.gameActive;
-            console.log('Check Solution Button:', {
-                disabled: checkSolutionBtn.disabled,
-                gameActive: this.gameActive
-            });
-        }
-        
-        if (removeSpareBtn) {
-            removeSpareBtn.disabled = !this.gameActive;
             
-            // Update remove button text based on remaining attempts
-            const spareInfo = scoreManager.getSpareRemovalInfo();
-            console.log('Spare Removal Info:', spareInfo);
+            // Update button states
+            const checkSolutionBtn = document.getElementById('check-solution');
+            const removeSpareBtn = document.getElementById('remove-spare');
             
-            if (spareInfo.remainingAttempts === 2) {
-                removeSpareBtn.textContent = 'Remove 50% of Spare Cells';
-            } else if (spareInfo.remainingAttempts === 1) {
-                removeSpareBtn.textContent = 'Remove Remaining Spare Cells';
-            } else {
-                removeSpareBtn.textContent = 'No More Removals';
-                removeSpareBtn.disabled = true;
+            if (checkSolutionBtn) {
+                checkSolutionBtn.disabled = !this.gameActive;
             }
-        }
-        
-        // Update level buttons
-        const levelButtons = document.querySelectorAll('.level-btn');
-        console.log('Total Level Buttons:', levelButtons.length);
-        
-        levelButtons.forEach(btn => {
-            const buttonLevel = parseInt(btn.dataset.level);
-            const isActive = buttonLevel === this.currentLevel;
             
-            btn.classList.toggle('active', isActive);
+            if (removeSpareBtn) {
+                removeSpareBtn.disabled = !this.gameActive;
+                
+                // Update remove button text based on remaining attempts
+                const spareInfo = scoreManager.getSpareRemovalInfo();
+                
+                if (spareInfo.remainingAttempts === 2) {
+                    removeSpareBtn.textContent = 'Remove 50% of Spare Cells';
+                } else if (spareInfo.remainingAttempts === 1) {
+                    removeSpareBtn.textContent = 'Remove Remaining Spare Cells';
+                } else {
+                    removeSpareBtn.textContent = 'No More Removals';
+                    removeSpareBtn.disabled = true;
+                }
+            }
             
-            console.log('Level Button:', {
-                level: buttonLevel,
-                isActive: isActive,
-                currentLevel: this.currentLevel
+            // Update level buttons
+            const levelButtons = document.querySelectorAll('.level-btn');
+            
+            levelButtons.forEach(btn => {
+                const buttonLevel = parseInt(btn.dataset.level);
+                const isActive = buttonLevel === this.currentLevel;
+                btn.classList.toggle('active', isActive);
             });
-        });
 
-        // Handle round completion UI updates
-        if (options.roundComplete && options.pointsBreakdown) {
-            console.log('Round Complete Points Breakdown:', options.pointsBreakdown);
+            // Handle round completion UI updates
+            if (options.roundComplete && options.pointsBreakdown) {
+                this.showMessage(
+                    `Congratulations! 
+                    Remaining Points: ${options.pointsBreakdown.remainingPoints}
+                    Bonus Points: ${options.pointsBreakdown.bonusPoints}
+                    Total Puzzle Points: ${options.pointsBreakdown.totalPuzzlePoints}
+                    Total Score: ${options.pointsBreakdown.totalScore}`, 
+                    'success'
+                );
+            }
             
-            this.showMessage(
-                `Congratulations! 
-                Remaining Points: ${options.pointsBreakdown.remainingPoints}
-                Bonus Points: ${options.pointsBreakdown.bonusPoints}
-                Total Puzzle Points: ${options.pointsBreakdown.totalPuzzlePoints}
-                Total Score: ${options.pointsBreakdown.totalScore}`, 
-                'success'
-            );
+        } catch (error) {
+            console.error('❌ COMPLETE Error updating UI:', error);
+            this.showMessage('Error updating game display', 'error');
         }
-        
-    } catch (error) {
-        console.error('❌ COMPLETE Error updating UI:', error);
-        
-        // Fallback error message
-        this.showMessage('Error updating game display', 'error');
+    }
+
+    showMessage(message, type = 'info') {
+        try {
+            const messageElement = document.getElementById('game-messages');
+            if (messageElement) {
+                messageElement.textContent = message;
+                messageElement.className = type;
+                
+                // Clear message after 3 seconds
+                setTimeout(() => {
+                    messageElement.textContent = '';
+                    messageElement.className = '';
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('Error showing message:', error);
+        }
     }
 }
     
