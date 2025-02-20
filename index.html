@@ -153,11 +153,13 @@
     <script src="js/rules.js"></script>
     
     <!-- React Component Mounting -->
-    <script>
-      window.addEventListener('load', function() {
-        const root = ReactDOM.createRoot(document.getElementById('rules-container'));
-        root.render(React.createElement(Rules));
-      });
-    </script>
+<script type="module">
+    import GameController from './js/GameController.js';
+    
+    window.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM Loaded - Initializing Game Controller');
+        window.gameController = new GameController();
+    });
+</script>
 </body>
 </html>
