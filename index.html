@@ -9,29 +9,29 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
     
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom": "https://esm.sh/react-dom@18.2.0"
-  }
-}
-</script>
-<script type="module">
-  import React from 'react';
-  import ReactDOM from 'react-dom';
-  window.React = React;
-  window.ReactDOM = ReactDOM;
-</script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    content: [
-      "./index.html",
-      "./js/*.js"
-    ]
-  }
-</script>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom": "https://esm.sh/react-dom@18.2.0"
+      }
+    }
+    </script>
+    <script type="module">
+      import React from 'react';
+      import ReactDOM from 'react-dom';
+      window.React = React;
+      window.ReactDOM = ReactDOM;
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        content: [
+          "./index.html",
+          "./js/*.js"
+        ]
+      }
+    </script>
         
     <!-- Preload critical resources -->
     <link rel="preload" href="styles/main.css" as="style">
@@ -40,11 +40,15 @@
     <link rel="stylesheet" href="styles/main.css">
     
     <!-- Module Preloading -->
-    <link rel="modulepreload" href="js/gameLogic.js">
+    <link rel="modulepreload" href="js/GameController.js">
+    <link rel="modulepreload" href="js/GameState.js">
+    <link rel="modulepreload" href="js/GridEventHandler.js">
     <link rel="modulepreload" href="js/pathGenerator.js">
     <link rel="modulepreload" href="js/sequenceGenerator.js">
     <link rel="modulepreload" href="js/gridRenderer.js">
     <link rel="modulepreload" href="js/scoreBox.js">
+    <link rel="modulepreload" href="js/scoreManager.js">
+    <link rel="modulepreload" href="js/pathValidator.js">
         
     <style>
         .level-buttons {
@@ -78,15 +82,14 @@
             </div>
         </header>
 
-<section class="level-selector">
-    <div class="level-buttons bg-blue-500 text-white p-4">
-        <button class="level-btn bg-green-500 p-2 m-1" data-level="1">Level 1</button>
-        <button class="level-btn bg-green-500 p-2 m-1" data-level="2">Level 2</button>
-        <button class="level-btn bg-green-500 p-2 m-1" data-level="3">Level 3</button>
-        <button class="level-btn bg-green-500 p-2 m-1" data-level="4">Level 4</button>
-        <button class="level-btn bg-green-500 p-2 m-1" data-level="5">Level 5</button>
-    </div>
-            
+        <section class="level-selector">
+            <div class="level-buttons bg-blue-500 text-white p-4">
+                <button class="level-btn bg-green-500 p-2 m-1" data-level="1">Level 1</button>
+                <button class="level-btn bg-green-500 p-2 m-1" data-level="2">Level 2</button>
+                <button class="level-btn bg-green-500 p-2 m-1" data-level="3">Level 3</button>
+                <button class="level-btn bg-green-500 p-2 m-1" data-level="4">Level 4</button>
+                <button class="level-btn bg-green-500 p-2 m-1" data-level="5">Level 5</button>
+            </div>
         </section>
 
         <!-- Main Game Area -->
@@ -122,20 +125,24 @@
         </main>
         
     <!-- Game Modules -->
-    <script type="module" src="js/gameLogic.js"></script>
+    <script type="module" src="js/GameController.js"></script>
+    <script type="module" src="js/GameState.js"></script>
+    <script type="module" src="js/GridEventHandler.js"></script>
     <script type="module" src="js/pathGenerator.js"></script>
     <script type="module" src="js/sequenceGenerator.js"></script>
     <script type="module" src="js/gridRenderer.js"></script>
     <script type="module" src="js/scoreBox.js"></script>
+    <script type="module" src="js/scoreManager.js"></script>
+    <script type="module" src="js/pathValidator.js"></script>
 
     <script src="js/rules.js"></script>
     
     <!-- React Component Mounting -->
-<script>
-  window.addEventListener('load', function() {
-    const root = ReactDOM.createRoot(document.getElementById('rules-container'));
-    root.render(React.createElement(Rules));
-  });
-</script>
+    <script>
+      window.addEventListener('load', function() {
+        const root = ReactDOM.createRoot(document.getElementById('rules-container'));
+        root.render(React.createElement(Rules));
+      });
+    </script>
 </body>
 </html>
