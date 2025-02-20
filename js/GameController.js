@@ -15,24 +15,24 @@ class GameController {
         this.initializeEventListeners();
     }
 
-initializeEventListeners() {
-    try {
-        console.error('Setting up event listeners');
-        
-        // Add level button setup first
-        this.setupLevelButtons();
-        
-        // Then your existing listeners
-        this.setupGameStartListener();
-        this.setupGameControlButtons();
-        this.gridEventHandler.setupGridInteractions();
-    } catch (error) {
-        console.error('Error setting up event listeners:', error);
-        this.state.showMessage('Error initializing game controls', 'error');
+    initializeEventListeners() {
+        try {
+            console.error('Setting up event listeners');
+            
+            // Add level button setup first
+            this.setupLevelButtons();
+            
+            // Then your existing listeners
+            this.setupGameStartListener();
+            this.setupGameControlButtons();
+            this.gridEventHandler.setupGridInteractions();
+        } catch (error) {
+            console.error('Error setting up event listeners:', error);
+            this.state.showMessage('Error initializing game controls', 'error');
+        }
     }
-}
 
-setupLevelButtons() {
+    setupLevelButtons() {
     console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE');
     
     const levelButtons = document.querySelectorAll('.level-btn');
