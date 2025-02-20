@@ -39,13 +39,20 @@ setupLevelButtons() {
     console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
 
     levelButtons.forEach((btn, index) => {
-        // Remove all existing event listeners
+        // Log button details before modification
+        console.error(`CRITICAL: Original Button ${index + 1} details:`, {
+            hasClickListener: btn.onclick !== null,
+            eventListeners: getEventListeners(btn),
+            attributes: btn.attributes
+        });
+
+        // Completely remove existing listeners and attributes
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
         
-        // Add new event listener with explicit logging
-        newBtn.addEventListener('click', (e) => {
-            console.error(`CRITICAL: Level Button ${index + 1} CLICKED!`);
+        // Add explicit click handler
+        newBtn.onclick = (e) => {
+            console.error(`CRITICAL: Level Button ${index + 1} ONCLICK TRIGGERED!`);
             console.error(`CRITICAL: Button details:`, {
                 level: newBtn.getAttribute('data-level'),
                 text: newBtn.textContent,
@@ -59,15 +66,22 @@ setupLevelButtons() {
             
             console.error(`CRITICAL: Attempting to start level: ${level}`);
             
-            // Directly call startLevel with error logging
-            this.startLevel(level)
-                .then(() => {
-                    console.error(`CRITICAL: Level ${level} started SUCCESSFULLY`);
-                })
-                .catch((error) => {
-                    console.error(`CRITICAL: Error starting level ${level}:`, error);
-                    console.error(`CRITICAL: Error stack:`, error.stack);
-                });
+            // Use setTimeout to ensure logging happens
+            setTimeout(() => {
+                this.startLevel(level)
+                    .then(() => {
+                        console.error(`CRITICAL: Level ${level} started SUCCESSFULLY`);
+                    })
+                    .catch((error) => {
+                        console.error(`CRITICAL: Error starting level ${level}:`, error);
+                        console.error(`CRITICAL: Error stack:`, error.stack);
+                    });
+            }, 0);
+        };
+
+        // Add event listener as a backup
+        newBtn.addEventListener('click', (e) => {
+            console.error(`CRITICAL: Level Button EVENT LISTENER TRIGGERED!`);
         });
     });
 }
