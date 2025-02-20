@@ -33,23 +33,48 @@ constructor() {
 }
 
 setupLevelButtons() {
-    console.error('CRITICAL: Setting up level buttons - VERBOSE DEBUG');
+    console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE DEBUG');
     
     const levelButtons = document.querySelectorAll('.level-btn');
     console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
 
     levelButtons.forEach((btn, index) => {
+        // Log initial button state
+        console.error(`CRITICAL: Button ${index + 1} initial state:`, {
+            element: btn,
+            dataLevel: btn.getAttribute('data-level'),
+            hasClickListener: btn.onclick !== null
+        });
+
         // Remove all existing event listeners
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
-        
-        // Add new event listener with full stop and alert
+
+        // Add multiple event listeners
         newBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
             e.preventDefault();
-            console.log(`Button ${index + 1} clicked - FULL STOP`);
-            alert(`Button ${index + 1} clicked!`);
-        }, true);  // Use capture phase
+            e.stopPropagation();
+
+            console.error(`CRITICAL: Level Button ${index + 1} CLICKED!`);
+            
+            const level = newBtn.getAttribute('data-level');
+            console.error(`CRITICAL: Attempting to start level: ${level}`);
+
+            // Directly call startLevel method
+            this.startLevel(parseInt(level))
+                .then(() => {
+                    console.error(`CRITICAL: Level ${level} started SUCCESSFULLY`);
+                })
+                .catch((error) => {
+                    console.error(`CRITICAL: Error starting level ${level}:`, error);
+                    console.error(`CRITICAL: Error stack:`, error.stack);
+                });
+        });
+
+        // Add inline onclick as a backup
+        newBtn.onclick = (e) => {
+            console.error(`CRITICAL: Inline onclick triggered for button ${index + 1}`);
+        };
     });
 }
     
