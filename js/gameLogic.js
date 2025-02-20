@@ -11,10 +11,6 @@ import { validatePath } from './pathValidator.js';
 
 console.log('🎮 GameLogic.js Loaded Successfully');
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-const createRoot = ReactDOM.createRoot;
-
 import ScoreBox from './scoreBox.js';
 import { generatePath } from './pathGenerator.js';
 import { generateSequence, sequenceToEntries, formatNumber } from './sequenceGenerator.js';
@@ -24,6 +20,7 @@ import { validatePath } from './pathValidator.js';
 
 console.log('🎮 GameLogic.js Loaded Successfully');
 
+// Game state management class
 class GameState {
     constructor() {
         this.currentLevel = null;
