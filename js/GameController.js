@@ -84,8 +84,11 @@ setupLevelButtons() {
 }
     
 setupGameStartListener() {
-    window.addEventListener('gameStart', () => {
-        console.log('Game start event received');
+    window.addEventListener('gameStart', (event) => {
+        console.error('CRITICAL: Game Start Event Received');
+        console.error('Event details:', event);
+        console.error('Current Game State:', this.state);
+        
         this.state.gameActive = true;
         this.state.updateUI();
         this.state.showMessage('Select a level to begin!', 'info');
