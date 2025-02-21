@@ -64,7 +64,7 @@ class GridEventHandler {
     }
 
 setupGridInteractions() {
-    console.error('🔍 ULTRA AGGRESSIVE Grid Interactions Setup');
+    console.error('🔍 ULTRA VERBOSE Grid Interactions Setup');
     
     const gridContainer = document.getElementById('grid-container');
     if (!gridContainer) {
@@ -72,59 +72,56 @@ setupGridInteractions() {
         return;
     }
 
-    // Clear ALL existing event listeners
+    console.error('Grid Container Details:', {
+        innerHTML: gridContainer.innerHTML,
+        childElementCount: gridContainer.children.length
+    });
+
     const gridCells = gridContainer.querySelectorAll('.grid-cell');
     console.error(`🧩 Found ${gridCells.length} Grid Cells`);
 
     gridCells.forEach((cell, index) => {
-        // Remove ALL existing event listeners
+        // Comprehensive cell verification
+        console.error(`Cell ${index} Detailed Inspection:`, {
+            hasGridCellClass: cell.classList.contains('grid-cell'),
+            dataIndex: cell.dataset.index,
+            hasExistingClickListeners: !!cell.onclick
+        });
+
+        // Remove all existing event listeners
         const cellClone = cell.cloneNode(true);
         cell.parentNode.replaceChild(cellClone, cell);
 
-        // Add multiple event listeners with different methods
+        // Multiple event listener approaches
         cellClone.addEventListener('click', (event) => {
             event.stopPropagation();
             event.preventDefault();
             
-            console.error(`🎯 DIRECT CELL CLICK - Method 1`, {
+            console.error(`🎯 CELL CLICK - Method 1`, {
                 cellIndex: cellClone.dataset.index,
-                event: event
+                target: event.target,
+                currentTarget: event.currentTarget
             });
             
             this.handleCellClick(cellClone);
-        }, false);
+        }, true);
 
         cellClone.onclick = (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            
-            console.error(`🎯 DIRECT CELL CLICK - Method 2`, {
-                cellIndex: cellClone.dataset.index,
-                event: event
+            console.error(`🎯 CELL CLICK - Method 2`, {
+                cellIndex: cellClone.dataset.index
             });
-            
             this.handleCellClick(cellClone);
         };
-
-        console.error(`Cell ${index} Detailed Inspection:`, {
-            dataset: cellClone.dataset,
-            index: cellClone.dataset.index,
-            classList: Array.from(cellClone.classList)
-        });
     });
 
-    // Add global fallback listener
+    // Global fallback listener
     document.addEventListener('click', (event) => {
         const cell = event.target.closest('.grid-cell');
         if (cell) {
-            event.stopPropagation();
-            event.preventDefault();
-            
             console.error('🌍 GLOBAL CELL CLICK FALLBACK', {
                 cell: cell,
                 cellIndex: cell.dataset.index
             });
-            
             this.handleCellClick(cell);
         }
     }, true);
