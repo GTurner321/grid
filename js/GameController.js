@@ -8,36 +8,55 @@ import GridEventHandler from './GridEventHandler.js';
 
 class GameController {
     constructor() {
-        console.error('CRITICAL: GameController constructor starting');
+    console.error('CRITICAL: GameController constructor starting');
+    
+    // Debug instance creation
+    try {
+        this.state = new GameState();
+        this.gridEventHandler = new GridEventHandler(this.state);
         
-        // Debug instance creation
-        try {
-            this.state = new GameState();
-            this.gridEventHandler = new GridEventHandler(this.state);
-            
-            // Bind critical methods to ensure proper 'this' context
-            this.startLevel = this.startLevel.bind(this);
-            this.checkSolution = this.checkSolution.bind(this);
-            this.removeAllSpareCells = this.removeAllSpareCells.bind(this);
-            
-            console.error('Instance created:', {
-                hasState: !!this.state,
-                hasGridHandler: !!this.gridEventHandler,
-                methods: Object.getOwnPropertyNames(Object.getPrototypeOf(this)),
-                startLevelExists: typeof this.startLevel === 'function'
-            });
-            
-            this.initializeEventListeners();
-            
-            // Make instance globally accessible for debugging
-            window._gameController = this;
-            console.error('GameController instance stored in window._gameController');
-        } catch (error) {
-            console.error('CRITICAL: Error in constructor:', error);
-            console.error('Stack:', error.stack);
+        // Bind critical methods to ensure proper 'this' context
+        this.startLevel = this.startLevel.bind(this);
+        this.checkSolution = this.checkSolution.bind(this);
+        this.removeAllSpareCells = this.removeAllSpareCells.bind(this);
+        this.handleValidPath = this.handleValidPath.bind(this);
+        this.handlePuzzleSolved = this.handlePuzzleSolved.bind(this);
+        this.handleMathematicalError = this.handleMathematicalError.bind(this);
+        this.highlightUserPath = this.highlightUserPath.bind(this);
+        this.placeMathSequence = this.placeMathSequence.bind(this);
+        this.fillRemainingCells = this.fillRemainingCells.bind(this);
+        this.generateRandomEntry = this.generateRandomEntry.bind(this);
+        this.displaySequenceSums = this.displaySequenceSums.bind(this);
+        this.handleFirstRemoval = this.handleFirstRemoval.bind(this);
+        this.handleSecondRemoval = this.handleSecondRemoval.bind(this);
+        
+        console.error('Instance created:', {
+            hasState: !!this.state,
+            hasGridHandler: !!this.gridEventHandler,
+            methods: Object.getOwnPropertyNames(Object.getPrototypeOf(this)),
+            startLevelExists: typeof this.startLevel === 'function'
+        });
+        
+        this.initializeEventListeners();
+        
+        // Make startLevel directly accessible for debugging
+        if (typeof this.startLevel === 'function') {
+            window._startLevel = (level) => {
+                console.error(`Direct startLevel call with level ${level}`);
+                this.startLevel(level);
+            };
+            console.error('Exposed startLevel globally as window._startLevel');
         }
+        
+        // Make instance globally accessible for debugging
+        window._gameController = this;
+        console.error('GameController instance stored in window._gameController');
+    } catch (error) {
+        console.error('CRITICAL: Error in constructor:', error);
+        console.error('Stack:', error.stack);
     }
-
+}
+    
     initializeEventListeners() {
         try {
             console.error('Setting up event listeners');
