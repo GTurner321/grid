@@ -78,6 +78,11 @@ class GridEventHandler {
     // Add new click listener with capture
     gridContainer.addEventListener('click', this._gridContainerClickHandler, true);
 
+    console.error('Grid Container Found - Detailed Inspection', {
+        innerHTML: gridContainer.innerHTML,
+        childElementCount: gridContainer.children.length
+    });
+
     // Detailed grid cell listener setup
     const gridCells = gridContainer.querySelectorAll('.grid-cell');
     console.error(`🧩 Found ${gridCells.length} Grid Cells`);
@@ -102,29 +107,12 @@ class GridEventHandler {
         console.error(`Cell ${index} Detailed Inspection:`, {
             dataset: cell.dataset,
             index: cell.dataset.index,
-            classList: Array.from(cell.classList)
-        });
-    });
-}
-    
-    console.error('Grid Container Found - Detailed Inspection', {
-        innerHTML: gridContainer.innerHTML,
-        childElementCount: gridContainer.children.length
-    });
-
-    const gridCells = gridContainer.querySelectorAll('.grid-cell');
-    console.error(`🧩 Found ${gridCells.length} Grid Cells`);
-
-    gridCells.forEach((cell, index) => {
-        console.error(`Cell ${index} Detailed Inspection:`, {
-            dataset: cell.dataset,
-            index: cell.dataset.index,
             classList: Array.from(cell.classList),
             isStartCell: cell.classList.contains('start-cell')
         });
     });
-    }
-
+}
+    
     _gridContainerClickHandler = (event) => {
         event.stopPropagation();
         event.preventDefault();
