@@ -86,14 +86,18 @@ export function renderGrid(gridEntries, options = {}) {
             // Add debug attribute
             cell.setAttribute('data-debug', `Cell ${index}`);
 
-            // Add click logging
-            cell.addEventListener('click', (e) => {
-                console.error('🎯 CELL CLICKED', {
-                    index: cell.dataset.index,
-                    value: cell.dataset.value,
-                    classes: Array.from(cell.classList)
-                });
-            }, { capture: true });
+// Add click logging and handling
+cell.addEventListener('click', (e) => {
+    console.error('🎯 CELL CLICKED', {
+        index: cell.dataset.index,
+        value: cell.dataset.value,
+        classes: Array.from(cell.classList)
+    });
+    
+    // Stop propagation and prevent default
+    e.stopPropagation();
+    e.preventDefault();
+}, { capture: true });
 
             gridContainer.appendChild(cell);
         });
