@@ -238,110 +238,130 @@ debugGameState() {
     }
 
     async startLevel(level) {
-        console.error(`CRITICAL: startLevel method CALLED with level: ${level}`);
-        
-        try {
-            // Debug check state and imports
-            console.error('DEBUG: Checking state and imports', {
-                state: this.state,
-                generatePath: typeof generatePath,
-                generateSequence: typeof generateSequence,
-                gridContainer: document.getElementById('grid-container')
-            });
-            
-            console.log(`DETAILED: Starting Level ${level}`);
-            
-            // Reset game state
-            console.log('1. Resetting game state...');
-            this.state.reset();
-            console.error('DEBUG: State after reset:', this.state);
-            
-            // Set current level
-            console.log('2. Setting current level...');
-            this.state.currentLevel = level;
-            
-            // Activate game
-            console.log('3. Setting game as active...');
-            this.state.gameActive = true;
-
-            // Initialize scoring
-            console.log('4. Initializing scoring...');
-            scoreManager.initializeLevel(level);
-
-            // Generate path with debug
-            console.log('5. Generating path...');
-            console.error('DEBUG: About to call generatePath');
-            this.state.path = await generatePath();
-            console.error('DEBUG: Path generated:', this.state.path);
-
-            // Generate sequence with debug
-            console.log('6. Generating sequence...');
-            console.error('DEBUG: About to call generateSequence with level:', level);
-            this.state.sequence = await generateSequence(level);
-            console.error('DEBUG: Sequence generated:', this.state.sequence);
-            
-            // Convert sequence to entries
-            console.log('7. Converting sequence to entries...');
-            this.state.sequenceEntries = sequenceToEntries(this.state.sequence);
-            console.error('DEBUG: Sequence entries:', this.state.sequenceEntries);
-
-            // Place math sequence
-            console.log('8. Placing math sequence...');
-            this.placeMathSequence();
-            
-            // Fill remaining cells
-            console.log('9. Filling remaining cells...');
-            this.fillRemainingCells();
-
-            // Make sequence container visible
-            console.log('10. Making sequence container visible...');
-            const sequenceContainer = document.querySelector('.sequence-container');
-            console.error('DEBUG: Sequence container found:', !!sequenceContainer);
-            if (sequenceContainer) {
-                sequenceContainer.style.display = 'block';
-            }
-
-            // Render grid with debug
-            console.log('11. Rendering grid...');
-            console.error('DEBUG: Grid data before render:', {
-                entries: this.state.gridEntries,
-                startCoord: this.state.path[0],
-                endCoord: this.state.path[this.state.path.length - 1]
-            });
-            
-            renderGrid(this.state.gridEntries, {
-                startCoord: this.state.path[0],
-                endCoord: this.state.path[this.state.path.length - 1]
-            });
-
-            // Display sequence sums
-            console.log('12. Displaying sequence sums...');
-            this.displaySequenceSums();
-
-            // Update UI
-            console.log('13. Updating UI...');
-            this.state.updateUI({
-                resetScores: true,
-                preserveTotalScore: true
-            });
-
-            // Show start message
-            console.log('14. Showing start message...');
-            this.state.showMessage('Game started! Find the path by following the mathematical sequence.');
-
-            console.log('Level start COMPLETE');
-        } catch (error) {
-            console.error('DETAILED Error starting level:', error);
-            console.error('Error stack:', error.stack);
-            console.error('DEBUG: Error context:', {
-                state: this.state,
-                level: level,
-                gridContainer: document.getElementById('grid-container')
-            });
-            this.state.showMessage('Error starting game. Please try again.', 'error');
-            throw error;
+    console.error(`🚀 CRITICAL: startLevel method CALLED with level: ${level}`);
+    
+    try {
+        // Validate input
+        if (!Number.isInteger(level) || level < 1) {
+            console.error('Invalid level selection', level);
+            this.state.showMessage('Invalid level selected', 'error');
+            return;
         }
+
+        // Debug imports and state
+        console.error('DEBUG: Checking state and imports', {
+            state: this.state,
+            generatePath: typeof generatePath,
+            generateSequence: typeof generateSequence,
+            gridContainer: document.getElementById('grid-container')
+        });
+        
+        console.log(`Starting Level ${level}`);
+        
+        // Reset game state
+        console.log('1. Resetting game state...');
+        this.state.reset();
+        console.error('DEBUG: State after reset:', this.state);
+        
+        // Set current level
+        console.log('2. Setting current level...');
+        this.state.currentLevel = level;
+        
+        // Activate game
+        console.log('3. Setting game as active...');
+        this.state.gameActive = true;
+
+        // Initialize scoring
+        console.log('4. Initializing scoring...');
+        scoreManager.initializeLevel(level);
+
+        // Generate path with debug
+        console.log('5. Generating path...');
+        console.error('DEBUG: About to call generatePath');
+        this.state.path = await generatePath();
+        console.error('DEBUG: Path generated:', this.state.path);
+
+        // Generate sequence with debug
+        console.log('6. Generating sequence...');
+        console.error('DEBUG: About to call generateSequence with level:', level);
+        this.state.sequence = await generateSequence(level);
+        console.error('DEBUG: Sequence generated:', this.state.sequence);
+        
+        // Convert sequence to entries
+        console.log('7. Converting sequence to entries...');
+        this.state.sequenceEntries = sequenceToEntries(this.state.sequence);
+        console.error('DEBUG: Sequence entries:', this.state.sequenceEntries);
+
+        // Place math sequence
+        console.log('8. Placing math sequence...');
+        this.placeMathSequence();
+        
+        // Fill remaining cells
+        console.log('9. Filling remaining cells...');
+        this.fillRemainingCells();
+
+        // Make sequence container visible
+        console.log('10. Making sequence container visible...');
+        const sequenceContainer = document.querySelector('.sequence-container');
+        console.error('DEBUG: Sequence container found:', !!sequenceContainer);
+        if (sequenceContainer) {
+            sequenceContainer.style.display = 'block';
+        }
+
+        // Render grid with debug
+        console.log('11. Rendering grid...');
+        console.error('DEBUG: Grid data before render:', {
+            entries: this.state.gridEntries,
+            startCoord: this.state.path[0],
+            endCoord: this.state.path[this.state.path.length - 1]
+        });
+        
+        renderGrid(this.state.gridEntries, {
+            startCoord: this.state.path[0],
+            endCoord: this.state.path[this.state.path.length - 1]
+        });
+
+        // Force grid event handler setup
+        if (this.gridEventHandler) {
+            this.gridEventHandler.setupGridInteractions();
+        }
+
+        // Display sequence sums
+        console.log('12. Displaying sequence sums...');
+        this.displaySequenceSums();
+
+        // Update UI
+        console.log('13. Updating UI...');
+        this.state.updateUI({
+            resetScores: true,
+            preserveTotalScore: true
+        });
+
+        // Show start message
+        console.log('14. Showing start message...');
+        this.state.showMessage('Game started! Find the path by following the mathematical sequence.');
+
+        // Extra grid verification
+        const gridContainer = document.getElementById('grid-container');
+        console.error('Grid Verification:', {
+            gridContainer: !!gridContainer,
+            gridCells: gridContainer ? gridContainer.querySelectorAll('.grid-cell').length : 'N/A',
+            gridEntries: this.state.gridEntries.length
+        });
+
+        console.log('Level start COMPLETE');
+    } catch (error) {
+        console.error('DETAILED Error starting level:', error);
+        console.error('Error stack:', error.stack);
+        console.error('DEBUG: Error context:', {
+            state: this.state,
+            level: level,
+            gridContainer: document.getElementById('grid-container')
+        });
+        this.state.showMessage('Error starting game. Please try again.', 'error');
+        throw error;
     }
+}
     
     displaySequenceSums() {
         const sumsContainer = document.getElementById('sequence-sums');
