@@ -19,7 +19,7 @@
         </script>
         <script type="module">
           import React from 'react';
-          import ReactDOM from 'react-dom';
+          import ReactDOM from 'react-dom/client';
           window.React = React;
           window.ReactDOM = ReactDOM;
         </script>
@@ -71,40 +71,40 @@
                 </div>
             </header>
 
-<section class="level-selector" style="position: relative; z-index: 1000;">
-    <div class="level-buttons">
-        <button 
-            type="button" 
-            class="level-btn rounded text-white font-bold" 
-            data-level="1">
-            Level 1
-        </button>
-        <button 
-            type="button" 
-            class="level-btn rounded text-white font-bold" 
-            data-level="2">
-            Level 2
-        </button>
-        <button 
-            type="button" 
-            class="level-btn rounded text-white font-bold" 
-            data-level="3">
-            Level 3
-        </button>
-        <button 
-            type="button" 
-            class="level-btn rounded text-white font-bold" 
-            data-level="4">
-            Level 4
-        </button>
-        <button 
-            type="button" 
-            class="level-btn rounded text-white font-bold" 
-            data-level="5">
-            Level 5
-        </button>
-    </div>
-</section>
+            <section class="level-selector" style="position: relative; z-index: 1000;">
+                <div class="level-buttons">
+                    <button 
+                        type="button" 
+                        class="level-btn rounded text-white font-bold" 
+                        data-level="1">
+                        Level 1
+                    </button>
+                    <button 
+                        type="button" 
+                        class="level-btn rounded text-white font-bold" 
+                        data-level="2">
+                        Level 2
+                    </button>
+                    <button 
+                        type="button" 
+                        class="level-btn rounded text-white font-bold" 
+                        data-level="3">
+                        Level 3
+                    </button>
+                    <button 
+                        type="button" 
+                        class="level-btn rounded text-white font-bold" 
+                        data-level="4">
+                        Level 4
+                    </button>
+                    <button 
+                        type="button" 
+                        class="level-btn rounded text-white font-bold" 
+                        data-level="5">
+                        Level 5
+                    </button>
+                </div>
+            </section>
             
             <!-- Main Game Area -->
             <main class="game-board">
@@ -137,7 +137,8 @@
                 <!-- Game Messages -->
                 <div id="game-messages" class="message-box"></div>
             </main>
-            
+        </div>
+        
         <!-- Game Modules -->
         <script type="module" src="js/GameController.js"></script>
         <script type="module" src="js/GameState.js"></script>
@@ -153,43 +154,55 @@
     
         <!-- React Component Mounting -->
         <script type="module">
-    import GameController from './js/GameController.js';
-    import Rules from './js/rules.js';
-    
-    console.error('DEBUG: Starting initialization');
-    console.error('DEBUG: GameController imported:', typeof GameController);
-    console.error('DEBUG: Rules imported:', typeof Rules);
+            import GameController from './js/GameController.js';
+            import Rules from './js/rules.js';
+            
+            console.error('DEBUG: Starting initialization');
+            console.error('DEBUG: GameController imported:', typeof GameController);
+            console.error('DEBUG: Rules imported:', typeof Rules);
 
-    window.addEventListener('DOMContentLoaded', () => {
-        try {
-            console.error('DOM Loaded - Starting GameController initialization');
-            
-            // Create game controller
-            const controller = new GameController();
-            console.error('GameController instance created:', controller);
-            
-            // Store in window
-            window._gameController = controller;
-            console.error('GameController stored in window:', window._gameController);
-            
-            // Mount React components
-            const root = window.ReactDOM.createRoot(document.getElementById('rules-container'));
-            root.render(React.createElement(Rules));
-            
-            console.error('Initialization complete');
-        } catch (error) {
-            console.error('CRITICAL ERROR during initialization:', error);
-            console.error('Error stack:', error.stack);
-        }
-    });
+            // Ensure components are mounted after DOM is fully loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                try {
+                    console.error('DOM Loaded - Starting GameController initialization');
+                    
+                    // Create game controller
+                    const controller = new GameController();
+                    console.error('GameController instance created:', controller);
+                    
+                    // Store in window for debugging
+                    window._gameController = controller;
+                    console.error('GameController stored in window:', window._gameController);
+                    
+                    // Mount React components
+                    const root = window.ReactDOM.createRoot(document.getElementById('rules-container'));
+                    root.render(React.createElement(Rules));
+                    
+                    // Dispatch game start event
+                    window.dispatchEvent(new CustomEvent('gameStart'));
+                    
+                    console.error('Initialization complete');
+                } catch (error) {
+                    console.error('CRITICAL ERROR during initialization:', error);
+                    console.error('Error stack:', error.stack);
+                }
+            });
 
-    // Add backup initialization check
-    setTimeout(() => {
-        console.error('Delayed initialization check:', {
-            hasController: !!window._gameController,
-            controllerType: typeof window._gameController
-        });
-    }, 2000);
-</script>
+            // Add backup initialization check
+            setTimeout(() => {
+                console.error('Delayed initialization check:', {
+                    hasController: !!window._gameController,
+                    controllerType: typeof window._gameController
+                });
+                
+                // If controller not initialized properly, try again
+                if (!window._gameController) {
+                    console.error('Controller not initialized properly, attempting recovery...');
+                    const controller = new GameController();
+                    window._gameController = controller;
+                    window.dispatchEvent(new CustomEvent('gameStart'));
+                }
+            }, 2000);
+        </script>
     </body>
 </html>
