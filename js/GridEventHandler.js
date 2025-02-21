@@ -4,199 +4,204 @@ import { updateCell } from './gridRenderer.js';
 
 class GridEventHandler {
     constructor(gameState) {
-        // Store game state reference
+        console.error('🔨 GridEventHandler CONSTRUCTOR CALLED');
+        
+        // Defensive check
+        if (!gameState) {
+            console.error('❌ NO GAME STATE PROVIDED TO GRID EVENT HANDLER');
+            throw new Error('Game state is required for GridEventHandler');
+        }
+
         this.state = gameState;
         
-        // Bind all methods to ensure correct 'this' context
-        this._bindMethods();
-        
-        // Debug logging for constructor
-        console.error('GridEventHandler Constructed', {
-            hasState: !!this.state,
-            stateLevel: this.state.currentLevel
-        });
-    }
-
-    // Bind all methods to ensure consistent 'this' context
-    _bindMethods() {
-        const methodsToBind = [
+        // Comprehensive method binding
+        this._bindMethodsSafely([
             'setupGridInteractions',
             'handleCellClick',
             'isValidMove',
             'updatePath',
             'updatePathDisplay',
-            'validateSolution',
-            'handleValidPath',
-            'handlePuzzleSolved',
-            'handleMathematicalError',
-            'getCellCoordinates',
-            'isStartSquare',
-            'isEndSquare'
-        ];
+            'validateSolution'
+        ]);
 
-        methodsToBind.forEach(method => {
+        // Global event debugging
+        this._setupGlobalEventDebugging();
+    }
+
+    _bindMethodsSafely(methods) {
+        methods.forEach(method => {
             if (typeof this[method] === 'function') {
                 this[method] = this[method].bind(this);
             } else {
-                console.error(`Method ${method} not found for binding`);
+                console.error(`❌ Method ${method} not found for binding`);
             }
         });
     }
 
+    _setupGlobalEventDebugging() {
+        // Add global event listeners to catch all interactions
+        document.addEventListener('click', this._globalClickDebugger, true);
+        document.addEventListener('mousedown', this._globalClickDebugger, true);
+        document.addEventListener('touchstart', this._globalTouchDebugger, true);
+    }
+
+    _globalClickDebugger = (event) => {
+        console.error('🌍 GLOBAL CLICK INTERCEPTED', {
+            target: event.target,
+            currentTarget: event.currentTarget,
+            path: event.composedPath(),
+            gameActive: this.state?.gameActive,
+            isGridCell: event.target.classList.contains('grid-cell')
+        });
+    }
+
+    _globalTouchDebugger = (event) => {
+        console.error('📱 GLOBAL TOUCH INTERCEPTED', {
+            touches: event.touches,
+            target: event.target,
+            gameActive: this.state?.gameActive
+        });
+    }
+
     setupGridInteractions() {
+        console.error('🔍 setupGridInteractions CALLED');
+        
         const gridContainer = document.getElementById('grid-container');
-        
         if (!gridContainer) {
-            console.error('🚨 CRITICAL: Grid container not found');
+            console.error('❌ NO GRID CONTAINER FOUND');
             return;
         }
 
-        console.error('🔍 Setting up Grid Interactions');
+        console.error('Grid Container found. Adding event listeners');
         
-        // Clear any existing event listeners to prevent duplicates
-        this._removeExistingListeners(gridContainer);
-        
-        // Add click event listener
-        gridContainer.addEventListener('click', this._handleGridClick, { capture: true });
-        
-        // Add touch event listeners for mobile support
-        gridContainer.addEventListener('touchstart', this._handleGridTouch, { passive: false });
-        
+        // Remove existing listeners first
+        gridContainer.removeEventListener('click', this._gridContainerClickHandler);
+        gridContainer.removeEventListener('mousedown', this._gridContainerClickHandler);
+        gridContainer.removeEventListener('touchstart', this._gridContainerTouchHandler);
+
+        // Add comprehensive event listeners
+        gridContainer.addEventListener('click', this._gridContainerClickHandler, true);
+        gridContainer.addEventListener('mousedown', this._gridContainerClickHandler, true);
+        gridContainer.addEventListener('touchstart', this._gridContainerTouchHandler, { passive: false });
+
         // Verify grid cells
-        this._verifyGridCells(gridContainer);
-    }
+        const gridCells = gridContainer.querySelectorAll('.grid-cell');
+        console.error(`🧩 Found ${gridCells.length} grid cells`);
 
-    _removeExistingListeners(gridContainer) {
-        // Remove any existing click and touch listeners
-        const oldClickHandler = this._handleGridClick;
-        const oldTouchHandler = this._handleGridTouch;
-        
-        if (oldClickHandler) {
-            gridContainer.removeEventListener('click', oldClickHandler, { capture: true });
-        }
-        if (oldTouchHandler) {
-            gridContainer.removeEventListener('touchstart', oldTouchHandler, { passive: false });
-        }
-    }
+        gridCells.forEach((cell, index) => {
+            // Remove existing listeners
+            cell.removeEventListener('click', this._cellClickHandler);
+            cell.removeEventListener('mousedown', this._cellClickHandler);
+            cell.removeEventListener('touchstart', this._cellTouchHandler);
 
-    _handleGridClick = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
+            // Add new listeners
+            cell.addEventListener('click', this._cellClickHandler, true);
+            cell.addEventListener('mousedown', this._cellClickHandler, true);
+            cell.addEventListener('touchstart', this._cellTouchHandler, { passive: false });
 
-        // Find the closest grid cell
-        const cell = event.target.closest('.grid-cell');
-        
-        if (!cell) {
-            console.error('Click not on a grid cell', {
-                target: event.target,
-                path: event.composedPath()
+            console.error(`Cell ${index} listener setup:`, {
+                index: cell.dataset.index,
+                hasListeners: true
             });
-            return;
-        }
-
-        this._processGridCellInteraction(cell);
+        });
     }
 
-    _handleGridTouch = (event) => {
-        event.preventDefault();
+    _gridContainerClickHandler = (event) => {
         event.stopPropagation();
+        event.preventDefault();
 
-        // Handle touch events (typically on mobile)
+        console.error('🎯 Grid Container Click', {
+            target: event.target,
+            isGridCell: event.target.classList.contains('grid-cell'),
+            cellIndex: event.target.dataset?.index
+        });
+
+        const cell = event.target.closest('.grid-cell');
+        if (cell) {
+            this.handleCellClick(cell);
+        }
+    }
+
+    _gridContainerTouchHandler = (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+
         const touch = event.touches[0];
         const cell = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.grid-cell');
-        
-        if (!cell) {
-            console.error('Touch not on a grid cell', {
-                touch: { x: touch.clientX, y: touch.clientY }
-            });
-            return;
-        }
 
-        this._processGridCellInteraction(cell);
-    }
-
-    _processGridCellInteraction(cell) {
-        // Detailed logging of cell interaction
-        console.error('Grid Cell Interaction', {
-            cellIndex: cell.dataset.index,
-            gameActive: this.state.gameActive,
-            currentPath: this.state.userPath
+        console.error('📱 Grid Container Touch', {
+            cell: cell,
+            coordinates: cell ? { x: touch.clientX, y: touch.clientY } : null
         });
 
-        // Check if game is active
-        if (!this.state.gameActive) {
-            console.error('Game not active - cell interaction ignored');
-            this.state.showMessage('Start a level first!', 'error');
-            return;
-        }
-
-        // Call handleCellClick with comprehensive error handling
-        try {
+        if (cell) {
             this.handleCellClick(cell);
-        } catch (error) {
-            console.error('Error processing cell click:', error);
-            this.state.showMessage('Error processing your move', 'error');
         }
     }
 
-    _verifyGridCells(gridContainer) {
-        const gridCells = gridContainer.querySelectorAll('.grid-cell');
-        
-        console.error(`🕵️ Grid Cell Verification: ${gridCells.length} cells found`);
-        
-        gridCells.forEach((cell, index) => {
-            console.error(`Cell ${index} Details:`, {
-                hasDataIndex: !!cell.dataset.index,
-                index: cell.dataset.index,
-                classList: Array.from(cell.classList),
-                isVisible: cell.offsetParent !== null,
-                computedStyle: {
-                    display: window.getComputedStyle(cell).display,
-                    visibility: window.getComputedStyle(cell).visibility,
-                    pointerEvents: window.getComputedStyle(cell).pointerEvents
-                }
-            });
+    _cellClickHandler = (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+
+        console.error('🔸 Direct Cell Click', {
+            target: event.target,
+            currentTarget: event.currentTarget,
+            cellIndex: event.currentTarget.dataset.index
         });
+
+        this.handleCellClick(event.currentTarget);
+    }
+
+    _cellTouchHandler = (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+
+        const touch = event.touches[0];
+        const cell = event.currentTarget;
+
+        console.error('🔸 Direct Cell Touch', {
+            cell: cell,
+            cellIndex: cell.dataset.index
+        });
+
+        this.handleCellClick(cell);
     }
 
     handleCellClick(cell) {
-        // Convert cell to numeric index
-        const cellIndex = parseInt(cell.dataset.index);
-        
-        console.error('Handling Cell Click', {
-            cellIndex: cellIndex,
-            currentUserPath: this.state.userPath
+        console.error('🎲 handleCellClick CALLED', {
+            cellIndex: cell.dataset.index,
+            gameActive: this.state.gameActive
         });
+
+        // Defensive checks
+        if (!this.state.gameActive) {
+            console.error('❌ Game not active. Click ignored.');
+            return;
+        }
+
+        const cellIndex = parseInt(cell.dataset.index);
 
         // First click logic
         if (this.state.userPath.length === 0) {
-            this._handleFirstCellClick(cellIndex);
+            if (this.isStartSquare(cellIndex)) {
+                this.state.userPath.push(cellIndex);
+                this.updatePathDisplay();
+                console.error(`✅ Start square selected: ${cellIndex}`);
+            } else {
+                console.error(`❌ Invalid first cell: ${cellIndex}`);
+                this.state.showMessage('You must start at the green square!', 'error');
+            }
             return;
         }
 
         // Subsequent move validation
-        this._processSubsequentMove(cellIndex);
-    }
-
-    _handleFirstCellClick(cellIndex) {
-        if (this.isStartSquare(cellIndex)) {
-            this.state.userPath.push(cellIndex);
-            this.updatePathDisplay();
-            console.error('Start square selected:', cellIndex);
-        } else {
-            this.state.showMessage('You must start at the green square!', 'error');
-            console.error('Non-start square selected as first cell:', cellIndex);
-        }
-    }
-
-    _processSubsequentMove(cellIndex) {
-        // Check if move is to an adjacent cell
         if (!this.isValidMove(cellIndex)) {
+            console.error(`❌ Invalid move to cell: ${cellIndex}`);
             this.state.showMessage('You can only move to adjacent squares!', 'error');
             return;
         }
 
-        // Check if cell is already in path (for backtracking)
+        // Update path
         if (this.state.userPath.includes(cellIndex)) {
             const index = this.state.userPath.indexOf(cellIndex);
             this.state.userPath = this.state.userPath.slice(0, index + 1);
@@ -204,10 +209,9 @@ class GridEventHandler {
             this.state.userPath.push(cellIndex);
         }
 
-        // Update path display
         this.updatePathDisplay();
 
-        // Check for end square completion
+        // Check for end square
         if (this.isEndSquare(cellIndex)) {
             this.validateSolution();
         }
