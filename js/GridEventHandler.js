@@ -5,11 +5,36 @@ import { updateCell } from './gridRenderer.js';
 class GridEventHandler {
     constructor(gameState) {
         this.state = gameState;
+        
+        // Bind methods to ensure proper 'this' context
+        this.setupGridInteractions = this.setupGridInteractions.bind(this);
+        this.setupMouseEvents = this.setupMouseEvents.bind(this);
+        this.setupTouchEvents = this.setupTouchEvents.bind(this);
+        this.handleCellClick = this.handleCellClick.bind(this);
+        this.handleTouchEvent = this.handleTouchEvent.bind(this);
+        this.getActualCell = this.getActualCell.bind(this);
+        this.processClick = this.processClick.bind(this);
+        this.handleInitialClick = this.handleInitialClick.bind(this);
+        this.isValidMove = this.isValidMove.bind(this);
+        this.getCellCoordinates = this.getCellCoordinates.bind(this);
+        this.updatePath = this.updatePath.bind(this);
+        this.updatePathDisplay = this.updatePathDisplay.bind(this);
+        this.clearAllHighlights = this.clearAllHighlights.bind(this);
+        this.highlightSelectedPath = this.highlightSelectedPath.bind(this);
+        this.validateSolution = this.validateSolution.bind(this);
+        this.handleValidPath = this.handleValidPath.bind(this);
+        this.handlePuzzleSolved = this.handlePuzzleSolved.bind(this);
+        this.handleMathematicalError = this.handleMathematicalError.bind(this);
+        this.highlightSolvedPath = this.highlightSolvedPath.bind(this);
+        this.isStartSquare = this.isStartSquare.bind(this);
+        this.isEndSquare = this.isEndSquare.bind(this);
+        this.removeSpareCells = this.removeSpareCells.bind(this);
     }
 
     setupGridInteractions() {
         const gridContainer = document.getElementById('grid-container');
         if (gridContainer) {
+            console.error('Setting up grid interactions on container:', gridContainer);
             this.setupMouseEvents(gridContainer);
             this.setupTouchEvents(gridContainer);
         } else {
@@ -18,23 +43,42 @@ class GridEventHandler {
     }
 
     setupMouseEvents(gridContainer) {
-        gridContainer.addEventListener('click', (e) => {
+        // Remove any existing click handlers
+        gridContainer.removeEventListener('click', this._clickHandler);
+        
+        // Define a click handler function
+        this._clickHandler = (e) => {
+            console.error('Grid cell clicked:', e.target);
             if (e.target.classList.contains('grid-cell')) {
                 this.handleCellClick(e.target);
             }
-        });
+        };
+        
+        // Add the click handler
+        gridContainer.addEventListener('click', this._clickHandler);
+        console.error('Grid click handler added');
     }
 
     setupTouchEvents(gridContainer) {
-        gridContainer.addEventListener('touchstart', (e) => {
+        // Remove any existing touch handlers
+        gridContainer.removeEventListener('touchstart', this._touchstartHandler);
+        gridContainer.removeEventListener('touchmove', this._touchmoveHandler);
+        
+        // Define touch handler functions
+        this._touchstartHandler = (e) => {
             e.preventDefault();
             this.handleTouchEvent(e);
-        });
-
-        gridContainer.addEventListener('touchmove', (e) => {
+        };
+        
+        this._touchmoveHandler = (e) => {
             e.preventDefault();
             this.handleTouchEvent(e);
-        });
+        };
+        
+        // Add the touch handlers
+        gridContainer.addEventListener('touchstart', this._touchstartHandler);
+        gridContainer.addEventListener('touchmove', this._touchmoveHandler);
+        console.error('Grid touch handlers added');
     }
 
     handleTouchEvent(e) {
@@ -49,9 +93,13 @@ class GridEventHandler {
     }
 
     handleCellClick(cell) {
-        if (!this.state.gameActive) return;
+        if (!this.state.gameActive) {
+            console.error('Game not active, ignoring cell click');
+            return;
+        }
 
         try {
+            console.error('Handling cell click for', cell.dataset.index);
             const cellIndex = parseInt(cell.dataset.index);
             const actualCell = this.getActualCell(cell);
             
@@ -63,6 +111,7 @@ class GridEventHandler {
             this.processClick(cellIndex);
         } catch (error) {
             console.error('Error handling cell click:', error);
+            console.error('Error stack:', error.stack);
         }
     }
 
@@ -71,6 +120,8 @@ class GridEventHandler {
     }
 
     processClick(cellIndex) {
+        console.error('Processing click for cell', cellIndex, 'Current path:', this.state.userPath);
+        
         if (this.state.userPath.length === 0) {
             this.handleInitialClick(cellIndex);
             return;
@@ -93,8 +144,10 @@ class GridEventHandler {
         if (this.isStartSquare(cellIndex)) {
             this.state.userPath.push(cellIndex);
             this.updatePathDisplay();
+            console.error('Start square selected:', cellIndex);
         } else {
             this.state.showMessage('You must start at the green square!', 'error');
+            console.error('Non-start square selected as first cell:', cellIndex);
         }
     }
 
@@ -120,6 +173,7 @@ class GridEventHandler {
         } else {
             this.state.userPath.push(cellIndex);
         }
+        console.error('Path updated:', this.state.userPath);
         this.updatePathDisplay();
     }
 
@@ -127,8 +181,10 @@ class GridEventHandler {
         try {
             this.clearAllHighlights();
             this.highlightSelectedPath();
+            console.error('Path display updated');
         } catch (error) {
             console.error('Error updating path display:', error);
+            console.error('Error stack:', error.stack);
         }
     }
 
@@ -173,6 +229,7 @@ class GridEventHandler {
             this.state.updateUI();
         } catch (error) {
             console.error('Error validating solution:', error);
+            console.error('Error stack:', error.stack);
         }
     }
 
