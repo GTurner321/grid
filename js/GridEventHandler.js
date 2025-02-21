@@ -152,9 +152,13 @@ class GridEventHandler {
     }
 
     handleCellClick(cell) {
-    console.error('🎲 handleCellClick CALLED', {
+    console.error('🎲 ULTRA VERBOSE Cell Click Diagnostics', {
+        cellElement: cell,
         cellIndex: cell.dataset.index,
-        gameActive: this.state.gameActive
+        gameActive: this.state.gameActive,
+        currentUserPath: [...this.state.userPath],
+        startCoord: this.state.path[0],
+        endCoord: this.state.path[this.state.path.length - 1]
     });
 
     // Defensive checks
@@ -165,10 +169,22 @@ class GridEventHandler {
 
     const cellIndex = parseInt(cell.dataset.index);
 
+    console.error('Pre-Path Update Checks', {
+        cellIndex: cellIndex,
+        userPathLength: this.state.userPath.length,
+        isStartSquare: this.isStartSquare(cellIndex)
+    });
+
     // First click logic
     if (this.state.userPath.length === 0) {
         if (this.isStartSquare(cellIndex)) {
+            console.error(`✅ Attempting to add start square: ${cellIndex}`);
             this.state.userPath.push(cellIndex);
+            
+            console.error('Path after first click', {
+                userPath: [...this.state.userPath]
+            });
+            
             this.updatePathDisplay();
             console.error(`✅ Start square selected: ${cellIndex}`);
         } else {
@@ -177,6 +193,14 @@ class GridEventHandler {
         }
         return;
     }
+
+    // Debug previous move validation
+    const lastCellIndex = this.state.userPath[this.state.userPath.length - 1];
+    console.error('Move Validation Debug', {
+        currentCellIndex: cellIndex,
+        lastCellIndex: lastCellIndex,
+        isValidMove: this.isValidMove(cellIndex)
+    });
 
     // Subsequent move validation
     if (!this.isValidMove(cellIndex)) {
@@ -189,14 +213,21 @@ class GridEventHandler {
     if (this.state.userPath.includes(cellIndex)) {
         const index = this.state.userPath.indexOf(cellIndex);
         this.state.userPath = this.state.userPath.slice(0, index + 1);
+        console.error(`🔙 Backtracking to cell: ${cellIndex}`);
     } else {
         this.state.userPath.push(cellIndex);
+        console.error(`➕ Adding new cell to path: ${cellIndex}`);
     }
+
+    console.error('Path after update', {
+        userPath: [...this.state.userPath]
+    });
 
     this.updatePathDisplay();
 
     // Check for end square
     if (this.isEndSquare(cellIndex)) {
+        console.error(`🏁 End square reached: ${cellIndex}`);
         this.validateSolution();
     }
 }
@@ -217,22 +248,33 @@ class GridEventHandler {
     }
 
     updatePathDisplay() {
-        // Clear previous highlights
-        this._clearPathHighlights();
-        
-        // Highlight current path
-        this.state.userPath.forEach((cellIndex, index) => {
-            const cell = document.querySelector(`[data-index="${cellIndex}"]`);
-            if (cell) {
-                cell.classList.add('selected');
-                
-                // Special highlights for start and end
-                if (index === 0) cell.classList.add('start-cell-selected');
-                if (index === this.state.userPath.length - 1) cell.classList.add('end-cell-selected');
-            }
-        });
-    }
+    console.error('🎨 Updating Path Display', {
+        userPath: [...this.state.userPath]
+    });
 
+    // Clear previous highlights
+    this._clearPathHighlights();
+    
+    // Highlight current path
+    this.state.userPath.forEach((cellIndex, index) => {
+        const cell = document.querySelector(`[data-index="${cellIndex}"]`);
+        if (cell) {
+            console.error(`Highlighting cell ${cellIndex}`, {
+                isFirstCell: index === 0,
+                isLastCell: index === this.state.userPath.length - 1
+            });
+
+            cell.classList.add('selected');
+            
+            // Special highlights for start and end
+            if (index === 0) cell.classList.add('start-cell-selected');
+            if (index === this.state.userPath.length - 1) cell.classList.add('end-cell-selected');
+        } else {
+            console.error(`❌ Cell not found for index: ${cellIndex}`);
+        }
+    });
+}
+    
     _clearPathHighlights() {
         document.querySelectorAll('.grid-cell').forEach(cell => {
             cell.classList.remove('selected', 'start-cell-selected', 'end-cell-selected');
