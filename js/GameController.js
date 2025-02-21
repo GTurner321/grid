@@ -7,13 +7,18 @@ import GameState from './GameState.js';
 import GridEventHandler from './GridEventHandler.js';
 
 class GameController {
-constructor() {
+    constructor() {
         console.error('CRITICAL: GameController constructor starting');
         
         // Debug instance creation
         try {
             this.state = new GameState();
             this.gridEventHandler = new GridEventHandler(this.state);
+            
+            // Bind critical methods to ensure proper 'this' context
+            this.startLevel = this.startLevel.bind(this);
+            this.checkSolution = this.checkSolution.bind(this);
+            this.removeAllSpareCells = this.removeAllSpareCells.bind(this);
             
             console.error('Instance created:', {
                 hasState: !!this.state,
@@ -50,7 +55,7 @@ constructor() {
         }
     }
 
-setupLevelButtons() {
+    setupLevelButtons() {
         console.error('CRITICAL: Setting up level buttons - ULTRA VERBOSE');
         
         // Store instance reference
@@ -61,11 +66,11 @@ setupLevelButtons() {
         console.error(`CRITICAL: Found ${levelButtons.length} level buttons`);
 
         levelButtons.forEach((btn, index) => {
-            // Remove existing click listeners
+            // Remove existing click listeners first to avoid duplication
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
             
-            // Bind click handler directly using arrow function
+            // Add a direct click event handler
             newBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -75,7 +80,7 @@ setupLevelButtons() {
                 console.error('Starting level:', level);
                 
                 try {
-                    // Use the stored instance
+                    // Check if startLevel is available
                     if (typeof self.startLevel !== 'function') {
                         throw new Error('startLevel is not a function');
                     }
