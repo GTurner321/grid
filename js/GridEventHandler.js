@@ -72,6 +72,41 @@ class GridEventHandler {
         return;
     }
 
+    // Remove any existing listeners first
+    gridContainer.removeEventListener('click', this._gridContainerClickHandler);
+    
+    // Add new click listener with capture
+    gridContainer.addEventListener('click', this._gridContainerClickHandler, true);
+
+    // Detailed grid cell listener setup
+    const gridCells = gridContainer.querySelectorAll('.grid-cell');
+    console.error(`🧩 Found ${gridCells.length} Grid Cells`);
+
+    gridCells.forEach((cell, index) => {
+        // Remove existing listeners to prevent duplicates
+        cell.removeEventListener('click', this._cellClickHandler);
+        
+        // Add new click listener to each cell
+        cell.addEventListener('click', (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            console.error(`🎯 Direct Cell ${index} Click`, {
+                cellIndex: cell.dataset.index,
+                event: event
+            });
+            
+            this.handleCellClick(cell);
+        }, true);
+
+        console.error(`Cell ${index} Detailed Inspection:`, {
+            dataset: cell.dataset,
+            index: cell.dataset.index,
+            classList: Array.from(cell.classList)
+        });
+    });
+}
+    
     console.error('Grid Container Found - Detailed Inspection', {
         innerHTML: gridContainer.innerHTML,
         childElementCount: gridContainer.children.length
