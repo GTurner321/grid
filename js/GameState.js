@@ -51,111 +51,99 @@ class GameState {
     }
     
     updateUI(options = {}) {
-        try {
-            console.log('Updating UI - DETAILED', { options });
-            
-            const scoreComponentElement = document.getElementById('score-component');
-            
-            if (scoreComponentElement) {
-                // Create root only once
-                if (!this.scoreRoot && window.ReactDOM) {
-                    console.log('Creating score component root');
-                    this.scoreRoot = window.ReactDOM.createRoot(scoreComponentElement);
-                }
-
-                if (this.scoreRoot) {
-                    // Create the ScoreBox element with all necessary props
-                    const scoreElement = React.createElement(ScoreBox, {
-                        key: Date.now(), // Ensure re-render
-                        level: this.currentLevel,
-                        possiblePoints: scoreManager.maxLevelPoints,
-                        spareRemovalCount: scoreManager.spareRemovalCount,
-                        checkCount: scoreManager.checkCount,
-                        startTime: scoreManager.puzzleStartTime,
-                        isComplete: options.roundComplete || false,
-                        totalScore: scoreManager.totalScore
-                    });
-
-                    // Render the score component
-                    console.log('Rendering score component');
-                    this.scoreRoot.render(scoreElement);
-                } else {
-                    console.error('Score root is not created yet or ReactDOM not available');
-                }
-            } else {
-                console.error('Score component element not found in DOM');
-            }
-            
-            // Update button states
-            const checkSolutionBtn = document.getElementById('check-solution');
-            const removeSpareBtn = document.getElementById('remove-spare');
-            
-            if (checkSolutionBtn) {
-                checkSolutionBtn.disabled = !this.gameActive || this.userPath.length === 0;
-            }
-            
-            if (removeSpareBtn) {
-                const spareInfo = scoreManager.getSpareRemovalInfo();
-                removeSpareBtn.disabled = !this.gameActive || spareInfo.remainingAttempts === 0;
-                
-                if (spareInfo.remainingAttempts === 2) {
-                    removeSpareBtn.textContent = 'Remove 50% of Spare Cells';
-                } else if (spareInfo.remainingAttempts === 1) {
-                    removeSpareBtn.textContent = 'Remove Remaining Spare Cells';
-                } else {
-                    removeSpareBtn.textContent = 'No More Removals';
-                    removeSpareBtn.disabled = true;
-                }
-            }
-            
-            // Update level buttons
-            const levelButtons = document.querySelectorAll('.level-btn');
-            levelButtons.forEach(btn => {
-                const buttonLevel = parseInt(btn.dataset.level);
-                const isActive = buttonLevel === this.currentLevel;
-                btn.classList.toggle('active', isActive);
+    try {
+        console.log('Updating UI - DETAILED', { options });
+        
+        const scoreComponentElement = document.getElementById('score-component');
+        
+        if (scoreComponentElement && window.React && window.ReactDOM) {
+            // Create ScoreBox element
+            const scoreElement = window.React.createElement(ScoreBox, {
+                key: Date.now(), // Ensure re-render
+                level: this.currentLevel,
+                possiblePoints: scoreManager.maxLevelPoints,
+                spareRemovalCount: scoreManager.spareRemovalCount,
+                checkCount: scoreManager.checkCount,
+                startTime: scoreManager.puzzleStartTime,
+                isComplete: options.roundComplete || false,
+                totalScore: scoreManager.totalScore
             });
 
-            if (options.roundComplete && options.pointsBreakdown) {
-                this.showMessage(
-                    `Congratulations! 
-                    Remaining Points: ${options.pointsBreakdown.remainingPoints}
-                    Bonus Points: ${options.pointsBreakdown.bonusPoints}
-                    Total Puzzle Points: ${options.pointsBreakdown.totalPuzzlePoints}
-                    Total Score: ${options.pointsBreakdown.totalScore}`, 
-                    'success'
-                );
-            }
-            
-        } catch (error) {
-            console.error('Error updating UI:', error);
-            console.error('Error stack:', error.stack);
-            this.showMessage('Error updating game display', 'error');
-        }
-    }
-
-    showMessage(message, type = 'info') {
-        try {
-            const messageElement = document.getElementById('game-messages');
-            if (messageElement) {
-                messageElement.textContent = message;
-                messageElement.className = 'message-box ' + type;
-                
-                // Clear message after 5 seconds for better visibility
-                setTimeout(() => {
-                    if (messageElement.textContent === message) {
-                        messageElement.textContent = '';
-                        messageElement.className = 'message-box';
-                    }
-                }, 5000);
+            // Handle different React versions
+            if (this.scoreRoot) {
+                // Already created with createRoot
+                this.scoreRoot.render(scoreElement);
+            } else if (typeof window.ReactDOM.createRoot === 'function') {
+                // React 18+ - createRoot available
+                this.scoreRoot = window.ReactDOM.createRoot(scoreComponentElement);
+                this.scoreRoot.render(scoreElement);
+            } else if (typeof window.ReactDOM.render === 'function') {
+                // React 17 and earlier
+                window.ReactDOM.render(scoreElement, scoreComponentElement);
             } else {
-                console.error('Game messages element not found');
+                console.error('No React rendering method available');
             }
-        } catch (error) {
-            console.error('Error showing message:', error);
-            console.error('Error stack:', error.stack);
+        } else {
+            console.error('Score component element not found or React not available', {
+                hasElement: !!scoreComponentElement,
+                hasReact: !!window.React,
+                hasReactDOM: !!window.ReactDOM
+            });
         }
+        
+        // Update button states
+        const checkSolutionBtn = document.getElementById('check-solution');
+        const removeSpareBtn = document.getElementById('remove-spare');
+        
+        if (checkSolutionBtn) {
+            checkSolutionBtn.disabled = !this.gameActive || this.userPath.length === 0;
+        }
+        
+        if (removeSpareBtn) {
+            const spareInfo = scoreManager.getSpareRemovalInfo();
+            removeSpareBtn.disabled = !this.gameActive || spareInfo.remainingAttempts === 0;
+            
+            if (spareInfo.remainingAttempts === 2) {
+                removeSpareBtn.textContent = 'Remove 50% of Spare Cells';
+            } else if (spareInfo.remainingAttempts === 1) {
+                removeSpareBtn.textContent = 'Remove Remaining Spare Cells';
+            } else {
+                removeSpareBtn.textContent = 'No More Removals';
+                removeSpareBtn.disabled = true;
+            }
+        }
+        
+        // Update level buttons
+        const levelButtons = document.querySelectorAll('.level-btn');
+        levelButtons.forEach(btn => {
+            const buttonLevel = parseInt(btn.dataset.level);
+            const isActive = buttonLevel === this.currentLevel;
+            btn.classList.toggle('active', isActive);
+        });
+
+        // Update sequence container visibility
+        const sequenceContainer = document.querySelector('.sequence-container');
+        if (sequenceContainer) {
+            sequenceContainer.style.display = this.gameActive ? 'block' : 'none';
+        }
+
+        // Show completion message if applicable
+        if (options.roundComplete && options.pointsBreakdown) {
+            this.showMessage(
+                `Congratulations! 
+                Remaining Points: ${options.pointsBreakdown.remainingPoints}
+                Bonus Points: ${options.pointsBreakdown.bonusPoints}
+                Total Puzzle Points: ${options.pointsBreakdown.totalPuzzlePoints}
+                Total Score: ${options.pointsBreakdown.totalScore}`, 
+                'success'
+            );
+        }
+        
+    } catch (error) {
+        console.error('Error updating UI:', error);
+        console.error('Error stack:', error.stack);
+        this.showMessage('Error updating game display', 'error');
     }
 }
-
+    
 export default GameState;
