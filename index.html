@@ -330,5 +330,64 @@ async function testGameComponents() {
 // Execute the test after a short delay
 setTimeout(testGameComponents, 3000);
 </script>
-    </body>
+<script>
+function setupGridClickTest() {
+    console.error('Setting up grid click test');
+    
+    // Add direct click handling to grid cells
+    const gridContainer = document.getElementById('grid-container');
+    if (!gridContainer) {
+        console.error('Grid container not found for testing');
+        return;
+    }
+    
+    // Add a special click handler to the entire grid
+    gridContainer.addEventListener('click', (e) => {
+        console.error('Grid container clicked:', {
+            target: e.target.tagName,
+            classes: e.target.className,
+            isGridCell: e.target.classList.contains('grid-cell'),
+            dataIndex: e.target.dataset?.index || 'none',
+            clientX: e.clientX,
+            clientY: e.clientY
+        });
+        
+        // If gridEventHandler exists, try to manually call it
+        if (window._gameController && window._gameController.gridEventHandler) {
+            try {
+                if (e.target.classList.contains('grid-cell')) {
+                    console.error('Manually calling handleCellClick');
+                    window._gameController.gridEventHandler.handleCellClick(e.target);
+                }
+            } catch (err) {
+                console.error('Error manually handling cell click:', err);
+            }
+        }
+    }, true);
+    
+    // Add visual feedback for all cells
+    const cells = gridContainer.querySelectorAll('.grid-cell');
+    cells.forEach(cell => {
+        // Add hover effect
+        cell.style.transition = 'all 0.2s';
+        
+        // Add visual click handler
+        cell.addEventListener('click', (e) => {
+            console.error('Direct cell click on:', cell.dataset.index);
+            
+            // Add temporary highlight
+            cell.style.boxShadow = '0 0 10px red';
+            setTimeout(() => {
+                cell.style.boxShadow = '';
+            }, 500);
+        });
+    });
+    
+    console.error(`Added direct click handlers to ${cells.length} grid cells`);
+}
+
+// Call this 5 seconds after page load to ensure grid has been rendered
+setTimeout(setupGridClickTest, 5000);
+</script>
+        </body>
 </html>
