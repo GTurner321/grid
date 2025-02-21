@@ -1,16 +1,28 @@
 import React from 'react';
 
-export default function RulesComponent() {
+console.error('Rules component loaded!');
+
+// Export the Rules component with a proper name
+function Rules() {
   const [isVisible, setIsVisible] = React.useState(true);
   
+  React.useEffect(() => {
+    console.error('Rules component mounted, isVisible:', isVisible);
+  }, []);
+  
   const handleStart = () => {
+    console.error('Start button clicked');
     setIsVisible(false);
-    // Optionally dispatch a game start event
-    window.dispatchEvent(new Event('gameStart'));
+    // Dispatch a game start event
+    window.dispatchEvent(new CustomEvent('gameStart'));
   };
-
+  
+  console.error('Rules component rendering with isVisible:', isVisible);
+  
+  // If not visible, return null (won't render anything)
   if (!isVisible) return null;
   
+  // Otherwise render the rules dialog
   return React.createElement(
     'div',
     {
@@ -77,3 +89,6 @@ export default function RulesComponent() {
     )
   );
 }
+
+// Add a default export for the Rules component
+export default Rules;
