@@ -189,16 +189,20 @@ setupGridInteractions() {
     }
 
     handleCellClick(cell) {
-    console.error('🎲 ULTRA VERBOSE Cell Click Diagnostics', {
-        cellElement: cell,
-        cellIndex: cell.dataset.index,
+    console.error('🎲 CELL CLICK COMPREHENSIVE DIAGNOSTICS', {
+        cell: cell,
+        cellElement: cell ? cell.outerHTML : 'NO CELL',
+        cellIndex: cell ? cell.dataset.index : 'NO INDEX',
         gameActive: this.state.gameActive,
-        currentUserPath: [...this.state.userPath],
-        startCoord: this.state.path[0],
-        endCoord: this.state.path[this.state.path.length - 1]
+        currentUserPath: [...this.state.userPath]
     });
 
     // Defensive checks
+    if (!cell) {
+        console.error('❌ NO CELL PROVIDED');
+        return;
+    }
+
     if (!this.state.gameActive) {
         console.error('❌ Game not active. Click ignored.');
         return;
@@ -206,12 +210,12 @@ setupGridInteractions() {
 
     const cellIndex = parseInt(cell.dataset.index);
 
-    console.error('Pre-Path Update Checks', {
+    console.error('CELL CLICK DETAILS', {
         cellIndex: cellIndex,
-        userPathLength: this.state.userPath.length,
-        isStartSquare: this.isStartSquare(cellIndex)
+        isNaN: isNaN(cellIndex),
+        userPathLength: this.state.userPath.length
     });
-
+        
     // First click logic
     if (this.state.userPath.length === 0) {
         if (this.isStartSquare(cellIndex)) {
