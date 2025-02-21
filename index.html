@@ -389,5 +389,34 @@ function setupGridClickTest() {
 // Call this 5 seconds after page load to ensure grid has been rendered
 setTimeout(setupGridClickTest, 5000);
 </script>
+<!-- Other scripts -->
+    <script type="module">
+        // Your new debugging script goes here
+        document.addEventListener('DOMContentLoaded', () => {
+            console.error('🌐 GLOBAL INITIALIZATION DEBUG');
+            
+            // Global click interceptor
+            document.addEventListener('click', (e) => {
+                console.error('🌍 DOCUMENT LEVEL CLICK', {
+                    target: e.target,
+                    isGridCell: e.target.classList.contains('grid-cell'),
+                    cellIndex: e.target.dataset?.index,
+                    path: e.composedPath()
+                });
+            }, true);
+
+            // Verify grid container setup
+            const gridContainer = document.getElementById('grid-container');
+            if (gridContainer) {
+                console.error('🧩 Grid Container Found', {
+                    children: gridContainer.children.length,
+                    gridCells: gridContainer.querySelectorAll('.grid-cell').length
+                });
+            } else {
+                console.error('❌ NO GRID CONTAINER FOUND');
+            }
+        });
+    </script>
+ 
         </body>
 </html>
