@@ -289,5 +289,46 @@
                 console.error('Level button verification complete');
             });
         </script>
+        <script>
+// Add this function to test your game components directly
+async function testGameComponents() {
+    console.error('TESTING GAME COMPONENTS DIRECTLY');
+    
+    try {
+        // Test path generator
+        console.error('Testing path generator...');
+        const pathModule = await import('./js/pathGenerator.js');
+        const path = await pathModule.generatePath();
+        console.error('Path generated successfully:', path);
+        
+        // Test sequence generator
+        console.error('Testing sequence generator...');
+        const seqModule = await import('./js/sequenceGenerator.js');
+        const sequence = await seqModule.generateSequence(1);
+        console.error('Sequence generated successfully:', sequence);
+        
+        // Test grid renderer
+        console.error('Testing grid renderer...');
+        const rendererModule = await import('./js/gridRenderer.js');
+        const gridContainer = document.getElementById('grid-container');
+        console.error('Grid container exists:', !!gridContainer);
+        
+        // If tests pass, try direct level start
+        console.error('Attempting direct level start...');
+        if (window._gameController && typeof window._gameController.startLevel === 'function') {
+            window._gameController.startLevel(1);
+            console.error('Direct level start called');
+        } else {
+            console.error('GameController not available for direct testing');
+        }
+    } catch (error) {
+        console.error('Error in component testing:', error);
+        console.error('Stack:', error.stack);
+    }
+}
+
+// Execute the test after a short delay
+setTimeout(testGameComponents, 3000);
+</script>
     </body>
 </html>
