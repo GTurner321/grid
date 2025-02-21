@@ -10,19 +10,36 @@
         <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧮</text></svg>">
         
         <script type="importmap">
-        {
-          "imports": {
-            "react": "https://esm.sh/react@18.2.0",
-            "react-dom": "https://esm.sh/react-dom@18.2.0"
-          }
-        }
-        </script>
-        <script type="module">
-          import React from 'react';
-          import ReactDOM from 'react-dom/client';
-          window.React = React;
-          window.ReactDOM = ReactDOM;
-        </script>
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client"
+  }
+}
+</script>
+<script type="module">
+  import React from 'react';
+  import * as ReactDOM from 'react-dom';
+  
+  // Add compatibility for older code expecting ReactDOM.createRoot
+  if (!ReactDOM.createRoot && ReactDOM.default && ReactDOM.default.createRoot) {
+    ReactDOM.createRoot = ReactDOM.default.createRoot;
+  } else if (!ReactDOM.createRoot) {
+    // Fallback for older React versions
+    ReactDOM.createRoot = (container) => ({
+      render: (element) => ReactDOM.render(element, container)
+    });
+  }
+  
+  window.React = React;
+  window.ReactDOM = ReactDOM;
+  
+  console.log('React initialized:', {
+    reactVersion: React.version,
+    hasCreateRoot: typeof ReactDOM.createRoot === 'function'
+  });
+</script>
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
           tailwind.config = {
@@ -154,55 +171,74 @@
     
         <!-- React Component Mounting -->
         <script type="module">
-            import GameController from './js/GameController.js';
-            import Rules from './js/rules.js';
+    import GameController from './js/GameController.js';
+    import Rules from './js/rules.js';
+    
+    console.error('DEBUG: Starting initialization');
+    console.error('DEBUG: GameController imported:', typeof GameController);
+    console.error('DEBUG: Rules imported:', typeof Rules);
+
+    // Ensure components are mounted after DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            console.error('DOM Loaded - Starting GameController initialization');
             
-            console.error('DEBUG: Starting initialization');
-            console.error('DEBUG: GameController imported:', typeof GameController);
-            console.error('DEBUG: Rules imported:', typeof Rules);
-
-            // Ensure components are mounted after DOM is fully loaded
-            document.addEventListener('DOMContentLoaded', () => {
-                try {
-                    console.error('DOM Loaded - Starting GameController initialization');
-                    
-                    // Create game controller
-                    const controller = new GameController();
-                    console.error('GameController instance created:', controller);
-                    
-                    // Store in window for debugging
-                    window._gameController = controller;
-                    console.error('GameController stored in window:', window._gameController);
-                    
-                    // Mount React components
-                    const root = window.ReactDOM.createRoot(document.getElementById('rules-container'));
-                    root.render(React.createElement(Rules));
-                    
-                    // Dispatch game start event
-                    window.dispatchEvent(new CustomEvent('gameStart'));
-                    
-                    console.error('Initialization complete');
-                } catch (error) {
-                    console.error('CRITICAL ERROR during initialization:', error);
-                    console.error('Error stack:', error.stack);
+            // Create game controller
+            const controller = new GameController();
+            console.error('GameController instance created:', controller);
+            
+            // Store in window for debugging
+            window._gameController = controller;
+            console.error('GameController stored in window:', window._gameController);
+            
+            // Mount React components - with fallback options
+            const rulesContainer = document.getElementById('rules-container');
+            
+            if (rulesContainer) {
+                if (typeof window.ReactDOM.createRoot === 'function') {
+                    // React 18 method
+                    const root = window.ReactDOM.createRoot(rulesContainer);
+                    root.render(window.React.createElement(Rules));
+                    console.error('Mounted Rules using createRoot (React 18+)');
+                } else if (typeof window.ReactDOM.render === 'function') {
+                    // React 17 and earlier fallback
+                    window.ReactDOM.render(window.React.createElement(Rules), rulesContainer);
+                    console.error('Mounted Rules using render (React 17-)');
+                } else {
+                    console.error('ERROR: No ReactDOM rendering method available');
                 }
-            });
+            } else {
+                console.error('ERROR: Rules container not found');
+            }
+            
+            // Dispatch game start event
+            window.dispatchEvent(new CustomEvent('gameStart'));
+            
+            console.error('Initialization complete');
+        } catch (error) {
+            console.error('CRITICAL ERROR during initialization:', error);
+            console.error('Error stack:', error.stack);
+        }
+    });
 
-            // Add backup initialization check
-            setTimeout(() => {
-                console.error('Delayed initialization check:', {
-                    hasController: !!window._gameController,
-                    controllerType: typeof window._gameController
-                });
-                
-                // If controller not initialized properly, try again
-                if (!window._gameController) {
-                    console.error('Controller not initialized properly, attempting recovery...');
-                    const controller = new GameController();
-                    window._gameController = controller;
-                    window.dispatchEvent(new CustomEvent('gameStart'));
-                }
-            }, 2000);
-        </script>
+    // Add backup initialization check
+    setTimeout(() => {
+        console.error('Delayed initialization check:', {
+            hasController: !!window._gameController,
+            controllerType: typeof window._gameController,
+            reactDOM: !!window.ReactDOM,
+            hasCreateRoot: typeof window.ReactDOM?.createRoot === 'function',
+            hasRender: typeof window.ReactDOM?.render === 'function'
+        });
+        
+        // If controller not initialized properly, try again
+        if (!window._gameController) {
+            console.error('Controller not initialized properly, attempting recovery...');
+            const controller = new GameController();
+            window._gameController = controller;
+            window.dispatchEvent(new CustomEvent('gameStart'));
+        }
+    }, 2000);
+</script>
     </body>
 </html>
