@@ -64,46 +64,30 @@ class GridEventHandler {
     }
 
     setupGridInteractions() {
-        console.error('🔍 setupGridInteractions CALLED');
-        
-        const gridContainer = document.getElementById('grid-container');
-        if (!gridContainer) {
-            console.error('❌ NO GRID CONTAINER FOUND');
-            return;
-        }
+    console.error('🔍 ULTRA VERBOSE Grid Interactions Setup');
+    
+    const gridContainer = document.getElementById('grid-container');
+    if (!gridContainer) {
+        console.error('❌ NO GRID CONTAINER FOUND');
+        return;
+    }
 
-        console.error('Grid Container found. Adding event listeners');
-        
-        // Remove existing listeners first
-        gridContainer.removeEventListener('click', this._gridContainerClickHandler);
-        gridContainer.removeEventListener('mousedown', this._gridContainerClickHandler);
-        gridContainer.removeEventListener('touchstart', this._gridContainerTouchHandler);
+    console.error('Grid Container Found - Detailed Inspection', {
+        innerHTML: gridContainer.innerHTML,
+        childElementCount: gridContainer.children.length
+    });
 
-        // Add comprehensive event listeners
-        gridContainer.addEventListener('click', this._gridContainerClickHandler, true);
-        gridContainer.addEventListener('mousedown', this._gridContainerClickHandler, true);
-        gridContainer.addEventListener('touchstart', this._gridContainerTouchHandler, { passive: false });
+    const gridCells = gridContainer.querySelectorAll('.grid-cell');
+    console.error(`🧩 Found ${gridCells.length} Grid Cells`);
 
-        // Verify grid cells
-        const gridCells = gridContainer.querySelectorAll('.grid-cell');
-        console.error(`🧩 Found ${gridCells.length} grid cells`);
-
-        gridCells.forEach((cell, index) => {
-            // Remove existing listeners
-            cell.removeEventListener('click', this._cellClickHandler);
-            cell.removeEventListener('mousedown', this._cellClickHandler);
-            cell.removeEventListener('touchstart', this._cellTouchHandler);
-
-            // Add new listeners
-            cell.addEventListener('click', this._cellClickHandler, true);
-            cell.addEventListener('mousedown', this._cellClickHandler, true);
-            cell.addEventListener('touchstart', this._cellTouchHandler, { passive: false });
-
-            console.error(`Cell ${index} listener setup:`, {
-                index: cell.dataset.index,
-                hasListeners: true
-            });
+    gridCells.forEach((cell, index) => {
+        console.error(`Cell ${index} Detailed Inspection:`, {
+            dataset: cell.dataset,
+            index: cell.dataset.index,
+            classList: Array.from(cell.classList),
+            isStartCell: cell.classList.contains('start-cell')
         });
+    });
     }
 
     _gridContainerClickHandler = (event) => {
@@ -168,55 +152,55 @@ class GridEventHandler {
     }
 
     handleCellClick(cell) {
-        console.error('🎲 handleCellClick CALLED', {
-            cellIndex: cell.dataset.index,
-            gameActive: this.state.gameActive
-        });
+    console.error('🎲 handleCellClick CALLED', {
+        cellIndex: cell.dataset.index,
+        gameActive: this.state.gameActive
+    });
 
-        // Defensive checks
-        if (!this.state.gameActive) {
-            console.error('❌ Game not active. Click ignored.');
-            return;
-        }
-
-        const cellIndex = parseInt(cell.dataset.index);
-
-        // First click logic
-        if (this.state.userPath.length === 0) {
-            if (this.isStartSquare(cellIndex)) {
-                this.state.userPath.push(cellIndex);
-                this.updatePathDisplay();
-                console.error(`✅ Start square selected: ${cellIndex}`);
-            } else {
-                console.error(`❌ Invalid first cell: ${cellIndex}`);
-                this.state.showMessage('You must start at the green square!', 'error');
-            }
-            return;
-        }
-
-        // Subsequent move validation
-        if (!this.isValidMove(cellIndex)) {
-            console.error(`❌ Invalid move to cell: ${cellIndex}`);
-            this.state.showMessage('You can only move to adjacent squares!', 'error');
-            return;
-        }
-
-        // Update path
-        if (this.state.userPath.includes(cellIndex)) {
-            const index = this.state.userPath.indexOf(cellIndex);
-            this.state.userPath = this.state.userPath.slice(0, index + 1);
-        } else {
-            this.state.userPath.push(cellIndex);
-        }
-
-        this.updatePathDisplay();
-
-        // Check for end square
-        if (this.isEndSquare(cellIndex)) {
-            this.validateSolution();
-        }
+    // Defensive checks
+    if (!this.state.gameActive) {
+        console.error('❌ Game not active. Click ignored.');
+        return;
     }
 
+    const cellIndex = parseInt(cell.dataset.index);
+
+    // First click logic
+    if (this.state.userPath.length === 0) {
+        if (this.isStartSquare(cellIndex)) {
+            this.state.userPath.push(cellIndex);
+            this.updatePathDisplay();
+            console.error(`✅ Start square selected: ${cellIndex}`);
+        } else {
+            console.error(`❌ Invalid first cell: ${cellIndex}`);
+            this.state.showMessage('You must start at the green square!', 'error');
+        }
+        return;
+    }
+
+    // Subsequent move validation
+    if (!this.isValidMove(cellIndex)) {
+        console.error(`❌ Invalid move to cell: ${cellIndex}`);
+        this.state.showMessage('You can only move to adjacent squares!', 'error');
+        return;
+    }
+
+    // Update path
+    if (this.state.userPath.includes(cellIndex)) {
+        const index = this.state.userPath.indexOf(cellIndex);
+        this.state.userPath = this.state.userPath.slice(0, index + 1);
+    } else {
+        this.state.userPath.push(cellIndex);
+    }
+
+    this.updatePathDisplay();
+
+    // Check for end square
+    if (this.isEndSquare(cellIndex)) {
+        this.validateSolution();
+    }
+}
+    
     isValidMove(cellIndex) {
         const lastCellIndex = this.state.userPath[this.state.userPath.length - 1];
         const [x1, y1] = this.getCellCoordinates(cellIndex);
@@ -329,10 +313,17 @@ class GridEventHandler {
     }
 
     isStartSquare(cellIndex) {
-        const coord = this.getCellCoordinates(cellIndex);
-        const startCoord = this.state.path[0];
-        return coord[0] === startCoord[0] && coord[1] === startCoord[1];
-    }
+    const coord = this.getCellCoordinates(cellIndex);
+    const startCoord = this.state.path[0];
+    
+    console.error('Start Square Verification', {
+        currentCoord: coord,
+        startCoord: startCoord,
+        coordMatch: coord[0] === startCoord[0] && coord[1] === startCoord[1]
+    });
+
+    return coord[0] === startCoord[0] && coord[1] === startCoord[1];
+}
 
     isEndSquare(cellIndex) {
         const coord = this.getCellCoordinates(cellIndex);
