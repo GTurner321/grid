@@ -51,24 +51,31 @@ class GameState {
     }
     
     updateUI(options = {}) {
-        try {
-            console.log('Updating UI - DETAILED', { options });
-            
-            const scoreComponentElement = document.getElementById('score-component');
-            
-            if (scoreComponentElement && window.React && window.ReactDOM) {
-                // Create ScoreBox element
-                const scoreElement = window.React.createElement(ScoreBox, {
-                    key: Date.now(), // Ensure re-render
-                    level: this.currentLevel,
-                    possiblePoints: scoreManager.maxLevelPoints,
-                    spareRemovalCount: scoreManager.spareRemovalCount,
-                    checkCount: scoreManager.checkCount,
-                    startTime: scoreManager.puzzleStartTime,
-                    isComplete: options.roundComplete || false,
-                    totalScore: scoreManager.totalScore
-                });
+    try {
+        console.log('Updating UI - DETAILED', { options });
+        
+        const scoreComponentElement = document.getElementById('score-component');
+        
+        if (scoreComponentElement && window.React && window.ReactDOM) {
+            // Only try to render the score component if React is available
+            const scoreProps = {
+                key: Date.now(),
+                level: this.currentLevel,
+                possiblePoints: scoreManager.maxLevelPoints,
+                spareRemovalCount: scoreManager.spareRemovalCount,
+                checkCount: scoreManager.checkCount,
+                startTime: scoreManager.puzzleStartTime,
+                isComplete: options.roundComplete || false,
+                totalScore: scoreManager.totalScore
+            };
 
+            try {
+                // Add this console log to debug
+                console.log('Rendering score with props:', scoreProps);
+                
+                // Create the score element - THIS WAS MISSING
+                const scoreElement = window.React.createElement(ScoreBox, scoreProps);
+                
                 // Handle different React versions
                 if (this.scoreRoot) {
                     // Already created with createRoot
@@ -83,14 +90,17 @@ class GameState {
                 } else {
                     console.error('No React rendering method available');
                 }
-            } else {
-                console.error('Score component element not found or React not available', {
-                    hasElement: !!scoreComponentElement,
-                    hasReact: !!window.React,
-                    hasReactDOM: !!window.ReactDOM
-                });
+            } catch (error) {
+                console.error('Error rendering score component:', error);
             }
-            
+        } else {
+            console.error('Score component element not found or React not available', {
+                hasElement: !!scoreComponentElement,
+                hasReact: !!window.React,
+                hasReactDOM: !!window.ReactDOM
+            });
+        }
+        
             // Update button states
             const checkSolutionBtn = document.getElementById('check-solution');
             const removeSpareBtn = document.getElementById('remove-spare');
