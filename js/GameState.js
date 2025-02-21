@@ -12,10 +12,12 @@ class GameState {
         this.gridEntries = new Array(100).fill(null);
         this.removedCells = new Set();
         this.gameActive = false;
+        this.scoreRoot = null;
     }
 
-    reset() {  // Add here, between constructor and updateUI
+    reset() {
         try {
+            console.log('GameState: Resetting state');
             this.userPath = [];
             this.path = [];
             this.sequence = [];
@@ -23,9 +25,28 @@ class GameState {
             this.gridEntries = new Array(100).fill(null);
             this.removedCells.clear();
             this.gameActive = false;
+            
+            // Important: We don't reset currentLevel here to maintain level selection
+            
+            // Clear the grid container
+            const gridContainer = document.getElementById('grid-container');
+            if (gridContainer) {
+                gridContainer.innerHTML = '';
+            }
+            
+            // Hide sequence container
+            const sequenceContainer = document.querySelector('.sequence-container');
+            if (sequenceContainer) {
+                sequenceContainer.style.display = 'none';
+            }
+            
+            // Update UI to reflect reset state
             this.updateUI();
+            
+            console.log('GameState: Reset complete');
         } catch (error) {
             console.error('Error resetting game state:', error);
+            console.error('Error stack:', error.stack);
         }
     }
     
@@ -37,23 +58,32 @@ class GameState {
             
             if (scoreComponentElement) {
                 // Create root only once
-                if (!this.scoreRoot) {
+                if (!this.scoreRoot && window.ReactDOM) {
+                    console.log('Creating score component root');
                     this.scoreRoot = window.ReactDOM.createRoot(scoreComponentElement);
                 }
 
-                // Create the ScoreBox element with all necessary props
-                const scoreElement = React.createElement(ScoreBox, {
-                    level: this.currentLevel,
-                    possiblePoints: scoreManager.maxLevelPoints,
-                    spareRemovalCount: scoreManager.spareRemovalCount,
-                    checkCount: scoreManager.checkCount,
-                    startTime: scoreManager.puzzleStartTime,
-                    isComplete: options.roundComplete || false,
-                    totalScore: scoreManager.totalScore
-                });
+                if (this.scoreRoot) {
+                    // Create the ScoreBox element with all necessary props
+                    const scoreElement = React.createElement(ScoreBox, {
+                        key: Date.now(), // Ensure re-render
+                        level: this.currentLevel,
+                        possiblePoints: scoreManager.maxLevelPoints,
+                        spareRemovalCount: scoreManager.spareRemovalCount,
+                        checkCount: scoreManager.checkCount,
+                        startTime: scoreManager.puzzleStartTime,
+                        isComplete: options.roundComplete || false,
+                        totalScore: scoreManager.totalScore
+                    });
 
-                // Render the score component
-                this.scoreRoot.render(scoreElement);
+                    // Render the score component
+                    console.log('Rendering score component');
+                    this.scoreRoot.render(scoreElement);
+                } else {
+                    console.error('Score root is not created yet or ReactDOM not available');
+                }
+            } else {
+                console.error('Score component element not found in DOM');
             }
             
             // Update button states
@@ -61,13 +91,12 @@ class GameState {
             const removeSpareBtn = document.getElementById('remove-spare');
             
             if (checkSolutionBtn) {
-                checkSolutionBtn.disabled = !this.gameActive;
+                checkSolutionBtn.disabled = !this.gameActive || this.userPath.length === 0;
             }
             
             if (removeSpareBtn) {
-                removeSpareBtn.disabled = !this.gameActive;
-                
                 const spareInfo = scoreManager.getSpareRemovalInfo();
+                removeSpareBtn.disabled = !this.gameActive || spareInfo.remainingAttempts === 0;
                 
                 if (spareInfo.remainingAttempts === 2) {
                     removeSpareBtn.textContent = 'Remove 50% of Spare Cells';
@@ -100,6 +129,7 @@ class GameState {
             
         } catch (error) {
             console.error('Error updating UI:', error);
+            console.error('Error stack:', error.stack);
             this.showMessage('Error updating game display', 'error');
         }
     }
@@ -109,16 +139,21 @@ class GameState {
             const messageElement = document.getElementById('game-messages');
             if (messageElement) {
                 messageElement.textContent = message;
-                messageElement.className = type;
+                messageElement.className = 'message-box ' + type;
                 
-                // Clear message after 3 seconds
+                // Clear message after 5 seconds for better visibility
                 setTimeout(() => {
-                    messageElement.textContent = '';
-                    messageElement.className = '';
-                }, 3000);
+                    if (messageElement.textContent === message) {
+                        messageElement.textContent = '';
+                        messageElement.className = 'message-box';
+                    }
+                }, 5000);
+            } else {
+                console.error('Game messages element not found');
             }
         } catch (error) {
             console.error('Error showing message:', error);
+            console.error('Error stack:', error.stack);
         }
     }
 }
