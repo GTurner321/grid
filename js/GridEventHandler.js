@@ -63,8 +63,8 @@ class GridEventHandler {
         });
     }
 
-    setupGridInteractions() {
-    console.error('🔍 ULTRA VERBOSE Grid Interactions Setup');
+setupGridInteractions() {
+    console.error('🔍 ULTRA AGGRESSIVE Grid Interactions Setup');
     
     const gridContainer = document.getElementById('grid-container');
     if (!gridContainer) {
@@ -72,45 +72,62 @@ class GridEventHandler {
         return;
     }
 
-    // Remove any existing listeners first
-    gridContainer.removeEventListener('click', this._gridContainerClickHandler);
-    
-    // Add new click listener with capture
-    gridContainer.addEventListener('click', this._gridContainerClickHandler, true);
-
-    console.error('Grid Container Found - Detailed Inspection', {
-        innerHTML: gridContainer.innerHTML,
-        childElementCount: gridContainer.children.length
-    });
-
-    // Detailed grid cell listener setup
+    // Clear ALL existing event listeners
     const gridCells = gridContainer.querySelectorAll('.grid-cell');
     console.error(`🧩 Found ${gridCells.length} Grid Cells`);
 
     gridCells.forEach((cell, index) => {
-        // Remove existing listeners to prevent duplicates
-        cell.removeEventListener('click', this._cellClickHandler);
-        
-        // Add new click listener to each cell
-        cell.addEventListener('click', (event) => {
+        // Remove ALL existing event listeners
+        const cellClone = cell.cloneNode(true);
+        cell.parentNode.replaceChild(cellClone, cell);
+
+        // Add multiple event listeners with different methods
+        cellClone.addEventListener('click', (event) => {
             event.stopPropagation();
             event.preventDefault();
             
-            console.error(`🎯 Direct Cell ${index} Click`, {
-                cellIndex: cell.dataset.index,
+            console.error(`🎯 DIRECT CELL CLICK - Method 1`, {
+                cellIndex: cellClone.dataset.index,
                 event: event
             });
             
-            this.handleCellClick(cell);
-        }, true);
+            this.handleCellClick(cellClone);
+        }, false);
+
+        cellClone.onclick = (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            console.error(`🎯 DIRECT CELL CLICK - Method 2`, {
+                cellIndex: cellClone.dataset.index,
+                event: event
+            });
+            
+            this.handleCellClick(cellClone);
+        };
 
         console.error(`Cell ${index} Detailed Inspection:`, {
-            dataset: cell.dataset,
-            index: cell.dataset.index,
-            classList: Array.from(cell.classList),
-            isStartCell: cell.classList.contains('start-cell')
+            dataset: cellClone.dataset,
+            index: cellClone.dataset.index,
+            classList: Array.from(cellClone.classList)
         });
     });
+
+    // Add global fallback listener
+    document.addEventListener('click', (event) => {
+        const cell = event.target.closest('.grid-cell');
+        if (cell) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            console.error('🌍 GLOBAL CELL CLICK FALLBACK', {
+                cell: cell,
+                cellIndex: cell.dataset.index
+            });
+            
+            this.handleCellClick(cell);
+        }
+    }, true);
 }
     
     _gridContainerClickHandler = (event) => {
