@@ -7,54 +7,110 @@ import GameState from './GameState.js';
 import GridEventHandler from './GridEventHandler.js';
 
 class GameController {
-    constructor() {
-    console.error('CRITICAL: GameController constructor starting');
+constructor() {
+    console.error('🚀 CRITICAL: GameController constructor starting - ULTRA ROBUST');
     
-    // Debug instance creation
     try {
+        // Extended debug logging
+        console.error('Initialization Context:', {
+            windowReady: typeof window !== 'undefined',
+            documentReady: document.readyState,
+            hasReact: typeof React !== 'undefined',
+            hasReactDOM: typeof ReactDOM !== 'undefined'
+        });
+        
+        // Create state and event handler with additional error handling
         this.state = new GameState();
         this.gridEventHandler = new GridEventHandler(this.state);
         
-        // Bind critical methods to ensure proper 'this' context
-        this.startLevel = this.startLevel.bind(this);
-        this.checkSolution = this.checkSolution.bind(this);
-        this.removeAllSpareCells = this.removeAllSpareCells.bind(this);
-        this.handleValidPath = this.handleValidPath.bind(this);
-        this.handlePuzzleSolved = this.handlePuzzleSolved.bind(this);
-        this.handleMathematicalError = this.handleMathematicalError.bind(this);
-        this.highlightUserPath = this.highlightUserPath.bind(this);
-        this.placeMathSequence = this.placeMathSequence.bind(this);
-        this.fillRemainingCells = this.fillRemainingCells.bind(this);
-        this.generateRandomEntry = this.generateRandomEntry.bind(this);
-        this.displaySequenceSums = this.displaySequenceSums.bind(this);
-        this.handleFirstRemoval = this.handleFirstRemoval.bind(this);
-        this.handleSecondRemoval = this.handleSecondRemoval.bind(this);
+        // Comprehensive method binding with error logging
+        const methodsToBindAndLog = [
+            'startLevel', 'checkSolution', 'removeAllSpareCells', 
+            'handleValidPath', 'handlePuzzleSolved', 
+            'handleMathematicalError', 'highlightUserPath'
+        ];
         
-        console.error('Instance created:', {
-            hasState: !!this.state,
-            hasGridHandler: !!this.gridEventHandler,
-            methods: Object.getOwnPropertyNames(Object.getPrototypeOf(this)),
-            startLevelExists: typeof this.startLevel === 'function'
+        methodsToBindAndLog.forEach(method => {
+            if (typeof this[method] === 'function') {
+                this[method] = this[method].bind(this);
+            } else {
+                console.error(`❌ Method ${method} not found during binding`);
+            }
         });
         
+        // Advanced initialization tracking
+        this._initializationAttempts = 0;
+        this._initializationComplete = false;
+        
+        // Robust initialization method
+        this.robustInitialize();
+        
+        // Add multiple backup initialization attempts
+        this._initializationInterval = setInterval(() => {
+            if (!this._initializationComplete && this._initializationAttempts < 3) {
+                console.error(`🔄 Retry initialization - Attempt ${this._initializationAttempts + 1}`);
+                this.robustInitialize();
+            } else {
+                clearInterval(this._initializationInterval);
+            }
+        }, 2000);
+        
+        console.error('✅ Initial constructor setup complete');
+    } catch (error) {
+        console.error('🚨 CRITICAL Constructor Error:', error);
+        console.error('Error Stack:', error.stack);
+    }
+}
+
+robustInitialize() {
+    try {
+        this._initializationAttempts++;
+        
+        // Ensure game controls are set up
         this.initializeEventListeners();
         
-        // Make startLevel directly accessible for debugging
-        if (typeof this.startLevel === 'function') {
-            window._startLevel = (level) => {
-                console.error(`Direct startLevel call with level ${level}`);
-                this.startLevel(level);
-            };
-            console.error('Exposed startLevel globally as window._startLevel');
+        // Force grid event handler setup
+        if (this.gridEventHandler) {
+            this.gridEventHandler.setupGridInteractions();
+        } else {
+            console.error('❌ Grid Event Handler not available');
         }
         
-        // Make instance globally accessible for debugging
+        // Create global access points for debugging
         window._gameController = this;
-        console.error('GameController instance stored in window._gameController');
+        window._gridEventHandler = this.gridEventHandler;
+        
+        // Dispatch custom initialization event
+        const initEvent = new CustomEvent('gameControllerInit', { 
+            detail: { 
+                level: this.state.currentLevel,
+                gameActive: this.state.gameActive 
+            } 
+        });
+        window.dispatchEvent(initEvent);
+        
+        this._initializationComplete = true;
+        
+        console.error('🎉 Robust Initialization Complete', {
+            gameActive: this.state.gameActive,
+            currentLevel: this.state.currentLevel,
+            hasGridHandler: !!this.gridEventHandler
+        });
     } catch (error) {
-        console.error('CRITICAL: Error in constructor:', error);
-        console.error('Stack:', error.stack);
+        console.error('🚨 Robust Initialization Error:', error);
+        console.error('Error Stack:', error.stack);
     }
+}
+
+// Additional debugging method
+debugGameState() {
+    console.error('🕵️ GAME STATE DEBUG', {
+        gameActive: this.state.gameActive,
+        currentLevel: this.state.currentLevel,
+        gridEntries: this.state.gridEntries.length,
+        userPath: this.state.userPath,
+        path: this.state.path
+    });
 }
     
     initializeEventListeners() {
