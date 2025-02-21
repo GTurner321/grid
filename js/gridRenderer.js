@@ -1,41 +1,57 @@
 // gridRenderer.js
 import PuzzleSymbols from './puzzleSymbols.js';
 
-/**
- * Renders the game grid based on the provided grid entries
- * @param {Array} gridEntries - Array of cell entries to render
- * @param {Object} options - Additional rendering options
- */
 export function renderGrid(gridEntries, options = {}) {
     try {
+        console.error('🎲 RENDERING GRID - ULTRA VERBOSE');
+        
         // Validate input
         if (!Array.isArray(gridEntries)) {
-            console.error('Invalid grid entries: Expected an array');
+            console.error('❌ Invalid grid entries: Expected an array');
             return;
         }
 
         const gridContainer = document.getElementById('grid-container');
         if (!gridContainer) {
-            console.error('Grid container not found');
+            console.error('❌ Grid container not found');
             return;
         }
 
         // Clear existing grid
         gridContainer.innerHTML = '';
+        
+        // Ensure grid is set up for proper layout
+        gridContainer.classList.add('grid');
+        gridContainer.style.display = 'grid';
+        gridContainer.style.gridTemplateColumns = 'repeat(10, 1fr)';
+        gridContainer.style.gap = '2px';
 
-        // Create grid cells
+        // Create grid cells with enhanced debugging
         gridEntries.forEach((entry, index) => {
             const cell = document.createElement('div');
+            
+            // Ensure cell is fully clickable
+            cell.style.cursor = 'pointer';
+            cell.style.userSelect = 'none';
+            cell.style.position = 'relative';
+            
+            // Critical: Add grid-cell class and index
             cell.classList.add('grid-cell');
             cell.dataset.index = index;
+            
+            // Enhanced cell creation logging
+            console.error(`Creating cell ${index}:`, {
+                entryType: entry ? entry.type : 'null',
+                entryValue: entry ? entry.value : 'null'
+            });
 
             if (entry) {
                 if (entry.type === 'number') {
                     const symbolContainer = document.createElement('div');
                     symbolContainer.classList.add('symbol-container');
                     
-                    // Ensure the whole cell remains clickable
-                    symbolContainer.style.pointerEvents = 'none';
+                    // IMPORTANT: Remove pointer-events: none
+                    symbolContainer.style.pointerEvents = 'auto';
                     
                     const symbolValue = entry.value instanceof Object 
                         ? (entry.value.numerator && entry.value.denominator 
@@ -67,31 +83,50 @@ export function renderGrid(gridEntries, options = {}) {
                 cell.textContent = '';
             }
 
+            // Add debug attribute
+            cell.setAttribute('data-debug', `Cell ${index}`);
+
+            // Add click logging
+            cell.addEventListener('click', (e) => {
+                console.error('🎯 CELL CLICKED', {
+                    index: cell.dataset.index,
+                    value: cell.dataset.value,
+                    classes: Array.from(cell.classList)
+                });
+            }, { capture: true });
+
             gridContainer.appendChild(cell);
         });
 
-        // Highlight start square if coordinates are provided
+        // Highlight start square
         if (options.startCoord) {
             const startIndex = options.startCoord[1] * 10 + options.startCoord[0];
             const startCell = gridContainer.querySelector(`[data-index="${startIndex}"]`);
             if (startCell) {
                 startCell.classList.add('start-cell');
+                console.error('🟢 Start cell identified:', startIndex);
             }
         }
 
-        // Highlight end square if coordinates are provided
+        // Highlight end square
         if (options.endCoord) {
             const endIndex = options.endCoord[1] * 10 + options.endCoord[0];
             const endCell = gridContainer.querySelector(`[data-index="${endIndex}"]`);
             if (endCell) {
                 endCell.classList.add('end-cell');
+                console.error('🏁 End cell identified:', endIndex);
             }
         }
 
-        // Ensure grid layout
-        gridContainer.style.gridTemplateColumns = 'repeat(10, 1fr)';
+        // Final verification log
+        console.error('🧩 Grid Rendering Complete', {
+            totalCells: gridEntries.length,
+            gridCells: gridContainer.querySelectorAll('.grid-cell').length
+        });
+
     } catch (error) {
-        console.error('Error rendering grid:', error);
+        console.error('❌ Error rendering grid:', error);
+        console.error('Error stack:', error.stack);
     }
 }
 
