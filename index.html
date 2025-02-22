@@ -69,56 +69,74 @@
         <link rel="modulepreload" href="js/puzzleSymbols.js">
         <link rel="modulepreload" href="js/rules.js">
 
-        <!-- Add this inline style tag right before the closing </head> tag in your HTML -->
-<style>
-/* Critical fix for buttons and clickable elements */
-.game-container,
-#grid-container,
-.grid-cell,
-.symbol-container,
-.level-selector,
-.level-buttons,
-.game-controls,
-button {
-    pointer-events: auto !important;
-}
+        <!-- Critical CSS fixes -->
+        <style>
+            /* Critical fix for buttons and clickable elements */
+            .game-container,
+            #grid-container,
+            .grid-cell,
+            .symbol-container,
+            .level-selector,
+            .level-buttons,
+            .game-controls,
+            button {
+                pointer-events: auto !important;
+            }
 
-.grid-cell {
-    cursor: pointer !important;
-    z-index: 10 !important;
-    position: relative !important;
-}
+            .grid-cell {
+                cursor: pointer !important;
+                z-index: 100 !important;
+                position: relative !important;
+            }
 
-/* Fix button display */
-.game-controls button {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    padding: 10px 20px !important;
-    background-color: #3b82f6 !important;
-    color: white !important;
-    border-radius: 6px !important;
-    cursor: pointer !important;
-    transition: opacity 0.2s !important;
-}
+            /* Fix button display */
+            .game-controls button {
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                padding: 10px 20px !important;
+                background-color: #3b82f6 !important;
+                color: white !important;
+                border-radius: 6px !important;
+                cursor: pointer !important;
+                transition: opacity 0.2s !important;
+            }
 
-.game-controls button:disabled {
-    opacity: 0.5 !important;
-    cursor: not-allowed !important;
-}
+            .game-controls button:disabled {
+                opacity: 0.5 !important;
+                cursor: not-allowed !important;
+            }
 
-/* Fix selected cell display */
-.grid-cell.selected {
-    background-color: #60a5fa !important;
-    color: white !important;
-    z-index: 15 !important;
-}
+            /* Fix selected cell display */
+            .grid-cell.selected {
+                background-color: #60a5fa !important;
+                color: white !important;
+                z-index: 15 !important;
+                border: 2px solid #1d4ed8 !important;
+                box-shadow: 0 0 8px rgba(59, 130, 246, 0.5) !important;
+            }
 
-/* Ensure SVG elements pass through clicks */
-svg {
-    pointer-events: none !important;
-}
-</style>
+            /* Ensure SVG elements pass through clicks */
+            svg, 
+            .symbol-container, 
+            .symbol-container * {
+                pointer-events: none !important;
+            }
+            
+            /* Improve visual feedback */
+            .grid-cell:active {
+                transform: scale(0.95) !important;
+                box-shadow: inset 0 0 5px rgba(0,0,0,0.3) !important;
+            }
+            
+            /* Make sure level buttons are clickable */
+            .level-btn {
+                cursor: pointer !important;
+                position: relative !important;
+                z-index: 1000 !important;
+                pointer-events: auto !important;
+            }
+        </style>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this game.</noscript>
@@ -225,64 +243,64 @@ svg {
         <script type="module" src="js/puzzleSymbols.js"></script>
     
         <!-- React Component Mounting -->
-       <script type="module">
-    import GameController from './js/GameController.js';
-    import Rules from './js/rules.js';
-    
-    // Wait until everything is fully loaded
-    window.addEventListener('load', () => {
-        console.error('Window fully loaded - Starting initialization');
-        
-        // Small delay to ensure DOM is ready
-        setTimeout(() => {
-            try {
-                // Create game controller
-                const controller = new GameController();
-                console.error('GameController created:', controller);
+        <script type="module">
+            import GameController from './js/GameController.js';
+            import Rules from './js/rules.js';
+            
+            // Wait until everything is fully loaded
+            window.addEventListener('load', () => {
+                console.error('Window fully loaded - Starting initialization');
                 
-                // Store in window for access
-                window._gameController = controller;
-                
-                // Apply additional CSS fixes
-                const style = document.createElement('style');
-                style.textContent = `
-                    .game-container, #grid-container, .grid-cell, .symbol-container {
-                        pointer-events: auto !important;
-                    }
-                    .grid-cell {
-                        cursor: pointer !important;
-                        z-index: 10;
-                    }
-                `;
-                document.head.appendChild(style);
-                
-                // Mount React components
-                const rulesContainer = document.getElementById('rules-container');
-                if (rulesContainer && window.React && window.ReactDOM) {
-                    if (typeof window.ReactDOM.createRoot === 'function') {
-                        const root = window.ReactDOM.createRoot(rulesContainer);
-                        root.render(window.React.createElement(Rules));
-                    } else if (typeof window.ReactDOM.render === 'function') {
-                        window.ReactDOM.render(window.React.createElement(Rules), rulesContainer);
-                    }
-                }
-                
-                // Force level 1 to start automatically after 1 second
+                // Small delay to ensure DOM is ready
                 setTimeout(() => {
-                    if (window._gameController && typeof window._gameController.startLevel === 'function') {
-                        window._gameController.startLevel(1);
-                        console.error('Auto-started level 1');
+                    try {
+                        // Create game controller
+                        const controller = new GameController();
+                        console.error('GameController created:', controller);
+                        
+                        // Store in window for access
+                        window._gameController = controller;
+                        
+                        // Apply additional CSS fixes
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            .game-container, #grid-container, .grid-cell, .symbol-container {
+                                pointer-events: auto !important;
+                            }
+                            .grid-cell {
+                                cursor: pointer !important;
+                                z-index: 10 !important;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                        
+                        // Mount React components
+                        const rulesContainer = document.getElementById('rules-container');
+                        if (rulesContainer && window.React && window.ReactDOM) {
+                            if (typeof window.ReactDOM.createRoot === 'function') {
+                                const root = window.ReactDOM.createRoot(rulesContainer);
+                                root.render(window.React.createElement(Rules));
+                            } else if (typeof window.ReactDOM.render === 'function') {
+                                window.ReactDOM.render(window.React.createElement(Rules), rulesContainer);
+                            }
+                        }
+                        
+                        // Force level 1 to start automatically after 1 second
+                        setTimeout(() => {
+                            if (window._gameController && typeof window._gameController.startLevel === 'function') {
+                                window._gameController.startLevel(1);
+                                console.error('Auto-started level 1');
+                            }
+                        }, 1000);
+                        
+                        console.error('Initialization sequence completed successfully');
+                    } catch (error) {
+                        console.error('Critical Error:', error);
+                        console.error('Stack:', error.stack);
                     }
-                }, 1000);
-                
-                console.error('Initialization sequence completed successfully');
-            } catch (error) {
-                console.error('Critical Error:', error);
-                console.error('Stack:', error.stack);
-            }
-        }, 500);
-    });
-</script>
+                }, 500);
+            });
+        </script>
         
         <!-- Additional event handlers for level buttons -->
         <script>
@@ -327,134 +345,133 @@ svg {
                 console.error('Level button verification complete');
             });
         </script>
+
+        <!-- COMPREHENSIVE GRID CELL FIX -->
         <script>
-// Add this function to test your game components directly
-async function testGameComponents() {
-    console.error('TESTING GAME COMPONENTS DIRECTLY');
-    
-    try {
-        // Test path generator
-        console.error('Testing path generator...');
-        const pathModule = await import('./js/pathGenerator.js');
-        const path = await pathModule.generatePath();
-        console.error('Path generated successfully:', path);
-        
-        // Test sequence generator
-        console.error('Testing sequence generator...');
-        const seqModule = await import('./js/sequenceGenerator.js');
-        const sequence = await seqModule.generateSequence(1);
-        console.error('Sequence generated successfully:', sequence);
-        
-        // Test grid renderer
-        console.error('Testing grid renderer...');
-        const rendererModule = await import('./js/gridRenderer.js');
-        const gridContainer = document.getElementById('grid-container');
-        console.error('Grid container exists:', !!gridContainer);
-        
-        // If tests pass, try direct level start
-        console.error('Attempting direct level start...');
-        if (window._gameController && typeof window._gameController.startLevel === 'function') {
-            window._gameController.startLevel(1);
-            console.error('Direct level start called');
-        } else {
-            console.error('GameController not available for direct testing');
-        }
-    } catch (error) {
-        console.error('Error in component testing:', error);
-        console.error('Stack:', error.stack);
-    }
-}
-
-// Execute the test after a short delay
-setTimeout(testGameComponents, 3000);
-</script>
-<script>
-function setupGridClickTest() {
-    console.error('Setting up grid click test');
-    
-    // Add direct click handling to grid cells
-    const gridContainer = document.getElementById('grid-container');
-    if (!gridContainer) {
-        console.error('Grid container not found for testing');
-        return;
-    }
-    
-    // Add a special click handler to the entire grid
-    gridContainer.addEventListener('click', (e) => {
-        console.error('Grid container clicked:', {
-            target: e.target.tagName,
-            classes: e.target.className,
-            isGridCell: e.target.classList.contains('grid-cell'),
-            dataIndex: e.target.dataset?.index || 'none',
-            clientX: e.clientX,
-            clientY: e.clientY
-        });
-        
-        // If gridEventHandler exists, try to manually call it
-        if (window._gameController && window._gameController.gridEventHandler) {
-            try {
-                if (e.target.classList.contains('grid-cell')) {
-                    console.error('Manually calling handleCellClick');
-                    window._gameController.gridEventHandler.handleCellClick(e.target);
+            // Fixed grid cell selection
+            document.addEventListener('DOMContentLoaded', function() {
+                console.error('🔧 PATH PUZZLE GRID CELL FIX LOADED');
+                
+                // Function to fix grid cells
+                function fixGridCells() {
+                    const gridCells = document.querySelectorAll('.grid-cell');
+                    console.error(`Found ${gridCells.length} grid cells to fix`);
+                    
+                    if (gridCells.length === 0) {
+                        // If no grid cells found, try again in a second
+                        setTimeout(fixGridCells, 1000);
+                        return;
+                    }
+                    
+                    // Apply the fix to each cell
+                    gridCells.forEach(cell => {
+                        try {
+                            // Create a new direct click handler
+                            const newCell = cell.cloneNode(true);
+                            if (cell.parentNode) {
+                                cell.parentNode.replaceChild(newCell, cell);
+                            }
+                            
+                            // Apply critical styling
+                            newCell.style.cssText += `
+                                cursor: pointer !important;
+                                pointer-events: auto !important;
+                                position: relative !important;
+                                z-index: 100 !important;
+                            `;
+                            
+                            // Make sure children don't block clicks
+                            Array.from(newCell.children).forEach(child => {
+                                child.style.pointerEvents = 'none';
+                            });
+                            
+                            // Attach direct click handler
+                            newCell.addEventListener('click', function(e) {
+                                console.error(`🎯 Direct click on cell ${this.dataset.index}`);
+                                e.stopPropagation(); // Stop other handlers
+                                
+                                // Visual feedback
+                                this.style.boxShadow = '0 0 10px #3b82f6';
+                                setTimeout(() => { this.style.boxShadow = ''; }, 300);
+                                
+                                // Call the game's handler
+                                if (window._gameController && window._gameController.gridEventHandler) {
+                                    window._gameController.gridEventHandler.handleCellClick(this);
+                                }
+                            });
+                        } catch (err) {
+                            console.error('Error fixing cell:', err);
+                        }
+                    });
+                    
+                    console.error('✅ Grid cell fix complete');
                 }
-            } catch (err) {
-                console.error('Error manually handling cell click:', err);
-            }
-        }
-    }, true);
-    
-    // Add visual feedback for all cells
-    const cells = gridContainer.querySelectorAll('.grid-cell');
-    cells.forEach(cell => {
-        // Add hover effect
-        cell.style.transition = 'all 0.2s';
-        
-        // Add visual click handler
-        cell.addEventListener('click', (e) => {
-            console.error('Direct cell click on:', cell.dataset.index);
-            
-            // Add temporary highlight
-            cell.style.boxShadow = '0 0 10px red';
-            setTimeout(() => {
-                cell.style.boxShadow = '';
-            }, 500);
-        });
-    });
-    
-    console.error(`Added direct click handlers to ${cells.length} grid cells`);
-}
-
-// Call this 5 seconds after page load to ensure grid has been rendered
-setTimeout(setupGridClickTest, 5000);
-</script>
-<!-- Other scripts -->
-    <script type="module">
-        // Your new debugging script goes here
-        document.addEventListener('DOMContentLoaded', () => {
-            console.error('🌐 GLOBAL INITIALIZATION DEBUG');
-            
-            // Global click interceptor
-            document.addEventListener('click', (e) => {
-                console.error('🌍 DOCUMENT LEVEL CLICK', {
-                    target: e.target,
-                    isGridCell: e.target.classList.contains('grid-cell'),
-                    cellIndex: e.target.dataset?.index,
-                    path: e.composedPath()
+                
+                // Monitor for grid updates
+                const observer = new MutationObserver(function(mutations) {
+                    for (const mutation of mutations) {
+                        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                            console.error('Grid container updated, applying fix...');
+                            setTimeout(fixGridCells, 200);
+                            break;
+                        }
+                    }
                 });
-            }, true);
-
-            // Verify grid container setup
-            const gridContainer = document.getElementById('grid-container');
-            if (gridContainer) {
-                console.error('🧩 Grid Container Found', {
-                    children: gridContainer.children.length,
-                    gridCells: gridContainer.querySelectorAll('.grid-cell').length
+                
+                // Start observing grid container
+                setTimeout(() => {
+                    const gridContainer = document.getElementById('grid-container');
+                    if (gridContainer) {
+                        observer.observe(gridContainer, { childList: true, subtree: true });
+                        console.error('Grid observer started');
+                    }
+                }, 1000);
+                
+                // Fix grid cells on page load
+                fixGridCells();
+                
+                // Fix grid cells after level changes
+                document.querySelectorAll('.level-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        console.error(`Level ${this.dataset.level} clicked, scheduling fix...`);
+                        setTimeout(fixGridCells, 1000);
+                    });
                 });
-            } else {
-                console.error('❌ NO GRID CONTAINER FOUND');
-            }
-        });
-    </script>
- 
-        </body>
+                
+                // Add emergency fix button
+                const emergencyButton = document.createElement('button');
+                emergencyButton.textContent = '🔄 Fix Grid Cells';
+                emergencyButton.style.cssText = `
+                    position: fixed;
+                    bottom: 10px;
+                    right: 10px;
+                    z-index: 9999;
+                    background: #3b82f6;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 8px 12px;
+                    cursor: pointer;
+                `;
+                emergencyButton.addEventListener('click', function() {
+                    console.error('Manual grid fix triggered');
+                    fixGridCells();
+                });
+                document.body.appendChild(emergencyButton);
+                
+                // Patch GridEventHandler if available
+                setTimeout(function() {
+                    if (window._gameController && window._gameController.gridEventHandler) {
+                        const originalSetup = window._gameController.gridEventHandler.setupGridInteractions;
+                        window._gameController.gridEventHandler.setupGridInteractions = function() {
+                            if (originalSetup) originalSetup.call(window._gameController.gridEventHandler);
+                            console.error('Patched grid interactions method called');
+                            setTimeout(fixGridCells, 200);
+                        };
+                        console.error('GridEventHandler patched successfully');
+                    }
+                }, 2000);
+            });
+        </script>
+    </body>
 </html>
