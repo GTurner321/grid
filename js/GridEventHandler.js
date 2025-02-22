@@ -1,14 +1,13 @@
-// Fixed GridEventHandler.js
 import { scoreManager } from './scoreManager.js';
 import { validatePath } from './pathValidator.js';
 import { updateCell } from './gridRenderer.js';
 
 class GridEventHandler {
     constructor(gameState) {
-        console.error('GridEventHandler constructor called');
+        console.error('🔨 GridEventHandler constructor called');
         
         if (!gameState) {
-            console.error('No game state provided');
+            console.error('❌ No game state provided');
             throw new Error('Game state is required for GridEventHandler');
         }
 
@@ -20,6 +19,12 @@ class GridEventHandler {
         this.isValidMove = this.isValidMove.bind(this);
         this.updatePathDisplay = this.updatePathDisplay.bind(this);
         this.validateSolution = this.validateSolution.bind(this);
+        this.isStartSquare = this.isStartSquare.bind(this);
+        this.isEndSquare = this.isEndSquare.bind(this);
+        this.getCellCoordinates = this.getCellCoordinates.bind(this);
+        this.handleValidPath = this.handleValidPath.bind(this);
+        this.handlePuzzleSolved = this.handlePuzzleSolved.bind(this);
+        this.handleMathematicalError = this.handleMathematicalError.bind(this);
         
         console.error('GridEventHandler initialized successfully');
     }
@@ -33,26 +38,25 @@ class GridEventHandler {
             return;
         }
 
-        // Remove any existing handler to prevent duplicates
-        gridContainer.removeEventListener('click', this._gridClickHandler);
-        
-        // Add a single delegated click handler to the container
-        this._gridClickHandler = (e) => {
+        // Direct and global approach to ensure clicks work
+        document.addEventListener('click', (e) => {
             const cell = e.target.closest('.grid-cell');
             if (cell) {
-                console.error(`Cell clicked: ${cell.dataset.index}`);
+                console.error(`Cell clicked via global handler: ${cell.dataset.index}`);
                 this.handleCellClick(cell);
+                e.stopPropagation();
             }
-        };
+        }, true);
         
-        // Use capture to ensure this runs before other handlers
-        gridContainer.addEventListener('click', this._gridClickHandler, true);
-        
-        console.error('Grid interactions setup complete');
+        console.error('Grid interactions setup complete with global handler');
     }
 
     handleCellClick(cell) {
-        if (!cell) return;
+        if (!cell) {
+            console.error('No cell provided to handleCellClick');
+            return;
+        }
+        
         if (!this.state.gameActive) {
             console.error('Game not active, ignoring click');
             return;
@@ -67,6 +71,7 @@ class GridEventHandler {
                 this.state.userPath.push(cellIndex);
                 this.updatePathDisplay();
                 console.error(`Start square selected: ${cellIndex}`);
+                this.state.showMessage('Path started! Now continue by selecting connected cells.', 'info');
             } else {
                 this.state.showMessage('You must start at the green square!', 'error');
             }
@@ -90,6 +95,12 @@ class GridEventHandler {
         }
 
         this.updatePathDisplay();
+        
+        // Enable check solution button if path is started
+        const checkSolutionBtn = document.getElementById('check-solution');
+        if (checkSolutionBtn) {
+            checkSolutionBtn.disabled = false;
+        }
 
         // Check for end square
         if (this.isEndSquare(cellIndex)) {
