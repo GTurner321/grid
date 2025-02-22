@@ -29,28 +29,77 @@ class GridEventHandler {
         console.error('GridEventHandler initialized successfully');
     }
 
-    setupGridInteractions() {
-        console.error('Setting up grid interactions');
-        
-        const gridContainer = document.getElementById('grid-container');
-        if (!gridContainer) {
-            console.error('Grid container not found');
-            return;
-        }
+    // Replace the setupGridInteractions method in GridEventHandler.js
 
-        // Direct and global approach to ensure clicks work
-        document.addEventListener('click', (e) => {
-            const cell = e.target.closest('.grid-cell');
-            if (cell) {
-                console.error(`Cell clicked via global handler: ${cell.dataset.index}`);
-                this.handleCellClick(cell);
-                e.stopPropagation();
-            }
-        }, true);
-        
-        console.error('Grid interactions setup complete with global handler');
+setupGridInteractions() {
+    console.error('Setting up grid interactions - FIXED VERSION');
+    
+    const gridContainer = document.getElementById('grid-container');
+    if (!gridContainer) {
+        console.error('Grid container not found');
+        return;
     }
 
+    // Clear any existing event listeners by cloning
+    const newGridContainer = gridContainer.cloneNode(false);
+    while (gridContainer.firstChild) {
+        newGridContainer.appendChild(gridContainer.firstChild);
+    }
+    gridContainer.parentNode.replaceChild(newGridContainer, gridContainer);
+
+    // Add direct click handlers to each cell
+    const cells = document.querySelectorAll('.grid-cell');
+    console.error(`Found ${cells.length} grid cells for setup`);
+    
+    cells.forEach(cell => {
+        // Clone to remove any existing handlers
+        const newCell = cell.cloneNode(true);
+        cell.parentNode.replaceChild(newCell, cell);
+        
+        // Add handler directly to the cell
+        newCell.addEventListener('click', (e) => {
+            console.error(`Grid cell ${newCell.dataset.index} clicked - Fixed handler`);
+            
+            // Prevent event propagation
+            e.stopPropagation();
+            e.preventDefault();
+            
+            // Call handle method directly
+            this.handleCellClick(newCell);
+        });
+        
+        // Make sure it's clickable
+        newCell.style.cssText += `
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            position: relative !important;
+            z-index: 100 !important;
+        `;
+        
+        // Make sure children don't block
+        Array.from(newCell.children).forEach(child => {
+            child.style.pointerEvents = 'none';
+        });
+    });
+    
+    // As a fallback, add a delegate handler to the grid container
+    newGridContainer.addEventListener('click', (e) => {
+        // Find the closest cell
+        const cell = e.target.closest('.grid-cell');
+        if (cell) {
+            console.error(`Delegated click for cell ${cell.dataset.index}`);
+            
+            // Call handler
+            this.handleCellClick(cell);
+            
+            // Prevent bubbling
+            e.stopPropagation();
+        }
+    });
+
+    console.error('Grid interactions setup complete - FIXED VERSION');
+}
+    
     handleCellClick(cell) {
         if (!cell) {
             console.error('No cell provided to handleCellClick');
