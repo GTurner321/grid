@@ -68,7 +68,57 @@
         <link rel="modulepreload" href="js/pathValidator.js">
         <link rel="modulepreload" href="js/puzzleSymbols.js">
         <link rel="modulepreload" href="js/rules.js">
-            
+
+        <!-- Add this inline style tag right before the closing </head> tag in your HTML -->
+<style>
+/* Critical fix for buttons and clickable elements */
+.game-container,
+#grid-container,
+.grid-cell,
+.symbol-container,
+.level-selector,
+.level-buttons,
+.game-controls,
+button {
+    pointer-events: auto !important;
+}
+
+.grid-cell {
+    cursor: pointer !important;
+    z-index: 10 !important;
+    position: relative !important;
+}
+
+/* Fix button display */
+.game-controls button {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 20px !important;
+    background-color: #3b82f6 !important;
+    color: white !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: opacity 0.2s !important;
+}
+
+.game-controls button:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+/* Fix selected cell display */
+.grid-cell.selected {
+    background-color: #60a5fa !important;
+    color: white !important;
+    z-index: 15 !important;
+}
+
+/* Ensure SVG elements pass through clicks */
+svg {
+    pointer-events: none !important;
+}
+</style>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this game.</noscript>
