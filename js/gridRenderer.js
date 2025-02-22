@@ -1,57 +1,39 @@
-// gridRenderer.js
+// Fixed gridRenderer.js
 import PuzzleSymbols from './puzzleSymbols.js';
 
 export function renderGrid(gridEntries, options = {}) {
     try {
-        console.error('🎲 RENDERING GRID - ULTRA VERBOSE');
+        console.error('Rendering grid');
         
         // Validate input
         if (!Array.isArray(gridEntries)) {
-            console.error('❌ Invalid grid entries: Expected an array');
+            console.error('Invalid grid entries: Expected an array');
             return;
         }
 
         const gridContainer = document.getElementById('grid-container');
         if (!gridContainer) {
-            console.error('❌ Grid container not found');
+            console.error('Grid container not found');
             return;
         }
 
         // Clear existing grid
         gridContainer.innerHTML = '';
         
-        // Ensure grid is set up for proper layout
-        gridContainer.classList.add('grid');
-        gridContainer.style.display = 'grid';
-        gridContainer.style.gridTemplateColumns = 'repeat(10, 1fr)';
-        gridContainer.style.gap = '2px';
-
-        // Create grid cells with enhanced debugging
+        // Create grid cells
         gridEntries.forEach((entry, index) => {
             const cell = document.createElement('div');
             
-            // Ensure cell is fully clickable
-            cell.style.cursor = 'pointer';
-            cell.style.userSelect = 'none';
-            cell.style.position = 'relative';
-            
-            // Critical: Add grid-cell class and index
+            // Set cell classes and data
             cell.classList.add('grid-cell');
             cell.dataset.index = index;
             
-            // Enhanced cell creation logging
-            console.error(`Creating cell ${index}:`, {
-                entryType: entry ? entry.type : 'null',
-                entryValue: entry ? entry.value : 'null'
-            });
+            // IMPORTANT: No click handlers here - they're handled by GridEventHandler
 
             if (entry) {
                 if (entry.type === 'number') {
                     const symbolContainer = document.createElement('div');
                     symbolContainer.classList.add('symbol-container');
-                    
-                    // IMPORTANT: Remove pointer-events: none
-                    symbolContainer.style.pointerEvents = 'auto';
                     
                     const symbolValue = entry.value instanceof Object 
                         ? (entry.value.numerator && entry.value.denominator 
@@ -66,8 +48,6 @@ export function renderGrid(gridEntries, options = {}) {
                     if (symbolSvg) {
                         symbolContainer.appendChild(symbolSvg);
                         cell.appendChild(symbolContainer);
-                        
-                        // Preserve original value for calculations
                         cell.dataset.value = symbolValue;
                     } else {
                         cell.textContent = symbolValue;
@@ -78,26 +58,7 @@ export function renderGrid(gridEntries, options = {}) {
                     cell.textContent = entry.value;
                     cell.classList.add('operator');
                 }
-            } else {
-                // Empty cell
-                cell.textContent = '';
             }
-
-            // Add debug attribute
-            cell.setAttribute('data-debug', `Cell ${index}`);
-
-// Add click logging and handling
-cell.addEventListener('click', (e) => {
-    console.error('🎯 CELL CLICKED', {
-        index: cell.dataset.index,
-        value: cell.dataset.value,
-        classes: Array.from(cell.classList)
-    });
-    
-    // Stop propagation and prevent default
-    e.stopPropagation();
-    e.preventDefault();
-}, { capture: true });
 
             gridContainer.appendChild(cell);
         });
@@ -108,7 +69,7 @@ cell.addEventListener('click', (e) => {
             const startCell = gridContainer.querySelector(`[data-index="${startIndex}"]`);
             if (startCell) {
                 startCell.classList.add('start-cell');
-                console.error('🟢 Start cell identified:', startIndex);
+                console.error('Start cell identified:', startIndex);
             }
         }
 
@@ -118,51 +79,36 @@ cell.addEventListener('click', (e) => {
             const endCell = gridContainer.querySelector(`[data-index="${endIndex}"]`);
             if (endCell) {
                 endCell.classList.add('end-cell');
-                console.error('🏁 End cell identified:', endIndex);
+                console.error('End cell identified:', endIndex);
             }
         }
 
-        // Final verification log
-        console.error('🧩 Grid Rendering Complete', {
-            totalCells: gridEntries.length,
-            gridCells: gridContainer.querySelectorAll('.grid-cell').length
-        });
+        console.error('Grid rendering complete');
 
     } catch (error) {
-        console.error('❌ Error rendering grid:', error);
-        console.error('Error stack:', error.stack);
+        console.error('Error rendering grid:', error);
     }
 }
 
 /**
  * Creates an SVG symbol for a given value
- * @param {number|string} value - Value to convert to a symbol
- * @param {number} size - Size of the symbol (default 40)
- * @returns {SVGSVGElement|null} Created SVG element or null
  */
-// Modify createSymbolSVG function
 function createSymbolSVG(value, size = 40) {
-    console.log('Creating symbol for value:', value, 'Type:', typeof value);
-    
     // Expanded validation to include fraction strings
     const isValidSymbol = PuzzleSymbols.validSymbols.includes(value) || 
         (Number.isInteger(value) && value >= 1 && value <= 9) ||
         (typeof value === 'string' && value.includes('/'));
 
-    console.log('Is valid symbol:', isValidSymbol);
-
     if (isValidSymbol) {
         const symbol = PuzzleSymbols.createSymbol(value, size);
-        console.log('Created symbol:', symbol);
         return symbol;
     }
 
     return null;
 }
+
 /**
  * Updates a specific cell in the grid
- * @param {number} index - Index of the cell to update
- * @param {*} value - New value for the cell
  */
 export function updateCell(index, value) {
     try {
@@ -205,7 +151,6 @@ export function updateCell(index, value) {
 
 /**
  * Highlights a specific path on the grid
- * @param {Array} path - Array of coordinates to highlight
  */
 export function highlightPath(path) {
     try {
@@ -227,18 +172,12 @@ export function highlightPath(path) {
     }
 }
 
-/**
- * Provides additional debugging information about the grid
- */
 export function debugGridInfo(gridEntries) {
     console.group('Grid Renderer Debug Info');
     console.log('Total grid entries:', gridEntries.length);
     
     const filledCells = gridEntries.filter(entry => entry !== null);
     console.log('Filled cells:', filledCells.length);
-    
-    // Log a sample of entries
-    console.log('Sample entries:', filledCells.slice(0, 5));
     
     console.groupEnd();
 }
