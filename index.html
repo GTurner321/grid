@@ -175,76 +175,64 @@
         <script type="module" src="js/puzzleSymbols.js"></script>
     
         <!-- React Component Mounting -->
-        <script type="module">
-            import GameController from './js/GameController.js';
-            import Rules from './js/rules.js';
-            
-            console.error('DEBUG: Starting initialization');
-            console.error('DEBUG: GameController imported:', typeof GameController);
-            console.error('DEBUG: Rules imported:', typeof Rules);
-
-            // Ensure components are mounted after DOM is fully loaded
-            document.addEventListener('DOMContentLoaded', () => {
-                try {
-                    console.error('DOM Loaded - Starting GameController initialization');
-                    
-                    // Create game controller
-                    const controller = new GameController();
-                    console.error('GameController instance created:', controller);
-                    
-                    // Store in window for debugging
-                    window._gameController = controller;
-                    console.error('GameController stored in window:', window._gameController);
-                    
-                    // Mount React components - with fallback options
-                    const rulesContainer = document.getElementById('rules-container');
-                    
-                    if (rulesContainer) {
-                        if (typeof window.ReactDOM.createRoot === 'function') {
-                            // React 18 method
-                            const root = window.ReactDOM.createRoot(rulesContainer);
-                            root.render(window.React.createElement(Rules));
-                            console.error('Mounted Rules using createRoot (React 18+)');
-                        } else if (typeof window.ReactDOM.render === 'function') {
-                            // React 17 and earlier fallback
-                            window.ReactDOM.render(window.React.createElement(Rules), rulesContainer);
-                            console.error('Mounted Rules using render (React 17-)');
-                        } else {
-                            console.error('ERROR: No ReactDOM rendering method available');
-                        }
-                    } else {
-                        console.error('ERROR: Rules container not found');
-                    }
-                    
-                    // Dispatch game start event
-                    window.dispatchEvent(new CustomEvent('gameStart'));
-                    
-                    console.error('Initialization complete');
-                } catch (error) {
-                    console.error('CRITICAL ERROR during initialization:', error);
-                    console.error('Error stack:', error.stack);
-                }
-            });
-
-            // Add backup initialization check
-            setTimeout(() => {
-                console.error('Delayed initialization check:', {
-                    hasController: !!window._gameController,
-                    controllerType: typeof window._gameController,
-                    reactDOM: !!window.ReactDOM,
-                    hasCreateRoot: typeof window.ReactDOM?.createRoot === 'function',
-                    hasRender: typeof window.ReactDOM?.render === 'function'
-                });
+       <script type="module">
+    import GameController from './js/GameController.js';
+    import Rules from './js/rules.js';
+    
+    // Wait until everything is fully loaded
+    window.addEventListener('load', () => {
+        console.error('Window fully loaded - Starting initialization');
+        
+        // Small delay to ensure DOM is ready
+        setTimeout(() => {
+            try {
+                // Create game controller
+                const controller = new GameController();
+                console.error('GameController created:', controller);
                 
-                // If controller not initialized properly, try again
-                if (!window._gameController) {
-                    console.error('Controller not initialized properly, attempting recovery...');
-                    const controller = new GameController();
-                    window._gameController = controller;
-                    window.dispatchEvent(new CustomEvent('gameStart'));
+                // Store in window for access
+                window._gameController = controller;
+                
+                // Apply additional CSS fixes
+                const style = document.createElement('style');
+                style.textContent = `
+                    .game-container, #grid-container, .grid-cell, .symbol-container {
+                        pointer-events: auto !important;
+                    }
+                    .grid-cell {
+                        cursor: pointer !important;
+                        z-index: 10;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Mount React components
+                const rulesContainer = document.getElementById('rules-container');
+                if (rulesContainer && window.React && window.ReactDOM) {
+                    if (typeof window.ReactDOM.createRoot === 'function') {
+                        const root = window.ReactDOM.createRoot(rulesContainer);
+                        root.render(window.React.createElement(Rules));
+                    } else if (typeof window.ReactDOM.render === 'function') {
+                        window.ReactDOM.render(window.React.createElement(Rules), rulesContainer);
+                    }
                 }
-            }, 2000);
-        </script>
+                
+                // Force level 1 to start automatically after 1 second
+                setTimeout(() => {
+                    if (window._gameController && typeof window._gameController.startLevel === 'function') {
+                        window._gameController.startLevel(1);
+                        console.error('Auto-started level 1');
+                    }
+                }, 1000);
+                
+                console.error('Initialization sequence completed successfully');
+            } catch (error) {
+                console.error('Critical Error:', error);
+                console.error('Stack:', error.stack);
+            }
+        }, 500);
+    });
+</script>
         
         <!-- Additional event handlers for level buttons -->
         <script>
