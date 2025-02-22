@@ -68,6 +68,7 @@
         <link rel="modulepreload" href="js/pathValidator.js">
         <link rel="modulepreload" href="js/puzzleSymbols.js">
         <link rel="modulepreload" href="js/rules.js">
+        <link rel="modulepreload" href="js/fix-grid.js">
 
         <!-- Critical CSS fixes -->
         <style>
@@ -346,132 +347,7 @@
             });
         </script>
 
-        <!-- COMPREHENSIVE GRID CELL FIX -->
-        <script>
-            // Fixed grid cell selection
-            document.addEventListener('DOMContentLoaded', function() {
-                console.error('🔧 PATH PUZZLE GRID CELL FIX LOADED');
-                
-                // Function to fix grid cells
-                function fixGridCells() {
-                    const gridCells = document.querySelectorAll('.grid-cell');
-                    console.error(`Found ${gridCells.length} grid cells to fix`);
-                    
-                    if (gridCells.length === 0) {
-                        // If no grid cells found, try again in a second
-                        setTimeout(fixGridCells, 1000);
-                        return;
-                    }
-                    
-                    // Apply the fix to each cell
-                    gridCells.forEach(cell => {
-                        try {
-                            // Create a new direct click handler
-                            const newCell = cell.cloneNode(true);
-                            if (cell.parentNode) {
-                                cell.parentNode.replaceChild(newCell, cell);
-                            }
-                            
-                            // Apply critical styling
-                            newCell.style.cssText += `
-                                cursor: pointer !important;
-                                pointer-events: auto !important;
-                                position: relative !important;
-                                z-index: 100 !important;
-                            `;
-                            
-                            // Make sure children don't block clicks
-                            Array.from(newCell.children).forEach(child => {
-                                child.style.pointerEvents = 'none';
-                            });
-                            
-                            // Attach direct click handler
-                            newCell.addEventListener('click', function(e) {
-                                console.error(`🎯 Direct click on cell ${this.dataset.index}`);
-                                e.stopPropagation(); // Stop other handlers
-                                
-                                // Visual feedback
-                                this.style.boxShadow = '0 0 10px #3b82f6';
-                                setTimeout(() => { this.style.boxShadow = ''; }, 300);
-                                
-                                // Call the game's handler
-                                if (window._gameController && window._gameController.gridEventHandler) {
-                                    window._gameController.gridEventHandler.handleCellClick(this);
-                                }
-                            });
-                        } catch (err) {
-                            console.error('Error fixing cell:', err);
-                        }
-                    });
-                    
-                    console.error('✅ Grid cell fix complete');
-                }
-                
-                // Monitor for grid updates
-                const observer = new MutationObserver(function(mutations) {
-                    for (const mutation of mutations) {
-                        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                            console.error('Grid container updated, applying fix...');
-                            setTimeout(fixGridCells, 200);
-                            break;
-                        }
-                    }
-                });
-                
-                // Start observing grid container
-                setTimeout(() => {
-                    const gridContainer = document.getElementById('grid-container');
-                    if (gridContainer) {
-                        observer.observe(gridContainer, { childList: true, subtree: true });
-                        console.error('Grid observer started');
-                    }
-                }, 1000);
-                
-                // Fix grid cells on page load
-                fixGridCells();
-                
-                // Fix grid cells after level changes
-                document.querySelectorAll('.level-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        console.error(`Level ${this.dataset.level} clicked, scheduling fix...`);
-                        setTimeout(fixGridCells, 1000);
-                    });
-                });
-                
-                // Add emergency fix button
-                const emergencyButton = document.createElement('button');
-                emergencyButton.textContent = '🔄 Fix Grid Cells';
-                emergencyButton.style.cssText = `
-                    position: fixed;
-                    bottom: 10px;
-                    right: 10px;
-                    z-index: 9999;
-                    background: #3b82f6;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    padding: 8px 12px;
-                    cursor: pointer;
-                `;
-                emergencyButton.addEventListener('click', function() {
-                    console.error('Manual grid fix triggered');
-                    fixGridCells();
-                });
-                document.body.appendChild(emergencyButton);
-                
-                // Patch GridEventHandler if available
-                setTimeout(function() {
-                    if (window._gameController && window._gameController.gridEventHandler) {
-                        const originalSetup = window._gameController.gridEventHandler.setupGridInteractions;
-                        window._gameController.gridEventHandler.setupGridInteractions = function() {
-                            if (originalSetup) originalSetup.call(window._gameController.gridEventHandler);
-                            console.error('Patched grid interactions method called');
-                            setTimeout(fixGridCells, 200);
-                        };
-                        console.error('GridEventHandler patched successfully');
-                    }
-                }, 2000);
-            });
-        </script>
+        <!-- Load the grid fix script -->
+        <script src="js/fix-grid.js"></script>
     </body>
 </html>
