@@ -1,9 +1,9 @@
-// Fixed gridRenderer.js
+// Revised gridRenderer.js
 import PuzzleSymbols from './puzzleSymbols.js';
 
 export function renderGrid(gridEntries, options = {}) {
     try {
-        console.error('Rendering grid');
+        console.error('🎲 RENDERING GRID');
         
         // Validate input
         if (!Array.isArray(gridEntries)) {
@@ -20,20 +20,31 @@ export function renderGrid(gridEntries, options = {}) {
         // Clear existing grid
         gridContainer.innerHTML = '';
         
+        // Ensure grid is set up for proper layout
+        gridContainer.classList.add('grid');
+        gridContainer.style.display = 'grid';
+        gridContainer.style.gridTemplateColumns = 'repeat(10, 1fr)';
+        gridContainer.style.gap = '2px';
+        gridContainer.style.pointerEvents = 'auto';
+
         // Create grid cells
         gridEntries.forEach((entry, index) => {
             const cell = document.createElement('div');
             
-            // Set cell classes and data
+            // Critical cell setup for interactions
             cell.classList.add('grid-cell');
             cell.dataset.index = index;
+            cell.style.pointerEvents = 'auto';
+            cell.style.cursor = 'pointer';
+            cell.style.position = 'relative';
+            cell.style.zIndex = '10';
             
-            // IMPORTANT: No click handlers here - they're handled by GridEventHandler
-
             if (entry) {
                 if (entry.type === 'number') {
                     const symbolContainer = document.createElement('div');
                     symbolContainer.classList.add('symbol-container');
+                    // Important: Make sure symbol container passes through clicks
+                    symbolContainer.style.pointerEvents = 'none';
                     
                     const symbolValue = entry.value instanceof Object 
                         ? (entry.value.numerator && entry.value.denominator 
@@ -60,6 +71,12 @@ export function renderGrid(gridEntries, options = {}) {
                 }
             }
 
+            // Add a direct click handler just to debug
+            cell.addEventListener('click', (e) => {
+                console.error(`Direct click on cell ${index}`);
+                // Don't handle the click here, just log it
+            });
+
             gridContainer.appendChild(cell);
         });
 
@@ -83,6 +100,14 @@ export function renderGrid(gridEntries, options = {}) {
             }
         }
 
+        // Add click handling to grid container as a fallback
+        gridContainer.addEventListener('click', (e) => {
+            const cell = e.target.closest('.grid-cell');
+            if (cell) {
+                console.error(`Grid container delegated click for cell ${cell.dataset.index}`);
+            }
+        });
+
         console.error('Grid rendering complete');
 
     } catch (error) {
@@ -90,9 +115,6 @@ export function renderGrid(gridEntries, options = {}) {
     }
 }
 
-/**
- * Creates an SVG symbol for a given value
- */
 function createSymbolSVG(value, size = 40) {
     // Expanded validation to include fraction strings
     const isValidSymbol = PuzzleSymbols.validSymbols.includes(value) || 
@@ -107,9 +129,6 @@ function createSymbolSVG(value, size = 40) {
     return null;
 }
 
-/**
- * Updates a specific cell in the grid
- */
 export function updateCell(index, value) {
     try {
         const cell = document.querySelector(`[data-index="${index}"]`);
@@ -126,6 +145,7 @@ export function updateCell(index, value) {
             // Update cell content
             const symbolContainer = document.createElement('div');
             symbolContainer.classList.add('symbol-container');
+            symbolContainer.style.pointerEvents = 'none';
             
             // Convert value to string for symbol rendering
             const symbolValue = value.value ? 
@@ -139,6 +159,7 @@ export function updateCell(index, value) {
                 symbolContainer.appendChild(symbolSvg);
                 cell.innerHTML = '';
                 cell.appendChild(symbolContainer);
+                cell.dataset.value = symbolValue;
             } else {
                 // Fallback to text if symbol creation fails
                 cell.textContent = value.toString();
@@ -149,9 +170,6 @@ export function updateCell(index, value) {
     }
 }
 
-/**
- * Highlights a specific path on the grid
- */
 export function highlightPath(path) {
     try {
         // Remove existing highlights
